@@ -58,7 +58,7 @@
                             </div>
                         </div>
                         <a href="{{ route('statistik.detail', 'sekolah') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Statistik</a>
-                        <a href="{{ route('admin.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
+                        {{-- <a href="{{ route('admin.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a> --}}
                     @endrole
 
                     @role('guru')
@@ -137,7 +137,7 @@
                     <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>
-                <a href="{{ route('admin.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>
+                {{-- <a href="{{ route('admin.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a> --}}
             @endrole
 
             @role('guru')

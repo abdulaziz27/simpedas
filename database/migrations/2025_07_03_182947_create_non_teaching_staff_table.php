@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('position', 100);
             $table->string('education_level', 100);
             $table->string('education_major', 100)->nullable();
-            $table->enum('employment_status', ['PNS', 'PPPK', 'PTY']);
+            $table->enum('employment_status', ['PNS', 'PPPK', 'PTY', 'Kontrak', 'Honorer']);
             $table->string('rank', 50)->nullable();
             $table->date('tmt')->nullable();
             $table->enum('status', ['Aktif', 'Tidak Aktif']);

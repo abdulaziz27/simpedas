@@ -3,8 +3,10 @@
 @section('content')
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     {{-- Header Card --}}
-    <div class="bg-[#136e67] rounded-2xl shadow-lg px-8 py-5 mb-8 border-b-4 border-white flex items-center">
-        <h2 class="text-3xl font-bold text-white mx-auto">Jumlah Statistik {{ ucfirst($type ?? 'Sekolah') }}</h2>
+    <div class="bg-[#136e67] rounded-2xl shadow-lg px-4 py-3 md:px-8 md:py-5 mb-8 border-b-4 border-white flex items-center">
+        <h2 class="text-xl md:text-3xl font-bold text-white mx-auto text-center leading-tight">
+            Jumlah Statistik {{ ucfirst($type ?? 'Sekolah') }}
+        </h2>
     </div>
     {{-- Tabs --}}
     <div class="flex justify-center mb-10">

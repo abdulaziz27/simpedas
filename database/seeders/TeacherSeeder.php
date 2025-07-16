@@ -9,7 +9,7 @@ class TeacherSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * Membuat 2 guru per sekolah (total 6 guru) untuk testing
+     * Membuat 12 guru manual (2 per sekolah)
      */
     public function run(): void
     {
@@ -34,7 +34,8 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Kelas',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
             ],
             [
                 'school_id' => 1,
@@ -55,7 +56,8 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Kelas',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
             ],
             // SMP Negeri 1 (ID: 2)
             [
@@ -77,7 +79,8 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Matematika',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
             ],
             [
                 'school_id' => 2,
@@ -98,7 +101,8 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Bahasa Indonesia',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
             ],
             // SMA Negeri 1 (ID: 3)
             [
@@ -120,7 +124,8 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Fisika',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
             ],
             [
                 'school_id' => 3,
@@ -141,7 +146,143 @@ class TeacherSeeder extends Seeder
                 'position' => 'Guru Kimia',
                 'tmt' => '2007-01-01',
                 'status' => 'Aktif',
-                'academic_year' => '2024/2025'
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            // SD Swasta Budi Mulia (ID: 4)
+            [
+                'school_id' => 4,
+                'full_name' => 'Dewi Lestari',
+                'nuptk' => '1234567007',
+                'nip' => '197301012007011007',
+                'birth_place' => 'Pematang Siantar',
+                'birth_date' => '1973-01-01',
+                'gender' => 'Perempuan',
+                'religion' => 'Islam',
+                'address' => 'Jl. Sisingamangaraja No. 12, Pematang Siantar',
+                'phone' => '081234567007',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'PGSD',
+                'subjects' => 'Bahasa Indonesia',
+                'employment_status' => 'PNS',
+                'rank' => 'III/d',
+                'position' => 'Guru Kelas',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            [
+                'school_id' => 4,
+                'full_name' => 'Bambang Sutrisno',
+                'nuptk' => '1234567008',
+                'nip' => '197401012007011008',
+                'birth_place' => 'Medan',
+                'birth_date' => '1974-01-01',
+                'gender' => 'Laki-laki',
+                'religion' => 'Islam',
+                'address' => 'Jl. Sisingamangaraja No. 13, Pematang Siantar',
+                'phone' => '081234567008',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'PGSD',
+                'subjects' => 'Matematika',
+                'employment_status' => 'PNS',
+                'rank' => 'III/c',
+                'position' => 'Guru Kelas',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            // SMP Swasta Methodist (ID: 5)
+            [
+                'school_id' => 5,
+                'full_name' => 'Yuliana Simanjuntak',
+                'nuptk' => '1234567009',
+                'nip' => '197501012007011009',
+                'birth_place' => 'Pematang Siantar',
+                'birth_date' => '1975-01-01',
+                'gender' => 'Perempuan',
+                'religion' => 'Kristen',
+                'address' => 'Jl. Diponegoro No. 22, Pematang Siantar',
+                'phone' => '081234567009',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'Pendidikan Bahasa Inggris',
+                'subjects' => 'Bahasa Inggris',
+                'employment_status' => 'PNS',
+                'rank' => 'III/d',
+                'position' => 'Guru Bahasa Inggris',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            [
+                'school_id' => 5,
+                'full_name' => 'Rudi Hartono',
+                'nuptk' => '1234567010',
+                'nip' => '197601012007011010',
+                'birth_place' => 'Medan',
+                'birth_date' => '1976-01-01',
+                'gender' => 'Laki-laki',
+                'religion' => 'Kristen',
+                'address' => 'Jl. Diponegoro No. 23, Pematang Siantar',
+                'phone' => '081234567010',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'Pendidikan Matematika',
+                'subjects' => 'Matematika',
+                'employment_status' => 'PNS',
+                'rank' => 'III/c',
+                'position' => 'Guru Matematika',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            // SMA Swasta HKBP (ID: 6)
+            [
+                'school_id' => 6,
+                'full_name' => 'Pardamean Siregar',
+                'nuptk' => '1234567011',
+                'nip' => '197701012007011011',
+                'birth_place' => 'Pematang Siantar',
+                'birth_date' => '1977-01-01',
+                'gender' => 'Laki-laki',
+                'religion' => 'Kristen',
+                'address' => 'Jl. Melanthon Siregar No. 30, Pematang Siantar',
+                'phone' => '081234567011',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'Pendidikan Fisika',
+                'subjects' => 'Fisika',
+                'employment_status' => 'PNS',
+                'rank' => 'III/d',
+                'position' => 'Guru Fisika',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
+            ],
+            [
+                'school_id' => 6,
+                'full_name' => 'Yohana Simbolon',
+                'nuptk' => '1234567012',
+                'nip' => '197801012007011012',
+                'birth_place' => 'Medan',
+                'birth_date' => '1978-01-01',
+                'gender' => 'Perempuan',
+                'religion' => 'Kristen',
+                'address' => 'Jl. Melanthon Siregar No. 31, Pematang Siantar',
+                'phone' => '081234567012',
+                'education_level' => 'S1 Pendidikan',
+                'education_major' => 'Pendidikan Kimia',
+                'subjects' => 'Kimia',
+                'employment_status' => 'PNS',
+                'rank' => 'III/c',
+                'position' => 'Guru Kimia',
+                'tmt' => '2007-01-01',
+                'status' => 'Aktif',
+                'academic_year' => '2024/2025',
+                'photo' => null
             ]
         ];
 
