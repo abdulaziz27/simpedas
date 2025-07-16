@@ -65,8 +65,8 @@ class PublicController extends Controller
         $q = $request->input('q');
         $nonTeachingStaff = NonTeachingStaff::with('school')
             ->when($q, function ($query) use ($q) {
-                $query->where('name', 'like', '%' . $q . '%')
-                    ->orWhere('nip', 'like', '%' . $q . '%')
+                $query->where('full_name', 'like', '%' . $q . '%')
+                    ->orWhere('nip_nik', 'like', '%' . $q . '%')
                     ->orWhere('position', 'like', '%' . $q . '%');
             })
             ->limit(50)

@@ -31,8 +31,8 @@
             @php
                 $rows = $nonTeachingStaff->map(function($staff){
                     return [
-                        $staff->name,
-                        $staff->nip ?? '-',
+                        $staff->full_name,
+                        $staff->nip_nik ?? '-',
                         $staff->school->name ?? '-',
                         $staff->position ?? '-',
                         '<a href="'.route('public.detail-non-teaching-staff',$staff->id).'" class="text-green-300 hover:underline">Lihat detail</a>'
