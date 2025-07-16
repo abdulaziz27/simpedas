@@ -1,0 +1,26 @@
+/* Custom Tailwind overrides & utilities for public pages */
+
+.bg-simpedas-green {
+    background-color: #14532d;
+}
+.text-simpedas-green {
+    color: #14532d;
+}
+.border-simpedas-green {
+    border-color: #14532d;
+}
+
+/* Contoh utility tambahan */
+.hero-gradient {
+    background: linear-gradient(90deg, #14532d 0%, #22c55e 100%);
+}
+
+.icon-bg-green {
+    background-color: #136e67;
+    border-radius: 18px;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} 
