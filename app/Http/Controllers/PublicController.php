@@ -74,6 +74,20 @@ class PublicController extends Controller
         return view('public.search-non-teaching-staff', compact('nonTeachingStaff', 'q'));
     }
 
+    public function searchSekolah(Request $request)
+    {
+        $q = $request->input('q');
+        $schools = School::when($q, function ($query) use ($q) {
+            $query->where('name', 'like', '%' . $q . '%')
+                ->orWhere('npsn', 'like', '%' . $q . '%')
+                ->orWhere('headmaster', 'like', '%' . $q . '%')
+                ->orWhere('region', 'like', '%' . $q . '%');
+        })
+            ->limit(50)
+            ->get();
+        return view('public.search-sekolah', compact('schools', 'q'));
+    }
+
     public function detailGuru($id)
     {
         $teacher = Teacher::with('school')->findOrFail($id);
@@ -90,6 +104,12 @@ class PublicController extends Controller
     {
         $nonTeachingStaff = NonTeachingStaff::with('school')->findOrFail($id);
         return view('public.detail-non-teaching-staff', compact('nonTeachingStaff'));
+    }
+
+    public function detailSekolah($id)
+    {
+        $school = School::findOrFail($id);
+        return view('public.detail-sekolah', compact('school'));
     }
 
     public function statistik(Request $request)

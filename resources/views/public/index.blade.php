@@ -21,9 +21,9 @@
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-10 w-10"></div>
             <span class="text-lg font-semibold">Cari Guru</span>
         </a>
-        <a href="#" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
-            <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Dokumen Guru" class="h-10 w-10"></div>
-            <span class="text-lg font-semibold">Lihat Dokumen Guru</span>
+        <a href="{{ route('public.search-sekolah') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
+            <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Sekolah" class="h-10 w-10"></div>
+            <span class="text-lg font-semibold">Cari Sekolah</span>
         </a>
         <a href="{{ route('statistik') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-stats.png') }}" alt="Icon Statistik" class="h-10 w-10"></div>
@@ -367,9 +367,9 @@
                 <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-10 w-10"></div>
                 <span class="text-lg font-semibold">Cari Guru</span>
             </a>
-            <a href="#" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
-                <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Dokumen Guru" class="h-10 w-10"></div>
-                <span class="text-lg font-semibold">Lihat Dokumen Guru</span>
+            <a href="{{ route('public.search-sekolah') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
+                <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Sekolah" class="h-10 w-10"></div>
+                <span class="text-lg font-semibold">Cari Sekolah</span>
             </a>
             <a href="{{ route('statistik') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
                 <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-stats.png') }}" alt="Icon Statistik" class="h-10 w-10"></div>
