@@ -11,15 +11,16 @@
             <!-- Navigation Links & User Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 @guest
-                    <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
-                    <a href="{{ route('public.search-siswa') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Data Siswa</a>
-                    <a href="{{ route('public.search-guru') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Data Guru</a>
+                    <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
+                    <a href="{{ route('public.search-siswa') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Siswa</a>
+                    <a href="{{ route('public.search-guru') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Guru</a>
+                    <a href="{{ route('public.search-sekolah') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-sekolah') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Sekolah</a>
                     <a href="{{ route('login') }}" class="ml-4 px-4 py-2 rounded bg-white text-[#125047] font-bold hover:bg-green-100 transition">Login</a>
                 @endguest
 
                 @auth
                     @role('admin_dinas')
-                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                         <div class="relative group">
                             <button class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold flex items-center">
                                 Manajemen Data
@@ -41,7 +42,7 @@
                     @endrole
 
                     @role('admin_sekolah')
-                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                         <div class="relative group">
                             <button class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold flex items-center">
                                 Manajemen Data
@@ -62,7 +63,7 @@
                     @endrole
 
                     @role('guru')
-                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                        <a href="/" class="px-3 py-2 rounded transition {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                         <a href="{{ route('guru.profile.show') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('guru.profile.show') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Profil Saya</a>
                         <a href="{{ route('guru.documents') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('guru.documents') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dokumen Pribadi</a>
                     @endrole
@@ -108,15 +109,16 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="md:hidden hidden px-4 pb-4 space-y-2 bg-[#125047]">
         @guest
-            <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
-            <a href="{{ route('public.search-siswa') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Data Siswa</a>
-            <a href="{{ route('public.search-guru') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Data Guru</a>
+            <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
+            <a href="{{ route('public.search-siswa') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Siswa</a>
+            <a href="{{ route('public.search-guru') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Guru</a>
+            <a href="{{ route('public.search-sekolah') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-sekolah') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Sekolah</a>
             <a href="{{ route('login') }}" class="block mt-2 px-4 py-2 rounded bg-white text-[#125047] font-bold hover:bg-green-100 transition">Login</a>
         @endguest
 
         @auth
             @role('admin_dinas')
-                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                 <div class="mt-2">
                     <div class="font-bold text-white mb-1">Manajemen Data</div>
                     <a href="{{ route('admin.schools.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Sekolah</a>
@@ -129,7 +131,7 @@
             @endrole
 
             @role('admin_sekolah')
-                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                 <div class="mt-2">
                     <div class="font-bold text-white mb-1">Manajemen Data</div>
                     <a href="{{ route('sekolah.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
@@ -141,7 +143,7 @@
             @endrole
 
             @role('guru')
-                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dashboard</a>
+                <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                 <a href="{{ route('guru.profile.show') }}" class="block px-3 py-2 rounded {{ request()->routeIs('guru.profile.show') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Profil Saya</a>
                 <a href="{{ route('guru.documents') }}" class="block px-3 py-2 rounded {{ request()->routeIs('guru.documents') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }}">Dokumen Pribadi</a>
             @endrole
