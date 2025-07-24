@@ -84,13 +84,13 @@
                 @auth
                     @if(auth()->user()->hasRole('admin_dinas'))
                         <div class="flex space-x-4 mt-2 print:hidden">
-                            <a href="{{ route('admin.teachers.edit', $teacher->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                            <a href="{{ route('dinas.teachers.edit', $teacher->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                                 Edit
                             </a>
                             <button onclick="window.print()" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                                 Cetak Data
                             </button>
-                            <form action="{{ route('admin.teachers.destroy', $teacher->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');">
+                            <form action="{{ route('dinas.teachers.destroy', $teacher->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-500 hover:text-red-600 font-semibold text-lg">

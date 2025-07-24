@@ -7,7 +7,7 @@
         <nav class="flex items-center space-x-2 text-white mb-6">
             <a href="{{ route('home') }}" class="hover:text-green-300">Dashboard</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('admin.students.index') }}" class="hover:text-green-300">Data Siswa</a>
+            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('dinas.students.index') }}" class="hover:text-green-300">Data Siswa</a>
             <span class="text-gray-300">&gt;</span>
             <span class="border-b-2 border-white">Edit Data Siswa</span>
         </nav>
@@ -15,7 +15,7 @@
         <div class="bg-white rounded-xl p-8 shadow-lg">
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Data Siswa</h1>
 
-            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.update', $student) : route('admin.students.update', $student) }}" method="POST">
+            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.update', $student) : route('dinas.students.update', $student) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -103,7 +103,7 @@
                                 <div class="ml-3">
                                     <p class="text-sm text-green-700">
                                         Data Ijazah dapat di-upload setelah menyimpan perubahan.
-                                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.create', $student) : route('admin.students.certificate.create', $student) }}" class="font-medium underline hover:text-green-600">
+                                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.create', $student) : route('dinas.students.certificate.create', $student) }}" class="font-medium underline hover:text-green-600">
                                             Klik di sini untuk upload ijazah.
                                         </a>
                                     </p>
@@ -116,7 +116,7 @@
                 <div class="mt-8 flex justify-between items-center">
                     <button type="button" x-data @click.prevent="$dispatch('open-modal', 'confirm-student-deletion')" class="text-red-600 hover:text-red-800 font-bold transition text-sm">Hapus Siswa</button>
                     <div class="flex space-x-3">
-                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('admin.students.show', $student) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
+                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">Update</button>
                     </div>
                 </div>
@@ -126,7 +126,7 @@
 </div>
 
 <x-modal name="confirm-student-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-    <form method="post" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.destroy', $student) : route('admin.students.destroy', $student) }}" class="p-6">
+    <form method="post" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.destroy', $student) : route('dinas.students.destroy', $student) }}" class="p-6">
         @csrf
         @method('delete')
         <h2 class="text-lg font-medium text-gray-900">Apakah Anda yakin ingin menghapus data siswa ini?</h2>

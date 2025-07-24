@@ -30,15 +30,15 @@
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-10">
                                 <div class="py-1">
-                                    <a href="{{ route('admin.schools.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Sekolah</a>
-                                    <a href="{{ route('admin.teachers.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Guru</a>
-                                    <a href="{{ route('admin.students.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Siswa</a>
-                                    <a href="{{ route('admin.non-teaching-staff.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Staf</a>
+                                    <a href="{{ route('dinas.schools.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Sekolah</a>
+                                    <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Guru</a>
+                                    <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Siswa</a>
+                                    <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Staf</a>
                                 </div>
                             </div>
                         </div>
                         <a href="{{ route('statistik.detail', 'sekolah') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Statistik</a>
-                        <a href="{{ route('admin.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
+                        <a href="{{ route('dinas.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
                     @endrole
 
                     @role('admin_sekolah')
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         <a href="{{ route('statistik.detail', 'sekolah') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Statistik</a>
-                        {{-- <a href="{{ route('admin.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a> --}}
+                        <a href="{{ route('dinas.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
                     @endrole
 
                     @role('guru')
@@ -121,13 +121,13 @@
                 <a href="/" class="block px-3 py-2 rounded {{ request()->routeIs('home') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Dashboard</a>
                 <div class="mt-2">
                     <div class="font-bold text-white mb-1">Manajemen Data</div>
-                    <a href="{{ route('admin.schools.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Sekolah</a>
-                    <a href="{{ route('admin.teachers.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Guru</a>
-                    <a href="{{ route('admin.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
-                    <a href="{{ route('admin.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
+                    <a href="{{ route('dinas.schools.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Sekolah</a>
+                    <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Guru</a>
+                    <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
+                    <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>
-                <a href="{{ route('admin.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>
+                <a href="{{ route('dinas.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>
             @endrole
 
             @role('admin_sekolah')
@@ -139,7 +139,7 @@
                     <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>
-                {{-- <a href="{{ route('admin.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a> --}}
+                <a href="{{ route('dinas.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>
             @endrole
 
             @role('guru')

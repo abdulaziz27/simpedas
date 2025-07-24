@@ -73,7 +73,10 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Admin Routes
-    Route::middleware('role:admin_dinas')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:admin_dinas')->prefix('dinas')->name('dinas.')->group(function () {
+        // Route download template harus di atas resource!
+        Route::get('schools/template-excel', [SchoolController::class, 'downloadTemplateSekolah'])
+            ->name('schools.template');
         Route::resource('schools', App\Http\Controllers\Admin\SchoolController::class);
         Route::get('schools/{school}/print', [App\Http\Controllers\Admin\SchoolController::class, 'print'])->name('schools.print');
         Route::resource('students', App\Http\Controllers\Admin\StudentController::class);
@@ -82,7 +85,8 @@ Route::middleware('auth')->group(function () {
         Route::get('teachers/{teacher}/print', [App\Http\Controllers\Admin\TeacherController::class, 'print'])->name('teachers.print');
         Route::resource('non-teaching-staff', App\Http\Controllers\Admin\NonTeachingStaffController::class);
         Route::get('non-teaching-staff/{nonTeachingStaff}/print', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'print'])->name('non-teaching-staff.print');
-
+        // Import and template routes for schools
+        Route::post('schools/import', [SchoolController::class, 'import'])->name('schools.import');
         // Reports routes
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
@@ -91,13 +95,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/students', [App\Http\Controllers\Admin\ReportController::class, 'studentsReport'])->name('students');
             Route::get('/graduation', [App\Http\Controllers\Admin\ReportController::class, 'graduationReport'])->name('graduation');
         });
-
         // Student Certificate Routes (tambahkan untuk admin dinas)
         Route::get('students/{student}/certificate/upload', [StudentController::class, 'createCertificate'])->name('students.certificate.create');
         Route::post('students/{student}/certificate', [StudentController::class, 'storeCertificate'])->name('students.certificate.store');
         Route::get('students/{student}/certificate', [StudentController::class, 'showCertificate'])->name('students.certificate.show');
         Route::delete('students/{student}/certificate/{certificate}', [StudentController::class, 'deleteCertificate'])->name('students.certificate.delete');
-
         // Student Report (Raport) Routes
         Route::get('students/{student}/reports/create', [\App\Http\Controllers\Admin\StudentReportController::class, 'create'])->name('students.reports.create');
         Route::post('students/{student}/reports', [\App\Http\Controllers\Admin\StudentReportController::class, 'store'])->name('students.reports.store');
@@ -133,3 +135,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('students/{student}/reports/{report}', [\App\Http\Controllers\Admin\StudentReportController::class, 'destroy'])->name('students.reports.destroy');
     });
 });
+
+// Route test tanpa middleware untuk debug download template
+Route::get('/test-template', [App\Http\Controllers\Admin\SchoolController::class, 'downloadTemplateSekolah']);

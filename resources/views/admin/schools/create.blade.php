@@ -7,7 +7,7 @@
         <nav class="flex items-center space-x-2 text-white mb-6">
             <a href="{{ route('home') }}" class="hover:text-green-300">Dashboard</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ route('admin.schools.index') }}" class="hover:text-green-300">Data Sekolah</a>
+            <a href="{{ route('dinas.schools.index') }}" class="hover:text-green-300">Data Sekolah</a>
             <span class="text-gray-300">&gt;</span>
             <span class="border-b-2 border-white">Form Input Data Sekolah</span>
         </nav>
@@ -16,7 +16,7 @@
         <div class="bg-white rounded-xl p-8 shadow-lg">
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Form Input Data Sekolah</h1>
 
-            <form action="{{ route('admin.schools.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('dinas.schools.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
@@ -140,7 +140,7 @@
 
                 {{-- Action Buttons --}}
                 <div class="mt-8 flex justify-end space-x-3">
-                    <a href="{{ route('admin.schools.index') }}"
+                    <a href="{{ route('dinas.schools.index') }}"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">
                         Batal
                     </a>

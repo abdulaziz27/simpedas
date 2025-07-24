@@ -7,9 +7,9 @@
         <nav class="flex items-center space-x-2 text-white mb-6">
             <a href="{{ route('home') }}" class="hover:text-green-300">Dashboard</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('admin.students.index') }}" class="hover:text-green-300">Data Siswa</a>
+            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('dinas.students.index') }}" class="hover:text-green-300">Data Siswa</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('admin.students.show', $student) }}" class="hover:text-green-300">Detail Siswa</a>
+            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}" class="hover:text-green-300">Detail Siswa</a>
             <span class="text-gray-300">&gt;</span>
             <span class="border-b-2 border-white">Tambah Raport</span>
         </nav>
@@ -17,7 +17,7 @@
         <div class="bg-white rounded-xl p-8 shadow-lg">
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Tambah Raport Siswa</h1>
 
-            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.reports.store', $student) : route('admin.students.reports.store', $student) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.reports.store', $student) : route('dinas.students.reports.store', $student) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="grid grid-cols-1 gap-y-6">
                     <div>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end space-x-3">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('admin.students.show', $student) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">Simpan</button>
                 </div>
             </form>

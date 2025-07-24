@@ -7,7 +7,7 @@
         <nav class="flex items-center space-x-2 text-white mb-6">
             <a href="{{ route('home') }}" class="hover:text-green-300">Dashboard</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('admin.non-teaching-staff.index') }}" class="hover:text-green-300">Manajemen Tenaga Pendidik Non Guru</a>
+            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('dinas.non-teaching-staff.index') }}" class="hover:text-green-300">Manajemen Tenaga Pendidik Non Guru</a>
             <span class="text-gray-300">&gt;</span>
             <span class="border-b-2 border-white">Edit Data Tenaga Pendidik Non Guru</span>
         </nav>
@@ -32,7 +32,7 @@
                 </div>
             @endif
 
-            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.update', $nonTeachingStaff) : route('admin.non-teaching-staff.update', $nonTeachingStaff) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.update', $nonTeachingStaff) : route('dinas.non-teaching-staff.update', $nonTeachingStaff) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -173,7 +173,7 @@
                 </div>
 
                 <div class="mt-8 flex justify-end space-x-3">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('admin.non-teaching-staff.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('dinas.non-teaching-staff.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">Update</button>
                 </div>
             </form>

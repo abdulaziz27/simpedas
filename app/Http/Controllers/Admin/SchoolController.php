@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Services\SchoolImportService;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SchoolTemplateExport;
+
+\Log::info('SchoolController loaded');
 
 class SchoolController extends Controller
 {
@@ -83,7 +88,7 @@ class SchoolController extends Controller
 
         School::create($validated);
 
-        return redirect()->route('admin.schools.index')->with('success', 'Data sekolah berhasil ditambahkan.');
+        return redirect()->route('dinas.schools.index')->with('success', 'Data sekolah berhasil ditambahkan.');
     }
 
     /**
@@ -136,7 +141,7 @@ class SchoolController extends Controller
 
         $school->update($validated);
 
-        return redirect()->route('admin.schools.index')->with('success', 'Data sekolah berhasil diperbarui.');
+        return redirect()->route('dinas.schools.index')->with('success', 'Data sekolah berhasil diperbarui.');
     }
 
     /**
@@ -145,7 +150,7 @@ class SchoolController extends Controller
     public function destroy(School $school)
     {
         $school->delete();
-        return redirect()->route('admin.schools.index')->with('success', 'Data sekolah berhasil dihapus.');
+        return redirect()->route('dinas.schools.index')->with('success', 'Data sekolah berhasil dihapus.');
     }
 
     /**
@@ -154,5 +159,66 @@ class SchoolController extends Controller
     public function print(School $school)
     {
         return view('admin.schools.print', compact('school'));
+    }
+
+    /**
+     * Import schools from Excel file
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $importService = new SchoolImportService();
+        $results = $importService->processExcel($request->file('file'));
+
+        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+        if (!empty($results['errors'])) {
+            $message .= "\n\nError: " . implode("\n", array_slice($results['errors'], 0, 5));
+            if (count($results['errors']) > 5) {
+                $message .= "\n... dan " . (count($results['errors']) - 5) . " error lainnya.";
+            }
+        }
+
+        if (!empty($results['warnings'])) {
+            $message .= "\n\nWarning: " . implode("\n", array_slice($results['warnings'], 0, 5));
+            if (count($results['warnings']) > 5) {
+                $message .= "\n... dan " . (count($results['warnings']) - 5) . " warning lainnya.";
+            }
+        }
+
+        return redirect()->route('dinas.schools.index')
+            ->with('success', $message)
+            ->with('import_errors', $results['errors'])
+            ->with('import_warnings', $results['warnings']);
+    }
+
+    /**
+     * Download template Excel untuk import
+     */
+    public function downloadTemplateSekolah()
+    {
+        \Log::info('SchoolController downloadTemplateSekolah: mulai', [
+            'user_id' => auth()->id(),
+            'user_email' => optional(auth()->user())->email,
+        ]);
+        try {
+            $response = \Excel::download(
+                new \App\Exports\SchoolTemplateExport(),
+                'template_import_sekolah.xlsx'
+            );
+            \Log::info('SchoolController downloadTemplateSekolah: sukses', [
+                'user_id' => auth()->id(),
+            ]);
+            return $response;
+        } catch (\Exception $e) {
+            \Log::error('Error downloading template sekolah: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

@@ -6,7 +6,7 @@
     <nav class="mb-6 flex items-center text-white text-base" aria-label="Breadcrumb">
         <a href="/" class="font-semibold hover:underline">Dashboard</a>
         <span class="mx-2">&gt;</span>
-        <a href="{{ route('admin.reports.index') }}" class="font-semibold hover:underline">Laporan</a>
+        <a href="{{ route('dinas.reports.index') }}" class="font-semibold hover:underline">Laporan</a>
         <span class="mx-2">&gt;</span>
         <span class="text-green-300 border-b-2 border-green-300 pb-1">Laporan Sekolah</span>
     </nav>
@@ -123,7 +123,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $school->students_count }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $school->non_teaching_staff_count }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <a href="{{ route('admin.schools.show', $school->id) }}" class="text-indigo-600 hover:text-indigo-900">
+                            <a href="{{ route('dinas.schools.show', $school->id) }}" class="text-indigo-600 hover:text-indigo-900">
                                 Detail
                             </a>
                         </td>

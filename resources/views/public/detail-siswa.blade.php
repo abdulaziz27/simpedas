@@ -64,13 +64,13 @@
                 @auth
                     @if(auth()->user()->hasRole('admin_dinas'))
                         <div class="flex space-x-4 mt-2 print:hidden">
-                            <a href="{{ route('admin.students.edit', $student->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                            <a href="{{ route('dinas.students.edit', $student->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                                 Edit
                             </a>
                             <button onclick="window.print()" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                                 Cetak Data
                             </button>
-                            <form action="{{ route('admin.students.destroy', $student->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data siswa ini?');">
+                            <form action="{{ route('dinas.students.destroy', $student->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data siswa ini?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-500 hover:text-red-600 font-semibold text-lg">
@@ -118,7 +118,7 @@
                                         </td>
                                         <td class="px-4 py-2 text-white print:text-black">{{ $report->additional_notes ?: '-' }}</td>
                                         <td class="px-4 py-2 text-right print:hidden">
-                                            <form action="{{ route('admin.students.reports.destroy', [$student, $report]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus raport ini?')">
+                                            <form action="{{ route('dinas.students.reports.destroy', [$student, $report]) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus raport ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-500 hover:text-red-600 font-bold text-xs">Hapus</button>
@@ -132,7 +132,7 @@
                 @endif
 
                 <div class="mt-4 print:hidden">
-                    <a href="{{ route('admin.students.reports.create', $student) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <a href="{{ route('dinas.students.reports.create', $student) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>

@@ -6,7 +6,7 @@
     <nav class="mb-6 flex items-center text-white text-base print:hidden" aria-label="Breadcrumb">
         <a href="/" class="font-semibold hover:underline">Dashboard</a>
         <span class="mx-2">&gt;</span>
-        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('admin.non-teaching-staff.index') }}" class="font-semibold hover:underline">Manajemen Tenaga Pendidik Non Guru</a>
+        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('dinas.non-teaching-staff.index') }}" class="font-semibold hover:underline">Manajemen Tenaga Pendidik Non Guru</a>
         <span class="mx-2">&gt;</span>
         <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Tenaga Pendidik Non Guru / {{ strtoupper($nonTeachingStaff->full_name) }}</span>
         </nav>
@@ -79,13 +79,13 @@
 
                 {{-- Admin Action Buttons --}}
                 <div class="flex space-x-4 mt-2 print:hidden">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.edit', $nonTeachingStaff->id) : route('admin.non-teaching-staff.edit', $nonTeachingStaff->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.edit', $nonTeachingStaff->id) : route('dinas.non-teaching-staff.edit', $nonTeachingStaff->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Edit
                     </a>
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.print', $nonTeachingStaff) : route('admin.non-teaching-staff.print', $nonTeachingStaff) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.print', $nonTeachingStaff) : route('dinas.non-teaching-staff.print', $nonTeachingStaff) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Cetak Data
                     </a>
-                    <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.destroy', $nonTeachingStaff->id) : route('admin.non-teaching-staff.destroy', $nonTeachingStaff->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data tenaga pendidik non guru ini?');">
+                    <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.destroy', $nonTeachingStaff->id) : route('dinas.non-teaching-staff.destroy', $nonTeachingStaff->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data tenaga pendidik non guru ini?');">
                     @csrf
                     @method('DELETE')
                         <button type="submit" class="text-red-500 hover:text-red-600 font-semibold text-lg">

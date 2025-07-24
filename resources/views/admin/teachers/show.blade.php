@@ -6,7 +6,7 @@
     <nav class="mb-6 flex items-center text-white text-base print:hidden" aria-label="Breadcrumb">
         <a href="/" class="font-semibold hover:underline">Dashboard</a>
         <span class="mx-2">&gt;</span>
-        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('admin.teachers.index') }}" class="font-semibold hover:underline">Data Guru</a>
+        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('dinas.teachers.index') }}" class="font-semibold hover:underline">Data Guru</a>
         <span class="mx-2">&gt;</span>
         <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Guru / {{ strtoupper($teacher->full_name) }}</span>
         </nav>
@@ -82,13 +82,13 @@
 
                 {{-- Admin Action Buttons --}}
                 <div class="flex space-x-4 mt-2 print:hidden">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.edit', $teacher->id) : route('admin.teachers.edit', $teacher->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.edit', $teacher->id) : route('dinas.teachers.edit', $teacher->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Edit
                     </a>
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.print', $teacher) : route('admin.teachers.print', $teacher) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.print', $teacher) : route('dinas.teachers.print', $teacher) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Cetak Data
                     </a>
-                    <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.destroy', $teacher->id) : route('admin.teachers.destroy', $teacher->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');">
+                    <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.destroy', $teacher->id) : route('dinas.teachers.destroy', $teacher->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data guru ini?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-red-500 hover:text-red-600 font-semibold text-lg">

@@ -7,7 +7,7 @@
         <nav class="flex items-center space-x-2 text-white mb-6">
             <a href="{{ route('home') }}" class="hover:text-green-300">Dashboard</a>
             <span class="text-gray-300">&gt;</span>
-            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('admin.teachers.index') }}" class="hover:text-green-300">Data Guru</a>
+            <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('dinas.teachers.index') }}" class="hover:text-green-300">Data Guru</a>
             <span class="text-gray-300">&gt;</span>
             <span class="border-b-2 border-white">Edit Data Guru</span>
         </nav>
@@ -16,7 +16,7 @@
         <div class="bg-white rounded-xl p-8 shadow-lg">
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Data Guru</h1>
 
-            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.update', $teacher) : route('admin.teachers.update', $teacher) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.update', $teacher) : route('dinas.teachers.update', $teacher) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -176,7 +176,7 @@
                 </div>
 
                 <div class="mt-8 flex justify-end space-x-3">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('admin.teachers.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.index') : route('dinas.teachers.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">Update</button>
                 </div>
             </form>

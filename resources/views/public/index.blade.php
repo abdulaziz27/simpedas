@@ -162,8 +162,8 @@
                             <img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Validasi" class="h-12 w-12">
                         </div>
                         <div>
-                            <div class="text-xl font-bold">Validasi Data</div>
-                            <div class="text-sm text-gray-600">Validasi data sistem</div>
+                            <div class="text-xl font-bold">Manajemen Pengguna</div>
+                            <div class="text-sm text-gray-600">Manajemen pengguna sistem</div>
                         </div>
                     </a>
                 </div>
@@ -172,7 +172,7 @@
                 <div class="mb-8">
                     <h2 class="text-2xl font-bold text-white mb-6">Aksi Cepat</h2>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <a href="{{ route('admin.schools.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                        <a href="{{ route('dinas.schools.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                             <div class="flex-1">
                                 <h3 class="text-xl font-bold text-white">Manajemen</h3>
                                 <h3 class="text-xl font-bold text-white">Sekolah</h3>
@@ -181,7 +181,7 @@
                                 <img src="{{ asset('images/icon-stats.png') }}" alt="Icon Sekolah" class="h-20 w-20 group-hover:scale-110 transition-transform duration-300">
                             </div>
                         </a>
-                        <a href="{{ route('admin.teachers.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                        <a href="{{ route('dinas.teachers.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                             <div class="flex-1">
                                 <h3 class="text-xl font-bold text-white">Manajemen</h3>
                                 <h3 class="text-xl font-bold text-white">Guru</h3>
@@ -190,7 +190,7 @@
                                 <img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-20 w-20 group-hover:scale-110 transition-transform duration-300">
                             </div>
                         </a>
-                        <a href="{{ route('admin.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                        <a href="{{ route('dinas.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                             <div class="flex-1">
                                 <h3 class="text-xl font-bold text-white">Manajemen</h3>
                                 <h3 class="text-xl font-bold text-white">Siswa</h3>

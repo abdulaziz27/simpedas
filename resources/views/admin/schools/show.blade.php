@@ -6,7 +6,7 @@
     <nav class="mb-6 flex items-center text-white text-base print:hidden" aria-label="Breadcrumb">
         <a href="/" class="font-semibold hover:underline">Dashboard</a>
         <span class="mx-2">&gt;</span>
-        <a href="{{ route('admin.schools.index') }}" class="font-semibold hover:underline">Data Sekolah</a>
+        <a href="{{ route('dinas.schools.index') }}" class="font-semibold hover:underline">Data Sekolah</a>
         <span class="mx-2">&gt;</span>
         <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Sekolah / {{ strtoupper($school->name) }}</span>
     </nav>
@@ -78,13 +78,13 @@
 
                 {{-- Admin Action Buttons --}}
                 <div class="flex space-x-4 mt-2 print:hidden">
-                    <a href="{{ route('admin.schools.edit', $school->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ route('dinas.schools.edit', $school->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Edit
                     </a>
-                    <a href="{{ route('admin.schools.print', $school) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ route('dinas.schools.print', $school) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Cetak Data
                     </a>
-                    <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data sekolah ini?');">
+                    <form action="{{ route('dinas.schools.destroy', $school->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data sekolah ini?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-red-500 hover:text-red-600 font-semibold text-lg">
@@ -102,7 +102,7 @@
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-white mb-6">Aksi Cepat</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="{{ route('admin.teachers.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                <a href="{{ route('dinas.teachers.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                     <div class="flex-1">
                         <h3 class="text-xl font-bold text-white">Manajemen</h3>
                         <h3 class="text-xl font-bold text-white">Guru</h3>
@@ -111,7 +111,7 @@
                         <img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-20 w-20 group-hover:scale-110 transition-transform duration-300">
                     </div>
                 </a>
-                <a href="{{ route('admin.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                <a href="{{ route('dinas.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                     <div class="flex-1">
                         <h3 class="text-xl font-bold text-white">Manajemen</h3>
                         <h3 class="text-xl font-bold text-white">Siswa</h3>
@@ -120,7 +120,7 @@
                         <img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Siswa" class="h-20 w-20 group-hover:scale-110 transition-transform duration-300">
                     </div>
                 </a>
-                <a href="{{ route('admin.non-teaching-staff.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+                <a href="{{ route('dinas.non-teaching-staff.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex items-center justify-between transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
                     <div class="flex-1">
                         <h3 class="text-xl font-bold text-white">Manajemen</h3>
                         <h3 class="text-xl font-bold text-white">Tenaga Pendidik</h3>

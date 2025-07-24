@@ -6,7 +6,7 @@
     <nav class="mb-6 flex items-center text-white text-base print:hidden" aria-label="Breadcrumb">
         <a href="/" class="font-semibold hover:underline">Dashboard</a>
         <span class="mx-2">&gt;</span>
-        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('admin.students.index') }}" class="font-semibold hover:underline">Data Siswa</a>
+        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('dinas.students.index') }}" class="font-semibold hover:underline">Data Siswa</a>
         <span class="mx-2">&gt;</span>
         <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Siswa / {{ strtoupper($student->full_name) }}</span>
     </nav>
@@ -102,13 +102,13 @@
 
                 {{-- Admin Action Buttons --}}
                 <div class="flex space-x-4 mt-2 print:hidden">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.edit', $student->id) : route('admin.students.edit', $student->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.edit', $student->id) : route('dinas.students.edit', $student->id) }}" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Edit
                     </a>
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.print', $student) : route('admin.students.print', $student) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.print', $student) : route('dinas.students.print', $student) }}" target="_blank" class="text-green-300 hover:text-green-400 font-semibold text-lg">
                         Cetak Data
                     </a>
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.create', $student->id) : route('admin.students.certificate.create', $student->id) }}" class="text-blue-300 hover:text-blue-400 font-semibold text-lg">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.create', $student->id) : route('dinas.students.certificate.create', $student->id) }}" class="text-blue-300 hover:text-blue-400 font-semibold text-lg">
                         Upload Ijazah
                     </a>
                     <button type="button" onclick="openDeleteModal('siswa', {{ $student->id }})" class="text-red-500 hover:text-red-600 font-semibold text-lg">
@@ -159,7 +159,7 @@
                 @endif
 
                 <div class="mt-4 print:hidden">
-                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.reports.create', $student) : route('admin.students.reports.create', $student) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.reports.create', $student) : route('dinas.students.reports.create', $student) }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
@@ -225,13 +225,13 @@
     foreach($student->certificates as $cert) {
         $ijazahDeleteUrls[$cert->id] = auth()->user()->hasRole('admin_sekolah')
             ? route('sekolah.students.certificate.delete', [$student, $cert])
-            : route('admin.students.certificate.delete', [$student, $cert]);
+            : route('dinas.students.certificate.delete', [$student, $cert]);
     }
     $raportDeleteUrls = [];
     foreach($student->reports as $rep) {
         $raportDeleteUrls[$rep->id] = auth()->user()->hasRole('admin_sekolah')
             ? route('sekolah.students.reports.destroy', [$student, $rep])
-            : route('admin.students.reports.destroy', [$student, $rep]);
+            : route('dinas.students.reports.destroy', [$student, $rep]);
     }
 @endphp
 <script>
@@ -249,7 +249,7 @@
         } else if(type === 'siswa') {
             document.getElementById('deleteSiswaModal').classList.remove('hidden');
             var form = document.getElementById('deleteSiswaForm');
-            form.action = "{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.destroy', $student) : route('admin.students.destroy', $student) }}";
+            form.action = "{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.destroy', $student) : route('dinas.students.destroy', $student) }}";
         }
     }
     function closeDeleteModal(type) {

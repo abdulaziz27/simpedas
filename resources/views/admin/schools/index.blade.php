@@ -10,9 +10,51 @@
                 <span class="border-b-2 border-white">Data Sekolah</span>
             </nav>
 
+            {{-- Pesan sukses/error import (hanya di sini, bukan di modal) --}}
             @if(session('success'))
-                <div class="bg-green-500 text-white p-4 rounded-lg mb-6">
-                    {{ session('success') }}
+                @php
+                    $successMsg = session('success');
+                    $successLines = preg_split('/\n+/', $successMsg);
+                    $mainMsg = array_shift($successLines);
+                @endphp
+                <div class="mb-6">
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-2" role="alert">
+                        <strong>{{ $mainMsg }}</strong>
+                    </div>
+                    @if(session('import_errors') && count(session('import_errors')))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-2" role="alert">
+                            <strong>Error:</strong>
+                            <ul class="list-disc pl-5">
+                                @foreach(session('import_errors') as $err)
+                                    <li>{{ $err }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if(session('import_warnings') && count(session('import_warnings')))
+                        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-2" role="alert">
+                            <strong>Warning:</strong>
+                            <ul class="list-disc pl-5">
+                                @foreach(session('import_warnings') as $warn)
+                                    <li>{{ $warn }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                    {{ session('error') }}
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                    <ul class="list-disc pl-5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -24,7 +66,7 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Sekolah</h2>
-                <form action="{{ route('admin.schools.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form action="{{ route('dinas.schools.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {{-- Form Filters --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Jenjang Pendidikan</label>
@@ -94,7 +136,7 @@
                             Import Excel
                         </button>
                         {{-- Tombol Tambah Sekolah --}}
-                        <a href="{{ route('admin.schools.create') }}" class="inline-flex items-center px-4 py-2 bg-white rounded-lg font-semibold text-[#0d524a] hover:bg-green-50 transition">
+                        <a href="{{ route('dinas.schools.create') }}" class="inline-flex items-center px-4 py-2 bg-white rounded-lg font-semibold text-[#0d524a] hover:bg-green-50 transition">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -138,10 +180,10 @@
                             </div>
                         </div>
                         <div class="flex space-x-2 mt-4">
-                            <a href="{{ route('admin.schools.show', $school) }}" class="flex-1 block text-center px-4 py-2 bg-[#0d524a] text-white rounded-lg hover:bg-[#125047] transition">
+                            <a href="{{ route('dinas.schools.show', $school) }}" class="flex-1 block text-center px-4 py-2 bg-[#0d524a] text-white rounded-lg hover:bg-[#125047] transition">
                                 Lihat Detail
                             </a>
-                            <a href="{{ route('admin.schools.edit', $school) }}" class="flex-1 block text-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
+                            <a href="{{ route('dinas.schools.edit', $school) }}" class="flex-1 block text-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
                                 Edit
                             </a>
                         </div>
@@ -165,15 +207,16 @@
                 @endif
             </div>
         </div>
-    </div>
-
-    {{-- Import Modal --}}
+        {{-- Import Modal --}}
     <div id="import-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="document.getElementById('import-modal').classList.add('hidden')"></div>
 
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                <form action="#" method="POST" enctype="multipart/form-data">
+                {{-- Hapus pesan error/success di dalam modal, hanya tampilkan di atas manajemen data sekolah --}}
+                <form action="{{ route('dinas.schools.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="sm:flex sm:items-start">
                         <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -187,6 +230,23 @@
                                 <input type="file" name="file" accept=".xlsx,.xls,.csv" required
                                     class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                 <p class="text-xs text-gray-500 mt-1">Format yang didukung: .xlsx, .xls, .csv</p>
+                                <div class="mt-3">
+                                    <a href="{{ route('dinas.schools.template') }}" class="text-sm text-blue-600 hover:underline">
+                                        Download template Excel
+                                    </a>
+                                </div>
+                                <div class="mt-3 text-xs text-gray-500">
+                                    <p class="font-semibold">Petunjuk Import:</p>
+                                    <ul class="list-disc pl-5 space-y-1 mt-1">
+                                        <li>Kolom ACTION: CREATE, UPDATE, atau DELETE</li>
+                                        <li>Kolom ID: Diisi untuk UPDATE/DELETE</li>
+                                        <li>Kolom NPSN: Wajib dan unik</li>
+                                        <li>Kolom NAME: Wajib, min 3 karakter</li>
+                                        <li>Kolom EDUCATION_LEVEL: TK, SD, SMP, SMA, SMK</li>
+                                        <li>Kolom STATUS: Negeri atau Swasta</li>
+                                        <li>Kolom ADDRESS: Wajib, min 10 karakter</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -200,6 +260,7 @@
                     </div>
                 </form>
             </div>
+        </div>
         </div>
     </div>
 
