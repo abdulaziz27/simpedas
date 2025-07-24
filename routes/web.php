@@ -77,6 +77,13 @@ Route::middleware('auth')->group(function () {
         // Route download template harus di atas resource!
         Route::get('schools/template-excel', [SchoolController::class, 'downloadTemplateSekolah'])
             ->name('schools.template');
+        Route::get('students/template-excel', [App\Http\Controllers\Admin\StudentController::class, 'downloadTemplateSiswa'])->name('students.template');
+        Route::post('students/import', [App\Http\Controllers\Admin\StudentController::class, 'import'])->name('students.import');
+        // Import and template routes for schools
+        Route::post('schools/import', [SchoolController::class, 'import'])->name('schools.import');
+        Route::get('students/template-excel', [StudentController::class, 'downloadTemplateSiswa'])->name('students.template');
+        Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
+
         Route::resource('schools', App\Http\Controllers\Admin\SchoolController::class);
         Route::get('schools/{school}/print', [App\Http\Controllers\Admin\SchoolController::class, 'print'])->name('schools.print');
         Route::resource('students', App\Http\Controllers\Admin\StudentController::class);
@@ -85,8 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::get('teachers/{teacher}/print', [App\Http\Controllers\Admin\TeacherController::class, 'print'])->name('teachers.print');
         Route::resource('non-teaching-staff', App\Http\Controllers\Admin\NonTeachingStaffController::class);
         Route::get('non-teaching-staff/{nonTeachingStaff}/print', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'print'])->name('non-teaching-staff.print');
-        // Import and template routes for schools
-        Route::post('schools/import', [SchoolController::class, 'import'])->name('schools.import');
+
         // Reports routes
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');

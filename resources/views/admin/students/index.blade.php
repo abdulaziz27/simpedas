@@ -67,6 +67,40 @@
                 </div>
             </div>
 
+            {{-- Pesan sukses/error import (hanya di sini, bukan di modal) --}}
+            @if(session('success'))
+                @php
+                    $successMsg = session('success');
+                    $successLines = preg_split('/\n+/', $successMsg);
+                    $mainMsg = array_shift($successLines);
+                @endphp
+                <div class="mb-6">
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-2" role="alert">
+                        <strong>{{ $mainMsg }}</strong>
+                    </div>
+                    @if(session('import_errors') && count(session('import_errors')))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-2" role="alert">
+                            <strong>Error:</strong>
+                            <ul class="list-disc pl-5">
+                                @foreach(session('import_errors') as $err)
+                                    <li>{{ $err }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if(session('import_warnings') && count(session('import_warnings')))
+                        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-2" role="alert">
+                            <strong>Warning:</strong>
+                            <ul class="list-disc pl-5">
+                                @foreach(session('import_warnings') as $warn)
+                                    <li>{{ $warn }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
             {{-- Daftar Siswa Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6">
                 <div class="flex justify-between items-center mb-6">
@@ -138,7 +172,7 @@
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="document.getElementById('import-modal').classList.add('hidden')"></div>
 
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                <form action="#" method="POST" enctype="multipart/form-data">
+                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.import') : route('dinas.students.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="sm:flex sm:items-start">
                         <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -152,6 +186,11 @@
                                 <input type="file" name="file" accept=".xlsx,.xls,.csv" required
                                     class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                 <p class="text-xs text-gray-500 mt-1">Format yang didukung: .xlsx, .xls, .csv</p>
+                                <div class="mt-3">
+                                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.template') : route('dinas.students.template') }}" class="text-sm text-blue-600 hover:underline">
+                                        Download template Excel
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

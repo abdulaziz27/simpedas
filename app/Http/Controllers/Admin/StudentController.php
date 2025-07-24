@@ -8,6 +8,9 @@ use App\Models\School;
 use App\Models\StudentCertificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StudentImportService;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\StudentTemplateExport;
 
 class StudentController extends Controller
 {
@@ -185,6 +188,38 @@ class StudentController extends Controller
     {
         $this->authorizeAccess($student);
         return view('admin.students.print', compact('student'));
+    }
+
+    /**
+     * Import students from Excel file
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $importService = new StudentImportService();
+        $results = $importService->processExcel($request->file('file'));
+
+        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+        return redirect()->back()
+            ->with('success', $message)
+            ->with('import_errors', $results['errors'])
+            ->with('import_warnings', $results['warnings']);
+    }
+
+    /**
+     * Download template Excel untuk import siswa
+     */
+    public function downloadTemplateSiswa()
+    {
+        try {
+            return Excel::download(new StudentTemplateExport(), 'template_import_siswa.xlsx');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     private function authorizeAccess(Student $student)
