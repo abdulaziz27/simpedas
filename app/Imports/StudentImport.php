@@ -27,6 +27,22 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             if (isset($row['nisn'])) $row['nisn'] = (string) $row['nisn'];
             if ($user->hasRole('admin_sekolah')) {
                 $row['school_id'] = $user->school_id;
+            } else {
+                // admin dinas: cari school_id dari SCHOOL_NPSN
+                if (!empty($row['school_npsn'])) {
+                    $school = \App\Models\School::where('npsn', $row['school_npsn'])->first();
+                    if ($school) {
+                        $row['school_id'] = $school->id;
+                    } else {
+                        $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
+                        $this->results['failed']++;
+                        continue;
+                    }
+                } else {
+                    $this->addError($index, "Kolom SCHOOL_NPSN wajib diisi untuk admin dinas.", $row);
+                    $this->results['failed']++;
+                    continue;
+                }
             }
             $action = strtoupper($row['action'] ?? 'CREATE');
             $result = false;
@@ -102,7 +118,10 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateRequired($row, $index)
     {
-        $required = ['nisn', 'full_name', 'gender', 'grade_level', 'student_status', 'academic_year', 'school_id'];
+        $required = ['nisn', 'full_name', 'gender', 'grade_level', 'student_status', 'academic_year'];
+        if (Auth::user()->hasRole('admin_dinas')) {
+            $required[] = 'school_npsn';
+        }
         $hasError = false;
         foreach ($required as $field) {
             if (empty($row[$field])) {
