@@ -7,6 +7,9 @@ use App\Models\Teacher;
 use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\TeacherImportService;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TeacherTemplateExport;
 
 class TeacherController extends Controller
 {
@@ -201,6 +204,38 @@ class TeacherController extends Controller
     {
         $this->authorizeAccess($teacher);
         return view('admin.teachers.print', compact('teacher'));
+    }
+
+    /**
+     * Import teachers from Excel file
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $importService = new TeacherImportService();
+        $results = $importService->processExcel($request->file('file'));
+
+        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+        return redirect()->back()
+            ->with('success', $message)
+            ->with('import_errors', $results['errors'])
+            ->with('import_warnings', $results['warnings']);
+    }
+
+    /**
+     * Download template Excel untuk import guru
+     */
+    public function downloadTemplateGuru()
+    {
+        try {
+            return Excel::download(new TeacherTemplateExport(), 'template_import_guru.xlsx');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     private function authorizeAccess(Teacher $teacher)

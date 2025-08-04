@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class StudentImport implements ToCollection, WithHeadingRow, WithValidation
+class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected $results = [
         'success' => 0,
@@ -24,7 +24,8 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
         foreach ($rows as $index => $row) {
             if (collect($row)->filter()->isEmpty()) continue;
             // CASTING
-            if (isset($row['nisn'])) $row['nisn'] = (string) $row['nisn'];
+            if (isset($row['nuptk'])) $row['nuptk'] = (string) $row['nuptk'];
+            if (isset($row['nip'])) $row['nip'] = (string) $row['nip'];
             if ($user->hasRole('admin_sekolah')) {
                 $row['school_id'] = $user->school_id;
             } else {
@@ -49,13 +50,13 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             try {
                 switch ($action) {
                     case 'CREATE':
-                        $result = $this->createStudent($row, $index);
+                        $result = $this->createTeacher($row, $index);
                         break;
                     case 'UPDATE':
-                        $result = $this->updateStudent($row, $index);
+                        $result = $this->updateTeacher($row, $index);
                         break;
                     case 'DELETE':
-                        $result = $this->deleteStudent($row, $index);
+                        $result = $this->deleteTeacher($row, $index);
                         break;
                     default:
                         $this->addError($index, "Aksi tidak valid: {$action}");
@@ -74,51 +75,51 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
         }
     }
 
-    protected function createStudent($row, $index)
+    protected function createTeacher($row, $index)
     {
         if (!$this->validateRequired($row, $index)) return false;
-        $existing = Student::where('nisn', $row['nisn'])->first();
+        $existing = Teacher::where('nuptk', $row['nuptk'])->first();
         if ($existing) {
-            $this->addError($index, "NISN sudah terdaftar.", $row);
+            $this->addError($index, "NUPTK sudah terdaftar.", $row);
             return false;
         }
-        Student::create($row->toArray());
+        Teacher::create($row->toArray());
         return true;
     }
 
-    protected function updateStudent($row, $index)
+    protected function updateTeacher($row, $index)
     {
-        if (empty($row['nisn'])) {
-            $this->addError($index, "NISN wajib diisi untuk update.", $row);
+        if (empty($row['nuptk'])) {
+            $this->addError($index, "NUPTK wajib diisi untuk update.", $row);
             return false;
         }
-        $student = Student::where('nisn', $row['nisn'])->first();
-        if (!$student) {
-            $this->addError($index, "Siswa tidak ditemukan untuk update", $row);
+        $teacher = Teacher::where('nuptk', $row['nuptk'])->first();
+        if (!$teacher) {
+            $this->addError($index, "Guru tidak ditemukan untuk update", $row);
             return false;
         }
-        $student->update($row->toArray());
+        $teacher->update($row->toArray());
         return true;
     }
 
-    protected function deleteStudent($row, $index)
+    protected function deleteTeacher($row, $index)
     {
-        if (empty($row['nisn'])) {
-            $this->addError($index, "NISN wajib diisi untuk delete.", $row);
+        if (empty($row['nuptk'])) {
+            $this->addError($index, "NUPTK wajib diisi untuk delete.", $row);
             return false;
         }
-        $student = Student::where('nisn', $row['nisn'])->first();
-        if (!$student) {
-            $this->addError($index, "Siswa tidak ditemukan untuk penghapusan", $row);
+        $teacher = Teacher::where('nuptk', $row['nuptk'])->first();
+        if (!$teacher) {
+            $this->addError($index, "Guru tidak ditemukan untuk penghapusan", $row);
             return false;
         }
-        $student->delete();
+        $teacher->delete();
         return true;
     }
 
     protected function validateRequired($row, $index)
     {
-        $required = ['nisn', 'nama_lengkap', 'jenis_kelamin', 'tingkat_kelas', 'status_siswa', 'tahun_ajaran'];
+        $required = ['nuptk', 'nama_lengkap', 'jenis_kelamin', 'status_ke_pegawaian'];
         if (Auth::user()->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }
@@ -137,7 +138,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
         $info = '';
         if ($row) {
             $infoParts = [];
-            if (!empty($row['nisn'])) $infoParts[] = 'NISN: ' . $row['nisn'];
+            if (!empty($row['nuptk'])) $infoParts[] = 'NUPTK: ' . $row['nuptk'];
             if (!empty($row['nama_lengkap'])) $infoParts[] = 'Nama: ' . $row['nama_lengkap'];
             if ($infoParts) $info = ' (' . implode(', ', $infoParts) . ')';
         }
@@ -157,16 +158,22 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            '*.nisn' => ['nullable', 'max:20'],
+            '*.nuptk' => ['nullable', 'max:20'],
+            '*.nip' => ['nullable', 'max:20'],
             '*.nama_lengkap' => ['nullable', 'string', 'max:255'],
             '*.jenis_kelamin' => ['nullable', 'string', 'in:Laki-laki,Perempuan'],
             '*.tempat_lahir' => ['nullable', 'string', 'max:100'],
             '*.tanggal_lahir' => ['nullable', 'date'],
             '*.agama' => ['nullable', 'string', 'max:50'],
-            '*.tingkat_kelas' => ['nullable', 'string', 'max:20'],
-            '*.status_siswa' => ['nullable', 'string', 'in:Aktif,Tamat'],
-            '*.tahun_ajaran' => ['nullable', 'string', 'max:20'],
-            '*.school_id' => ['nullable', 'integer'],
+            '*.alamat' => ['nullable', 'string'],
+            '*.telepon' => ['nullable', 'string', 'max:20'],
+            '*.tingkat_pendidikan' => ['nullable', 'string', 'max:100'],
+            '*.jurusan_pendidikan' => ['nullable', 'string', 'max:100'],
+            '*.mata_pelajaran' => ['nullable', 'string'],
+            '*.status_ke_pegawaian' => ['nullable', 'string', 'in:PNS,PPPK,GTY,PTY'],
+            '*.pangkat' => ['nullable', 'string', 'max:50'],
+            '*.jabatan' => ['nullable', 'string', 'max:100'],
+            '*.npsn_sekolah' => ['nullable', 'string'],
         ];
     }
 }

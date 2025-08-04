@@ -83,6 +83,10 @@ Route::middleware('auth')->group(function () {
         Route::post('schools/import', [SchoolController::class, 'import'])->name('schools.import');
         Route::get('students/template-excel', [StudentController::class, 'downloadTemplateSiswa'])->name('students.template');
         Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
+        Route::get('teachers/template-excel', [TeacherController::class, 'downloadTemplateGuru'])->name('teachers.template');
+        Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
+        Route::get('non-teaching-staff/template-excel', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'downloadTemplateStaff'])->name('non-teaching-staff.template');
+        Route::post('non-teaching-staff/import', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'import'])->name('non-teaching-staff.import');
 
         Route::resource('schools', App\Http\Controllers\Admin\SchoolController::class);
         Route::get('schools/{school}/print', [App\Http\Controllers\Admin\SchoolController::class, 'print'])->name('schools.print');
@@ -114,6 +118,10 @@ Route::middleware('auth')->group(function () {
 
     // Admin Sekolah Routes
     Route::middleware('role:admin_sekolah')->prefix('sekolah')->name('sekolah.')->group(function () {
+        Route::get('teachers/template-excel', [App\Http\Controllers\Admin\TeacherController::class, 'downloadTemplateGuru'])->name('teachers.template');
+        Route::post('teachers/import', [App\Http\Controllers\Admin\TeacherController::class, 'import'])->name('teachers.import');
+        Route::get('non-teaching-staff/template-excel', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'downloadTemplateStaff'])->name('non-teaching-staff.template');
+        Route::post('non-teaching-staff/import', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'import'])->name('non-teaching-staff.import');
         Route::resource('students', App\Http\Controllers\Admin\StudentController::class);
         Route::get('students/{student}/print', [App\Http\Controllers\Admin\StudentController::class, 'print'])->name('students.print');
         Route::resource('teachers', App\Http\Controllers\Admin\TeacherController::class);

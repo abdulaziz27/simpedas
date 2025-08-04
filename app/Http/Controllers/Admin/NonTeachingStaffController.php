@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\NonTeachingStaff;
 use App\Models\School;
+use App\Services\NonTeachingStaffImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class NonTeachingStaffController extends Controller
 {
@@ -129,6 +131,69 @@ class NonTeachingStaffController extends Controller
     {
         $this->authorizeAccess($nonTeachingStaff);
         return view('admin.non-teaching-staff.print', compact('nonTeachingStaff'));
+    }
+
+    /**
+     * Import non-teaching staff from Excel file
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        $importService = new NonTeachingStaffImportService();
+        $results = $importService->processExcel($request->file('file'));
+
+        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+        if (!empty($results['errors'])) {
+            $message .= "\n\nError: " . implode("\n", array_slice($results['errors'], 0, 5));
+            if (count($results['errors']) > 5) {
+                $message .= "\n... dan " . (count($results['errors']) - 5) . " error lainnya.";
+            }
+        }
+
+        if (!empty($results['warnings'])) {
+            $message .= "\n\nWarning: " . implode("\n", array_slice($results['warnings'], 0, 5));
+            if (count($results['warnings']) > 5) {
+                $message .= "\n... dan " . (count($results['warnings']) - 5) . " warning lainnya.";
+            }
+        }
+
+        $routeName = Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.index' : 'dinas.non-teaching-staff.index';
+
+        return redirect()->route($routeName)
+            ->with('success', $message)
+            ->with('import_errors', $results['errors'])
+            ->with('import_warnings', $results['warnings']);
+    }
+
+    /**
+     * Download template Excel untuk import
+     */
+    public function downloadTemplateStaff()
+    {
+        \Log::info('NonTeachingStaffController downloadTemplateStaff: mulai', [
+            'user_id' => auth()->id(),
+            'user_email' => optional(auth()->user())->email,
+        ]);
+        try {
+            $response = \Excel::download(
+                new \App\Exports\NonTeachingStaffTemplateExport(),
+                'template_import_staff.xlsx'
+            );
+            \Log::info('NonTeachingStaffController downloadTemplateStaff: sukses', [
+                'user_id' => auth()->id(),
+            ]);
+            return $response;
+        } catch (\Exception $e) {
+            \Log::error('Error downloading template staff: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     private function authorizeAccess(NonTeachingStaff $staff)

@@ -12,21 +12,27 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
-class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, WithColumnWidths
+class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, WithColumnWidths
 {
     public function headings(): array
     {
         return [
             'AKSI',
-            'NISN',
+            'NUPTK',
+            'NIP',
             'NAMA_LENGKAP',
             'JENIS_KELAMIN',
             'TEMPAT_LAHIR',
             'TANGGAL_LAHIR',
             'AGAMA',
-            'TINGKAT_KELAS',
-            'STATUS_SISWA',
-            'TAHUN_AJARAN',
+            'ALAMAT',
+            'TELEPON',
+            'TINGKAT_PENDIDIKAN',
+            'JURUSAN_PENDIDIKAN',
+            'MATA_PELAJARAN',
+            'STATUS_KE_PEGAWAIAN',
+            'PANGKAT',
+            'JABATAN',
             'NPSN_SEKOLAH',
         ];
     }
@@ -35,19 +41,25 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
     {
         return [
             'A' => 15, // AKSI
-            'B' => 15, // NISN
-            'C' => 30, // NAMA_LENGKAP
-            'D' => 15, // JENIS_KELAMIN
-            'E' => 20, // TEMPAT_LAHIR
-            'F' => 15, // TANGGAL_LAHIR
-            'G' => 20, // AGAMA
-            'H' => 15, // TINGKAT_KELAS
-            'I' => 18, // STATUS_SISWA
-            'J' => 18, // TAHUN_AJARAN
-            'K' => 15, // NPSN_SEKOLAH
-            'M' => 60, // PETUNJUK
-            'N' => 60,
-            'O' => 60,
+            'B' => 15, // NUPTK
+            'C' => 15, // NIP
+            'D' => 30, // NAMA_LENGKAP
+            'E' => 15, // JENIS_KELAMIN
+            'F' => 20, // TEMPAT_LAHIR
+            'G' => 15, // TANGGAL_LAHIR
+            'H' => 20, // AGAMA
+            'I' => 40, // ALAMAT
+            'J' => 20, // TELEPON
+            'K' => 25, // TINGKAT_PENDIDIKAN
+            'L' => 25, // JURUSAN_PENDIDIKAN
+            'M' => 30, // MATA_PELAJARAN
+            'N' => 20, // STATUS_KE_PEGAWAIAN
+            'O' => 20, // PANGKAT
+            'P' => 25, // JABATAN
+            'Q' => 15, // NPSN_SEKOLAH
+            'S' => 60, // PETUNJUK
+            'T' => 60,
+            'U' => 60,
         ];
     }
 
@@ -93,7 +105,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $actionValidation->setPrompt('Pilih CREATE, UPDATE, atau DELETE');
                 $actionValidation->setFormula1('"CREATE,UPDATE,DELETE"');
 
-                $genderValidation = $sheet->getCell('D2')->getDataValidation();
+                $genderValidation = $sheet->getCell('E2')->getDataValidation();
                 $genderValidation->setType(DataValidation::TYPE_LIST);
                 $genderValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $genderValidation->setAllowBlank(false);
@@ -106,7 +118,20 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $genderValidation->setPrompt('Pilih Laki-laki atau Perempuan');
                 $genderValidation->setFormula1('"Laki-laki,Perempuan"');
 
-                $statusValidation = $sheet->getCell('I2')->getDataValidation();
+                $religionValidation = $sheet->getCell('H2')->getDataValidation();
+                $religionValidation->setType(DataValidation::TYPE_LIST);
+                $religionValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                $religionValidation->setAllowBlank(false);
+                $religionValidation->setShowInputMessage(true);
+                $religionValidation->setShowErrorMessage(true);
+                $religionValidation->setShowDropDown(true);
+                $religionValidation->setErrorTitle('Input error');
+                $religionValidation->setError('Nilai tidak valid. Pilih dari daftar.');
+                $religionValidation->setPromptTitle('Pilih dari daftar');
+                $religionValidation->setPrompt('Pilih agama');
+                $religionValidation->setFormula1('"Islam,Kristen,Katolik,Hindu,Buddha,Konghucu"');
+
+                $statusValidation = $sheet->getCell('N2')->getDataValidation();
                 $statusValidation->setType(DataValidation::TYPE_LIST);
                 $statusValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $statusValidation->setAllowBlank(false);
@@ -116,36 +141,37 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $statusValidation->setErrorTitle('Input error');
                 $statusValidation->setError('Nilai tidak valid. Pilih dari daftar.');
                 $statusValidation->setPromptTitle('Pilih dari daftar');
-                $statusValidation->setPrompt('Pilih Aktif atau Tamat');
-                $statusValidation->setFormula1('"Aktif,Tamat"');
+                $statusValidation->setPrompt('Pilih status kepegawaian');
+                $statusValidation->setFormula1('"PNS,PPPK,GTY,PTY"');
 
                 // Terapkan validasi ke seluruh kolom (baris 2-100)
                 $lastRow = 100;
                 $sheet->duplicateStyle($sheet->getStyle('A2'), 'A2:A' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('D2'), 'D2:D' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('I2'), 'I2:I' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('E2'), 'E2:E' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('H2'), 'H2:H' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('N2'), 'N2:N' . $lastRow);
 
                 // Petunjuk penggunaan di kanan
-                $startCol = 'M';
+                $startCol = 'S';
                 $row = 2;
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
-                    '2. Kolom NISN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NISN.',
-                    '3. Kolom NAMA_LENGKAP: Wajib diisi',
-                    '4. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan',
-                    '5. Kolom TINGKAT_KELAS: Wajib diisi',
-                    '6. Kolom STATUS_SISWA: Wajib diisi dengan Aktif atau Tamat',
-                    '7. Kolom TAHUN_AJARAN: Wajib diisi',
-                    '8. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah. Isi dengan NPSN sekolah (lihat menu sekolah)',
+                    '2. Kolom NUPTK: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NUPTK.',
+                    '3. Kolom NIP: Opsional',
+                    '4. Kolom NAMA_LENGKAP: Wajib diisi',
+                    '5. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan',
+                    '6. Kolom AGAMA: Wajib diisi dengan agama yang valid',
+                    '7. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian',
+                    '8. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah. Isi dengan NPSN sekolah',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
-                    $sheet->mergeCells($startCol . $row . ':O' . $row);
+                    $sheet->mergeCells($startCol . $row . ':U' . $row);
                     $sheet->getStyle($startCol . $row)->getFont()->setBold($row === 2);
                     $row++;
                 }
-                $sheet->getStyle('M2:O' . ($row - 1))->getAlignment()->setWrapText(true);
+                $sheet->getStyle('S2:U' . ($row - 1))->getAlignment()->setWrapText(true);
             }
         ];
     }

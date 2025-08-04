@@ -29,18 +29,18 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 continue;
             }
             // Skip baris petunjuk/template (bukan data sekolah)
-            $action = strtoupper($row['action'] ?? '');
+            $action = strtoupper($row['aksi'] ?? '');
             $validActions = ['CREATE', 'UPDATE', 'DELETE'];
             if (empty($row['npsn']) && !in_array($action, $validActions)) {
                 // Baris ini kemungkinan besar baris petunjuk, skip
                 continue;
             }
-            // CASTING: pastikan npsn dan phone selalu string
+            // CASTING: pastikan npsn dan telepon selalu string
             if (isset($row['npsn'])) {
                 $row['npsn'] = (string) $row['npsn'];
             }
-            if (isset($row['phone'])) {
-                $row['phone'] = (string) $row['phone'];
+            if (isset($row['telepon'])) {
+                $row['telepon'] = (string) $row['telepon'];
             }
             try {
                 if (empty($action)) {
@@ -58,9 +58,9 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                         $result = $this->deleteSchool($row, $index);
                         break;
                     default:
-                        $this->addError($index, "Invalid action: {$action}");
+                        $this->addError($index, "Aksi tidak valid: {$action}");
                         $this->results['failed']++;
-                        \Log::error('[IMPORT] Invalid action pada baris ' . ($index + 2) . ': ' . $action);
+                        \Log::error('[IMPORT] Aksi tidak valid pada baris ' . ($index + 2) . ': ' . $action);
                         continue 2;
                 }
 
@@ -92,14 +92,14 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 // Restore dan update data
                 $existing->restore();
                 $existing->update([
-                    'name' => $row['name'],
-                    'education_level' => $row['education_level'],
+                    'name' => $row['nama_sekolah'],
+                    'education_level' => $row['jenjang_pendidikan'],
                     'status' => $row['status'],
-                    'address' => $row['address'],
-                    'phone' => $row['phone'] ?? null,
+                    'address' => $row['alamat'],
+                    'phone' => $row['telepon'] ?? null,
                     'email' => $row['email'] ?? null,
-                    'headmaster' => $row['headmaster'] ?? null,
-                    'region' => $row['region'] ?? 'Siantar Utara',
+                    'headmaster' => $row['kepala_sekolah'] ?? null,
+                    'region' => $row['kecamatan'] ?? 'Siantar Utara',
                 ]);
             } else {
                 $this->addError($index, "NPSN sudah terdaftar.", $row);
@@ -109,14 +109,14 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             // Buat sekolah baru
             $school = School::create([
                 'npsn' => $row['npsn'],
-                'name' => $row['name'],
-                'education_level' => $row['education_level'],
+                'name' => $row['nama_sekolah'],
+                'education_level' => $row['jenjang_pendidikan'],
                 'status' => $row['status'],
-                'address' => $row['address'],
-                'phone' => $row['phone'] ?? null,
+                'address' => $row['alamat'],
+                'phone' => $row['telepon'] ?? null,
                 'email' => $row['email'] ?? null,
-                'headmaster' => $row['headmaster'] ?? null,
-                'region' => $row['region'] ?? 'Siantar Utara',
+                'headmaster' => $row['kepala_sekolah'] ?? null,
+                'region' => $row['kecamatan'] ?? 'Siantar Utara',
             ]);
         }
 
@@ -127,7 +127,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 $user = User::firstOrCreate(
                     ['email' => $row['email']],
                     [
-                        'name' => $row['headmaster'] ?? 'Admin Sekolah',
+                        'name' => $row['kepala_sekolah'] ?? 'Admin Sekolah',
                         'password' => Hash::make($randomPassword),
                     ]
                 );
@@ -157,25 +157,25 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             $school = School::where('npsn', $row['npsn'])->first();
         }
         if (!$school) {
-            $this->addError($index, "CRITICAL ERROR: School not found for update");
+            $this->addError($index, "ERROR KRITIS: Sekolah tidak ditemukan untuk update");
             return false;
         }
 
         // Validasi field yang diperlukan untuk update
-        if (empty($row['name']) || empty($row['education_level']) || empty($row['status']) || empty($row['address'])) {
-            $this->addError($index, "CRITICAL ERROR: Required fields missing for update");
+        if (empty($row['nama_sekolah']) || empty($row['jenjang_pendidikan']) || empty($row['status']) || empty($row['alamat'])) {
+            $this->addError($index, "ERROR KRITIS: Field wajib tidak lengkap untuk update");
             return false;
         }
 
         // Validasi education level
-        if (!in_array($row['education_level'], ['TK', 'SD', 'SMP', 'SMA', 'SMK'])) {
-            $this->addError($index, "CRITICAL ERROR: Invalid education level");
+        if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'SMA', 'SMK'])) {
+            $this->addError($index, "ERROR KRITIS: Jenjang pendidikan tidak valid");
             return false;
         }
 
         // Validasi status
         if (!in_array($row['status'], ['Negeri', 'Swasta'])) {
-            $this->addError($index, "CRITICAL ERROR: Invalid status");
+            $this->addError($index, "ERROR KRITIS: Status tidak valid");
             return false;
         }
 
@@ -184,14 +184,14 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
         // Update sekolah
         $school->update([
-            'name' => $row['name'],
-            'education_level' => $row['education_level'],
+            'name' => $row['nama_sekolah'],
+            'education_level' => $row['jenjang_pendidikan'],
             'status' => $row['status'],
-            'address' => $row['address'],
-            'phone' => $row['phone'] ?? $school->phone,
+            'address' => $row['alamat'],
+            'phone' => $row['telepon'] ?? $school->phone,
             'email' => $row['email'] ?? $school->email,
-            'headmaster' => $row['headmaster'] ?? $school->headmaster,
-            'region' => $row['region'] ?? $school->region,
+            'headmaster' => $row['kepala_sekolah'] ?? $school->headmaster,
+            'region' => $row['kecamatan'] ?? $school->region,
         ]);
         return true;
     }
@@ -204,7 +204,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             $school = School::where('npsn', $row['npsn'])->first();
         }
         if (!$school) {
-            $this->addError($index, "CRITICAL ERROR: School not found for deletion");
+            $this->addError($index, "ERROR KRITIS: Sekolah tidak ditemukan untuk penghapusan");
             return false;
         }
 
@@ -218,7 +218,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateRequired($row, $index)
     {
-        $required = ['npsn', 'name', 'education_level', 'status', 'address'];
+        $required = ['npsn', 'nama_sekolah', 'jenjang_pendidikan', 'status', 'alamat'];
         $hasError = false;
         foreach ($required as $field) {
             if (empty($row[$field])) {
@@ -227,7 +227,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             }
         }
         // Validasi panjang minimum untuk name
-        if (!empty($row['name']) && strlen($row['name']) < 3) {
+        if (!empty($row['nama_sekolah']) && strlen($row['nama_sekolah']) < 3) {
             $this->addError($index, "Nama sekolah minimal 3 karakter.", $row);
             $hasError = true;
         }
@@ -236,25 +236,25 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             $this->addError($index, "NPSN maksimal 20 karakter.", $row);
             $hasError = true;
         }
-        if (!empty($row['name']) && strlen($row['name']) > 255) {
+        if (!empty($row['nama_sekolah']) && strlen($row['nama_sekolah']) > 255) {
             $this->addError($index, "Nama sekolah maksimal 255 karakter.", $row);
             $hasError = true;
         }
-        if (!empty($row['phone']) && strlen($row['phone']) > 20) {
+        if (!empty($row['telepon']) && strlen($row['telepon']) > 20) {
             $this->addWarning($index, "Nomor telepon dipotong maksimal 20 karakter.", $row);
-            $row['phone'] = substr($row['phone'], 0, 20);
+            $row['telepon'] = substr($row['telepon'], 0, 20);
         }
-        if (!empty($row['headmaster']) && strlen($row['headmaster']) > 255) {
+        if (!empty($row['kepala_sekolah']) && strlen($row['kepala_sekolah']) > 255) {
             $this->addWarning($index, "Nama kepala sekolah dipotong maksimal 255 karakter.", $row);
-            $row['headmaster'] = substr($row['headmaster'], 0, 255);
+            $row['kepala_sekolah'] = substr($row['kepala_sekolah'], 0, 255);
         }
         return !$hasError;
     }
 
     protected function validateSchoolName($row, $index)
     {
-        $name = $row['name'];
-        $level = $row['education_level'];
+        $name = $row['nama_sekolah'];
+        $level = $row['jenjang_pendidikan'];
         $status = $row['status'];
 
         // Validasi nama berdasarkan jenjang pendidikan
@@ -293,7 +293,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         if ($row) {
             $infoParts = [];
             if (!empty($row['npsn'])) $infoParts[] = 'NPSN: ' . $row['npsn'];
-            if (!empty($row['name'])) $infoParts[] = 'Nama: ' . $row['name'];
+            if (!empty($row['nama_sekolah'])) $infoParts[] = 'Nama: ' . $row['nama_sekolah'];
             if ($infoParts) $info = ' (' . implode(', ', $infoParts) . ')';
         }
         $errorMsg = "Baris " . ($index + 2) . "{$info}: {$message}";
@@ -315,13 +315,13 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
     {
         return [
             '*.npsn' => ['nullable', 'max:20'],
-            '*.name' => ['nullable', 'string', 'max:255'],
-            '*.education_level' => ['nullable', 'string', 'in:TK,SD,SMP,SMA,SMK'],
+            '*.nama_sekolah' => ['nullable', 'string', 'max:255'],
+            '*.jenjang_pendidikan' => ['nullable', 'string', 'in:TK,SD,SMP,SMA,SMK'],
             '*.status' => ['nullable', 'string', 'in:Negeri,Swasta'],
-            '*.address' => ['nullable', 'string'],
-            '*.phone' => ['nullable', 'max:20'],
+            '*.alamat' => ['nullable', 'string'],
+            '*.telepon' => ['nullable', 'max:20'],
             '*.email' => ['nullable', 'email'],
-            '*.headmaster' => ['nullable', 'string', 'max:255'],
+            '*.kepala_sekolah' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

@@ -31,18 +31,18 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
     public function headings(): array
     {
         return [
-            'ACTION',
+            'AKSI',
             'ID',
             'NPSN',
-            'NAME',
-            'EDUCATION_LEVEL',
+            'NAMA_SEKOLAH',
+            'JENJANG_PENDIDIKAN',
             'STATUS',
-            'ADDRESS',
-            'PHONE',
+            'ALAMAT',
+            'TELEPON',
             'EMAIL',
             'WEBSITE',
-            'HEADMASTER',
-            'REGION'
+            'KEPALA_SEKOLAH',
+            'KECAMATAN'
         ];
     }
 
@@ -52,18 +52,18 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
     public function columnWidths(): array
     {
         return [
-            'A' => 15, // ACTION
+            'A' => 15, // AKSI
             'B' => 10, // ID
             'C' => 15, // NPSN
-            'D' => 30, // NAME
-            'E' => 20, // EDUCATION_LEVEL
+            'D' => 30, // NAMA_SEKOLAH
+            'E' => 20, // JENJANG_PENDIDIKAN
             'F' => 15, // STATUS
-            'G' => 40, // ADDRESS
-            'H' => 20, // PHONE
+            'G' => 40, // ALAMAT
+            'H' => 20, // TELEPON
             'I' => 30, // EMAIL
             'J' => 30, // WEBSITE
-            'K' => 30, // HEADMASTER
-            'L' => 20, // REGION
+            'K' => 30, // KEPALA_SEKOLAH
+            'L' => 20, // KECAMATAN
             'N' => 60, // PETUNJUK (kolom utama)
             'O' => 60, // PETUNJUK (merge, biar wrap text optimal)
             'P' => 60, // PETUNJUK (merge, biar wrap text optimal)
@@ -173,16 +173,16 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $row = 2; // Mulai di bawah header
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
-                    '1. Kolom ACTION: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
-                    '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN, kolom ID boleh dikosongkan.',
-                    '3. Kolom ID: (Opsional) Bisa diisi untuk operasi UPDATE/DELETE, tapi cukup isi NPSN saja sudah cukup.',
-                    '4. Kolom NAME: Wajib diisi, minimal 3 karakter',
-                    '5. Kolom EDUCATION_LEVEL: Wajib diisi dengan nilai TK, SD, SMP, SMA, atau SMK',
+                    '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
+                    '2. Kolom ID: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi ID, kolom NPSN boleh dikosongkan.',
+                    '3. Kolom NPSN: (Opsional) Bisa diisi untuk operasi UPDATE/DELETE, tapi cukup isi ID saja sudah cukup.',
+                    '4. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
+                    '5. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, SMA, atau SMK',
                     '6. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta',
-                    '7. Kolom ADDRESS: Wajib diisi',
-                    '8. Kolom PHONE, EMAIL, WEBSITE: Opsional',
-                    '9. Kolom HEADMASTER: Wajib diisi',
-                    '10. Kolom REGION: Wajib diisi dengan kecamatan yang valid',
+                    '7. Kolom ALAMAT: Wajib diisi',
+                    '8. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
+                    '9. Kolom KEPALA_SEKOLAH: Wajib diisi',
+                    '10. Kolom KECAMATAN: Wajib diisi dengan kecamatan yang valid',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
