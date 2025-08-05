@@ -157,7 +157,7 @@
                             <div class="text-sm text-gray-600">Lihat statistik lengkap</div>
                         </div>
                     </a>
-                    <a href="#" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-6 flex items-center transition cursor-pointer">
+                    <a href="{{ route('dinas.user-management.index') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-6 flex items-center transition cursor-pointer">
                         <div class="icon-bg-green mr-6">
                             <img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Validasi" class="h-12 w-12">
                         </div>

@@ -34,6 +34,7 @@
                                     <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Guru</a>
                                     <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Siswa</a>
                                     <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Staf</a>
+                                    <a href="{{ route('dinas.user-management.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Pengguna</a>
                                 </div>
                             </div>
                         </div>
@@ -55,6 +56,7 @@
                                     <a href="{{ route('sekolah.students.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Siswa</a>
                                     <a href="{{ route('sekolah.teachers.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Guru</a>
                                     <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Staf</a>
+                                    <a href="{{ route('sekolah.user-management.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Pengguna</a>
                                 </div>
                             </div>
                         </div>
@@ -125,6 +127,7 @@
                     <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Guru</a>
                     <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
                     <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
+                    <a href="{{ route('dinas.user-management.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Pengguna</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>
                 <a href="{{ route('dinas.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>
@@ -137,6 +140,7 @@
                     <a href="{{ route('sekolah.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
                     <a href="{{ route('sekolah.teachers.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Guru</a>
                     <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
+                    <a href="{{ route('sekolah.user-management.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Pengguna</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>
                 <a href="{{ route('dinas.reports.index') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Laporan</a>

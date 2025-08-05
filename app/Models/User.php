@@ -76,4 +76,14 @@ class User extends Authenticatable
     {
         return $this->hasRole('guru');
     }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
 }

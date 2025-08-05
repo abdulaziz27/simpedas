@@ -96,6 +96,9 @@ Route::middleware('auth')->group(function () {
         Route::get('teachers/{teacher}/print', [App\Http\Controllers\Admin\TeacherController::class, 'print'])->name('teachers.print');
         Route::resource('non-teaching-staff', App\Http\Controllers\Admin\NonTeachingStaffController::class);
         Route::get('non-teaching-staff/{nonTeachingStaff}/print', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'print'])->name('non-teaching-staff.print');
+        Route::resource('user-management', App\Http\Controllers\Admin\UserManagementController::class)->parameters([
+            'user-management' => 'user'
+        ]);
 
         // Reports routes
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -128,6 +131,9 @@ Route::middleware('auth')->group(function () {
         Route::get('teachers/{teacher}/print', [App\Http\Controllers\Admin\TeacherController::class, 'print'])->name('teachers.print');
         Route::resource('non-teaching-staff', App\Http\Controllers\Admin\NonTeachingStaffController::class);
         Route::get('non-teaching-staff/{nonTeachingStaff}/print', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'print'])->name('non-teaching-staff.print');
+        Route::resource('user-management', App\Http\Controllers\Admin\UserManagementController::class)->parameters([
+            'user-management' => 'user'
+        ]);
 
         // Reports routes
         Route::prefix('reports')->name('reports.')->group(function () {
