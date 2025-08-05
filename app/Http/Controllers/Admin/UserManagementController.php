@@ -69,6 +69,9 @@ class UserManagementController extends Controller
     {
         $user = Auth::user();
 
+        // Log untuk debugging
+        \Log::info('Creating user with data:', $request->all());
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -76,11 +79,13 @@ class UserManagementController extends Controller
             'role' => 'required|exists:roles,name',
             'school_id' => [
                 'required_if:role,admin_sekolah,guru',
+                'nullable',
                 'exists:schools,id'
             ],
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Validation failed:', $validator->errors()->toArray());
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -96,6 +101,11 @@ class UserManagementController extends Controller
             $request->merge(['school_id' => $user->school_id]);
         }
 
+        // Set school_id berdasarkan role
+        if ($request->role === 'admin_dinas') {
+            $request->merge(['school_id' => null]); // Admin dinas tidak terikat sekolah
+        }
+
         $userData = [
             'name' => $request->name,
             'email' => $request->email,
@@ -103,13 +113,22 @@ class UserManagementController extends Controller
             'school_id' => $request->school_id,
         ];
 
-        $newUser = User::create($userData);
-        $newUser->assignRole($request->role);
+        \Log::info('User data to be created:', $userData);
 
-        $routeName = $user->hasRole('admin_sekolah') ? 'sekolah.user-management.index' : 'dinas.user-management.index';
+        try {
+            $newUser = User::create($userData);
+            $newUser->assignRole($request->role);
 
-        return redirect()->route($routeName)
-            ->with('success', 'User berhasil ditambahkan.');
+            $routeName = $user->hasRole('admin_sekolah') ? 'sekolah.user-management.index' : 'dinas.user-management.index';
+
+            return redirect()->route($routeName)
+                ->with('success', 'User berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            \Log::error('Error creating user: ' . $e->getMessage());
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan saat membuat user: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     public function show(User $user)
@@ -161,6 +180,7 @@ class UserManagementController extends Controller
             'role' => 'required|exists:roles,name',
             'school_id' => [
                 'required_if:role,admin_sekolah,guru',
+                'nullable',
                 'exists:schools,id'
             ],
         ]);
@@ -179,6 +199,11 @@ class UserManagementController extends Controller
                     ->withInput();
             }
             $request->merge(['school_id' => $currentUser->school_id]);
+        }
+
+        // Set school_id berdasarkan role
+        if ($request->role === 'admin_dinas') {
+            $request->merge(['school_id' => null]); // Admin dinas tidak terikat sekolah
         }
 
         $userData = [

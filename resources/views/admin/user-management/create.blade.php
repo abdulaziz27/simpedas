@@ -163,6 +163,10 @@
                 if (selectedRole === 'admin_sekolah' || selectedRole === 'guru') {
                     schoolField.classList.remove('hidden');
                     schoolSelect.required = true;
+                } else if (selectedRole === 'admin_dinas') {
+                    schoolField.classList.add('hidden');
+                    schoolSelect.required = false;
+                    schoolSelect.value = '';
                 } else {
                     schoolField.classList.add('hidden');
                     schoolSelect.required = false;
