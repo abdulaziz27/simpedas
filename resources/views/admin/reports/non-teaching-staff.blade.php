@@ -8,13 +8,13 @@
         <span class="mx-2">&gt;</span>
         <a href="{{ route('dinas.reports.index') }}" class="font-semibold hover:underline">Laporan</a>
         <span class="mx-2">&gt;</span>
-        <span class="text-green-300 border-b-2 border-green-300 pb-1">Laporan Kelulusan</span>
+        <span class="text-green-300 border-b-2 border-green-300 pb-1">Laporan Tenaga Kerja Non Pendidik</span>
     </nav>
 
     {{-- Header Card --}}
     <div class="bg-[#136e67] rounded-2xl shadow-lg px-8 py-5 mb-8 border-b-4 border-white flex items-center justify-between">
-        <h2 class="text-3xl font-bold text-white">Laporan Kelulusan Siswa</h2>
-        <a href="{{ route('dinas.reports.graduation.export') }}" class="bg-white text-[#136e67] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+        <h2 class="text-3xl font-bold text-white">Laporan Tenaga Kerja Non Pendidik</h2>
+        <a href="{{ route('dinas.reports.non-teaching-staff.export') }}" class="bg-white text-[#136e67] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -27,12 +27,26 @@
         <div class="bg-[#0E453F] rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-300">Total Lulusan</p>
-                    <p class="text-2xl font-bold">{{ number_format($totalGraduates) }}</p>
+                    <p class="text-sm text-gray-300">Total Tenaga Kerja</p>
+                    <p class="text-2xl font-bold">{{ number_format($totalStaff) }}</p>
+                </div>
+                <div class="bg-indigo-500 p-3 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-[#0E453F] rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-300">PNS</p>
+                    <p class="text-2xl font-bold">{{ number_format($totalPNS) }}</p>
                 </div>
                 <div class="bg-green-500 p-3 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             </div>
@@ -41,26 +55,12 @@
         <div class="bg-[#0E453F] rounded-xl p-6 text-white">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-300">Siswa Lulus</p>
-                    <p class="text-2xl font-bold">{{ number_format($totalLulus) }}</p>
+                    <p class="text-sm text-gray-300">PPPK</p>
+                    <p class="text-2xl font-bold">{{ number_format($totalPPPK) }}</p>
                 </div>
-                <div class="bg-blue-500 p-3 rounded-full">
+                <div class="bg-yellow-500 p-3 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-[#0E453F] rounded-xl p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-300">Siswa Tidak Lulus</p>
-                    <p class="text-2xl font-bold">{{ number_format($totalTidakLulus) }}</p>
-                </div>
-                <div class="bg-red-500 p-3 rounded-full">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             </div>
@@ -70,7 +70,7 @@
     {{-- Data Table --}}
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Detail Kelulusan per Sekolah</h3>
+            <h3 class="text-lg font-semibold text-gray-900">Detail Tenaga Kerja Non Pendidik per Sekolah</h3>
         </div>
 
         <div class="overflow-x-auto">
@@ -82,16 +82,19 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NPSN</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenjang</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa Lulus</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa Tidak Lulus</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Lulusan</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PNS</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PPPK</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Honorer</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">PTY</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Kontrak</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($schoolsWithGraduation as $index => $school)
+                    @forelse($schoolsWithStaff as $index => $school)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ ($schoolsWithGraduation->currentPage() - 1) * $schoolsWithGraduation->perPage() + $index + 1 }}
+                            {{ ($schoolsWithStaff->currentPage() - 1) * $schoolsWithStaff->perPage() + $index + 1 }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $school->name }}</div>
@@ -107,19 +110,28 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
-                            <span class="font-semibold text-green-600">{{ number_format($school->total_lulus) }}</span>
+                            <span class="font-semibold text-green-600">{{ number_format($school->total_pns) }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
-                            <span class="font-semibold text-red-600">{{ number_format($school->total_tidak_lulus) }}</span>
+                            <span class="font-semibold text-yellow-600">{{ number_format($school->total_pppk) }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
-                            <span class="font-bold text-blue-600">{{ number_format($school->total_lulus + $school->total_tidak_lulus) }}</span>
+                            <span class="font-semibold text-orange-600">{{ number_format($school->total_honorer) }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                            <span class="font-semibold text-purple-600">{{ number_format($school->total_pty) }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                            <span class="font-semibold text-red-600">{{ number_format($school->total_kontrak) }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900">
+                            <span class="font-bold text-blue-600">{{ number_format($school->total_pns + $school->total_pppk + $school->total_honorer + $school->total_pty + $school->total_kontrak) }}</span>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                            Tidak ada data kelulusan yang ditemukan
+                        <td colspan="11" class="px-6 py-4 text-center text-gray-500">
+                            Tidak ada data tenaga kerja non pendidik yang ditemukan
                         </td>
                     </tr>
                     @endforelse
@@ -128,9 +140,9 @@
         </div>
 
         {{-- Pagination --}}
-        @if($schoolsWithGraduation->hasPages())
+        @if($schoolsWithStaff->hasPages())
         <div class="px-6 py-4 border-t border-gray-200">
-            {{ $schoolsWithGraduation->links() }}
+            {{ $schoolsWithStaff->links() }}
         </div>
         @endif
     </div>

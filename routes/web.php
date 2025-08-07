@@ -88,6 +88,20 @@ Route::middleware('auth')->group(function () {
         Route::get('non-teaching-staff/template-excel', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'downloadTemplateStaff'])->name('non-teaching-staff.template');
         Route::post('non-teaching-staff/import', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'import'])->name('non-teaching-staff.import');
 
+        // Export routes harus di atas resource routes!
+        Route::get('/reports/teachers/export', [App\Http\Controllers\Admin\ReportController::class, 'exportTeachers'])->name('reports.teachers.export');
+        Route::get('/reports/students/export', [App\Http\Controllers\Admin\ReportController::class, 'exportStudents'])->name('reports.students.export');
+        Route::get('/reports/graduation/export', [App\Http\Controllers\Admin\ReportController::class, 'exportGraduation'])->name('reports.graduation.export');
+        Route::get('/reports/non-teaching-staff/export', [App\Http\Controllers\Admin\ReportController::class, 'exportNonTeachingStaff'])->name('reports.non-teaching-staff.export');
+        Route::get('/reports/schools/export', [App\Http\Controllers\Admin\ReportController::class, 'exportSchools'])->name('reports.schools.export');
+
+        // Report routes
+        Route::get('/reports/schools', [App\Http\Controllers\Admin\ReportController::class, 'schoolsReport'])->name('reports.schools');
+        Route::get('/reports/teachers', [App\Http\Controllers\Admin\ReportController::class, 'teachersReport'])->name('reports.teachers');
+        Route::get('/reports/students', [App\Http\Controllers\Admin\ReportController::class, 'studentsReport'])->name('reports.students');
+        Route::get('/reports/graduation', [App\Http\Controllers\Admin\ReportController::class, 'graduationReport'])->name('reports.graduation');
+        Route::get('/reports/non-teaching-staff', [App\Http\Controllers\Admin\ReportController::class, 'nonTeachingStaffReport'])->name('reports.non-teaching-staff');
+
         Route::resource('schools', App\Http\Controllers\Admin\SchoolController::class);
         Route::get('schools/{school}/print', [App\Http\Controllers\Admin\SchoolController::class, 'print'])->name('schools.print');
         Route::resource('students', App\Http\Controllers\Admin\StudentController::class);
@@ -101,13 +115,7 @@ Route::middleware('auth')->group(function () {
         ]);
 
         // Reports routes
-        Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
-            Route::get('/schools', [App\Http\Controllers\Admin\ReportController::class, 'schoolsReport'])->name('schools');
-            Route::get('/teachers', [App\Http\Controllers\Admin\ReportController::class, 'teachersReport'])->name('teachers');
-            Route::get('/students', [App\Http\Controllers\Admin\ReportController::class, 'studentsReport'])->name('students');
-            Route::get('/graduation', [App\Http\Controllers\Admin\ReportController::class, 'graduationReport'])->name('graduation');
-        });
+        Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
         // Student Certificate Routes (tambahkan untuk admin dinas)
         Route::get('students/{student}/certificate/upload', [StudentController::class, 'createCertificate'])->name('students.certificate.create');
         Route::post('students/{student}/certificate', [StudentController::class, 'storeCertificate'])->name('students.certificate.store');

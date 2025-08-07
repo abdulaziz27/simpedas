@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register Excel service provider if not already registered
+        if (!app()->bound('excel')) {
+            $this->app->register(\Maatwebsite\Excel\ExcelServiceProvider::class);
+            $this->app->alias('Excel', \Maatwebsite\Excel\Facades\Excel::class);
+        }
     }
 
     /**
