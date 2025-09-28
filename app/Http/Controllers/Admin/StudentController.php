@@ -30,7 +30,23 @@ class StudentController extends Controller
     {
         $query = $this->getStudentQuery();
 
-        if ($request->has('search')) {
+        // Filter by school
+        if ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
+        }
+
+        // Filter by grade level
+        if ($request->filled('grade_level')) {
+            $query->where('grade_level', $request->grade_level);
+        }
+
+        // Filter by student status
+        if ($request->filled('student_status')) {
+            $query->where('student_status', $request->student_status);
+        }
+
+        // Search
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
@@ -39,7 +55,9 @@ class StudentController extends Controller
         }
 
         $students = $query->with('school')->latest()->paginate(10);
-        return view('admin.students.index', compact('students'));
+        $schools = \App\Models\School::all();
+
+        return view('admin.students.index', compact('students', 'schools'));
     }
 
     public function create()
@@ -70,7 +88,7 @@ class StudentController extends Controller
 
         $student = Student::create($data);
 
-        return redirect()->route($user->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)
+        return redirect()->route($user->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
             ->with('success', 'Data siswa berhasil ditambahkan.');
     }
 
@@ -113,7 +131,7 @@ class StudentController extends Controller
 
         $student->update($data);
 
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
             ->with('success', 'Data siswa berhasil diperbarui.');
     }
 
@@ -121,7 +139,7 @@ class StudentController extends Controller
     {
         $this->authorizeAccess($student);
         $student->delete();
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.index' : 'admin.students.index')
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.index' : 'dinas.students.index')
             ->with('success', 'Data siswa berhasil dihapus.');
     }
 
@@ -134,6 +152,12 @@ class StudentController extends Controller
     public function storeCertificate(Request $request, Student $student)
     {
         $this->authorizeAccess($student);
+
+        // Cek apakah siswa sudah memiliki ijazah
+        if ($student->certificates()->exists()) {
+            return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
+                ->with('error', 'Siswa ini sudah memiliki ijazah. Silakan hapus ijazah yang ada terlebih dahulu jika ingin mengunggah yang baru.');
+        }
 
         $request->validate([
             'graduation_date' => 'required|date',
@@ -159,7 +183,7 @@ class StudentController extends Controller
             'graduation_status' => $request->graduation_status,
         ]);
 
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
             ->with('success', 'Ijazah berhasil diunggah.');
     }
 
@@ -177,7 +201,7 @@ class StudentController extends Controller
             \Storage::disk('public')->delete($certificate->certificate_file);
         }
         $certificate->delete();
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
             ->with('success', 'Ijazah berhasil dihapus.');
     }
 

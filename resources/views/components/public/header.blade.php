@@ -61,7 +61,7 @@
                             </div>
                         </div>
                         <a href="{{ route('statistik.detail', 'sekolah') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Statistik</a>
-                        <a href="{{ route('dinas.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
+                        <a href="{{ route('sekolah.reports.index') }}" class="px-3 py-2 rounded transition text-white hover:text-[#6ee7b7] font-semibold">Laporan</a>
                     @endrole
 
                     @role('guru')

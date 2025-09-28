@@ -133,6 +133,8 @@ Route::middleware('auth')->group(function () {
         Route::post('teachers/import', [App\Http\Controllers\Admin\TeacherController::class, 'import'])->name('teachers.import');
         Route::get('non-teaching-staff/template-excel', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'downloadTemplateStaff'])->name('non-teaching-staff.template');
         Route::post('non-teaching-staff/import', [App\Http\Controllers\Admin\NonTeachingStaffController::class, 'import'])->name('non-teaching-staff.import');
+        Route::get('students/template-excel', [App\Http\Controllers\Admin\StudentController::class, 'downloadTemplateSiswa'])->name('students.template');
+        Route::post('students/import', [App\Http\Controllers\Admin\StudentController::class, 'import'])->name('students.import');
         Route::resource('students', App\Http\Controllers\Admin\StudentController::class);
         Route::get('students/{student}/print', [App\Http\Controllers\Admin\StudentController::class, 'print'])->name('students.print');
         Route::resource('teachers', App\Http\Controllers\Admin\TeacherController::class);

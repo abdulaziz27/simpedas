@@ -286,6 +286,14 @@
                 <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const ctx = document.getElementById('schoolStatsChart').getContext('2d');
+
+                    // Debug data
+                    console.log('Stats data:', {
+                        total_guru: {{ $stats['total_guru'] ?? 0 }},
+                        total_siswa: {{ $stats['total_siswa'] ?? 0 }},
+                        total_non_teaching_staff: {{ $stats['total_non_teaching_staff'] ?? 0 }}
+                    });
+
                     const chartData = {
                         labels: ['GURU', 'SISWA', 'TENAGA NON GURU'],
                         datasets: [{
@@ -310,7 +318,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return context.label + ': ' + context.parsed;
+                                        return context.label + ': ' + context.parsed.y;
                                     }
                                 }
                             }
@@ -318,9 +326,9 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: {{ max($stats['total_guru'] ?? 0, $stats['total_siswa'] ?? 0, $stats['total_non_teaching_staff'] ?? 0) + 50 }},
+                                max: {{ max(($stats['total_guru'] ?? 0), ($stats['total_siswa'] ?? 0), ($stats['total_non_teaching_staff'] ?? 0)) + 10 }},
                                 ticks: {
-                                    stepSize: 10
+                                    stepSize: 1
                                 },
                                 grid: {
                                     color: '#E5E7EB'

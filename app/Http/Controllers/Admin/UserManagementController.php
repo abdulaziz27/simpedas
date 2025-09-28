@@ -29,14 +29,14 @@ class UserManagementController extends Controller
         }
 
         // Filter berdasarkan role
-        if ($request->has('role') && $request->role !== '') {
+        if ($request->filled('role')) {
             $query->whereHas('roles', function ($q) use ($request) {
                 $q->where('name', $request->role);
             });
         }
 
         // Search
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -44,8 +44,15 @@ class UserManagementController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(10);
-        $roles = Role::all();
+        $users = $query->latest()->paginate(10)->withQueryString();
+
+        // Filter roles berdasarkan user yang login
+        if ($user->hasRole('admin_sekolah')) {
+            $roles = Role::where('name', 'guru')->get();
+        } else {
+            $roles = Role::all();
+        }
+
         $schools = School::all();
 
         return view('admin.user-management.index', compact('users', 'roles', 'schools'));

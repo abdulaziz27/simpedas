@@ -39,7 +39,7 @@ class StudentReportController extends Controller
             'uploaded_by' => Auth::id(),
         ]);
 
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)->with('success', 'Raport berhasil ditambahkan.');
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)->with('success', 'Raport berhasil ditambahkan.');
     }
 
     public function destroy(Student $student, StudentReport $report)
@@ -48,6 +48,6 @@ class StudentReportController extends Controller
             Storage::disk('public')->delete($report->file_path);
         }
         $report->delete();
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'admin.students.show', $student)->with('success', 'Raport berhasil dihapus.');
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)->with('success', 'Raport berhasil dihapus.');
     }
 }

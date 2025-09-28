@@ -90,13 +90,13 @@ class PublicController extends Controller
 
     public function detailGuru($id)
     {
-        $teacher = Teacher::with('school')->findOrFail($id);
+        $teacher = Teacher::with(['school', 'documents'])->findOrFail($id);
         return view('public.detail-guru', compact('teacher'));
     }
 
     public function detailSiswa($id)
     {
-        $student = Student::with('school')->findOrFail($id);
+        $student = Student::with(['school', 'reports', 'certificates'])->findOrFail($id);
         return view('public.detail-siswa', compact('student'));
     }
 
@@ -203,6 +203,11 @@ class PublicController extends Controller
             $options = [
                 'plugins' => [
                     'legend' => false,
+                    'tooltip' => [
+                        'callbacks' => [
+                            'label' => 'function(context) { return context.dataset.label + ": " + context.parsed.x + "%"; }'
+                        ]
+                    ]
                 ],
                 'scales' => [
                     'x' => [
@@ -228,6 +233,11 @@ class PublicController extends Controller
             $options = [
                 'plugins' => [
                     'legend' => false,
+                    'tooltip' => [
+                        'callbacks' => [
+                            'label' => 'function(context) { return context.label + ": " + context.parsed.y; }'
+                        ]
+                    ]
                 ]
             ];
             $datasets = [$dataset];

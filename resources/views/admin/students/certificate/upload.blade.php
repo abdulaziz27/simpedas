@@ -29,6 +29,19 @@
                 </div>
             @endif
 
+            {{-- Cek apakah siswa sudah memiliki ijazah --}}
+            @if($student->certificates()->exists())
+                <div class="mb-6 bg-yellow-500 text-white px-6 py-4 rounded-lg shadow-lg text-center">
+                    <strong>Peringatan:</strong> Siswa ini sudah memiliki ijazah. Silakan hapus ijazah yang ada terlebih dahulu jika ingin mengunggah yang baru.
+                    <div class="mt-2">
+                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}"
+                           class="bg-white text-yellow-600 px-4 py-2 rounded hover:bg-gray-100 transition">
+                            Lihat Detail Siswa
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.store', $student) : route('dinas.students.certificate.store', $student) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">

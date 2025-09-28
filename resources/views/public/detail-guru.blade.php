@@ -106,6 +106,37 @@
                 @endauth
             </div>
         </div>
+
+        {{-- Documents Section --}}
+        @if($teacher->documents && $teacher->documents->count() > 0)
+            <div class="mt-8 pt-8 border-t border-gray-700 print:border-gray-300">
+                <h3 class="text-xl font-bold text-white mb-4 print:text-black">Dokumen Guru</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($teacher->documents as $document)
+                        <div class="bg-[#0a403a] rounded-lg p-4 print:bg-gray-100 print:text-black">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-white print:text-black">{{ $document->document_type }}</h4>
+                                <span class="text-xs text-gray-300 print:text-gray-600">
+                                    {{ $document->created_at->translatedFormat('d M Y') }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-300 print:text-gray-600 mb-3">{{ $document->description ?: 'Tidak ada deskripsi' }}</p>
+                            <div class="flex space-x-2">
+                                <a href="{{ asset('storage/' . $document->file_path) }}"
+                                   target="_blank"
+                                   class="inline-flex items-center px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Lihat
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </div>
 </section>
 

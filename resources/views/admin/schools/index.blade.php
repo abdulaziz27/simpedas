@@ -152,8 +152,14 @@
                     <div class="bg-white rounded-xl p-6 shadow-lg flex flex-col justify-between">
                         <div>
                             <div class="flex items-center mb-4">
-                                <div class="w-16 h-16 bg-gray-200 rounded-full mr-4 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                <div class="w-16 h-16 rounded-full mr-4 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                    @if($school->logo)
+                                        <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                        </div>
+                                    @endif
                                 </div>
                                 <h3 class="text-xl font-bold text-[#0d524a] truncate flex-1">{{ $school->name }}</h3>
                             </div>

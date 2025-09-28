@@ -39,22 +39,30 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Pengguna</h2>
-                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.user-management.index') : route('dinas.user-management.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.user-management.index') : route('dinas.user-management.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
                         <div class="relative">
                             <select name="role" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                                 <option value="">Semua Role</option>
                                 @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ (request('role') == $role->name) ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
+                                    @if(auth()->user()->hasRole('admin_sekolah'))
+                                        @if($role->name === 'guru')
+                                            <option value="{{ $role->name }}" {{ (request('role') == $role->name) ? 'selected' : '' }}>
+                                                {{ ucfirst($role->name) }}
+                                            </option>
+                                        @endif
+                                    @else
+                                        <option value="{{ $role->name }}" {{ (request('role') == $role->name) ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">&nbsp;</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Cari Nama atau Email</label>
                         <div class="relative">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau email..."
                                 class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
@@ -66,12 +74,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">&nbsp;</label>
-                        <button type="submit" class="w-full bg-green-600 text-white rounded-lg py-2.5 hover:bg-green-700 transition">
-                            Filter
-                        </button>
                     </div>
                 </form>
             </div>
@@ -89,6 +91,7 @@
                         </a>
                     </div>
                 </div>
+
 
                 {{-- Users Table --}}
                 @if($users->isEmpty())

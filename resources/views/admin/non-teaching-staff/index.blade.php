@@ -66,14 +66,14 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Tenaga Kependidikan</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.non-teaching-staff.index') : route('dinas.non-teaching-staff.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Sekolah</label>
                         <div class="relative">
-                            <select name="sekolah" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                            <select name="school_id" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                                 <option value="">Semua Sekolah</option>
                                 @foreach($schools ?? [] as $school)
-                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                    <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -88,11 +88,11 @@
                         <div class="relative">
                             <select name="position" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                                 <option value="">Semua Jabatan</option>
-                                <option value="Tata Usaha">Tata Usaha</option>
-                                <option value="Pustakawan">Pustakawan</option>
-                                <option value="Laboran">Laboran</option>
-                                <option value="Keamanan">Keamanan</option>
-                                <option value="Kebersihan">Kebersihan</option>
+                                <option value="Tata Usaha" {{ request('position') == 'Tata Usaha' ? 'selected' : '' }}>Tata Usaha</option>
+                                <option value="Pustakawan" {{ request('position') == 'Pustakawan' ? 'selected' : '' }}>Pustakawan</option>
+                                <option value="Laboran" {{ request('position') == 'Laboran' ? 'selected' : '' }}>Laboran</option>
+                                <option value="Keamanan" {{ request('position') == 'Keamanan' ? 'selected' : '' }}>Keamanan</option>
+                                <option value="Kebersihan" {{ request('position') == 'Kebersihan' ? 'selected' : '' }}>Kebersihan</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,12 +104,12 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
                         <div class="relative">
-                            <select name="status" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                            <select name="employment_status" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                                 <option value="">Semua Status</option>
-                                <option value="PNS">PNS</option>
-                                <option value="PPPK">PPPK</option>
-                                <option value="GTT/PTT">GTT/PTT</option>
-                                <option value="Honorer">Honorer</option>
+                                <option value="PNS" {{ request('employment_status') == 'PNS' ? 'selected' : '' }}>PNS</option>
+                                <option value="PPPK" {{ request('employment_status') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
+                                <option value="GTY" {{ request('employment_status') == 'GTY' ? 'selected' : '' }}>GTY</option>
+                                <option value="PTY" {{ request('employment_status') == 'PTY' ? 'selected' : '' }}>PTY</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">&nbsp;</label>
                         <div class="relative">
-                            <input type="text" name="search" placeholder="Cari nama atau NIP..." class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIP..." class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                 <button type="submit" class="text-gray-700 hover:text-gray-900">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
 
             {{-- Daftar Staff Section --}}

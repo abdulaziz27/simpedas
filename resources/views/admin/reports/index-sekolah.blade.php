@@ -39,7 +39,7 @@
         </a>
 
         {{-- Laporan Raport --}}
-        <a href="{{ route('sekolah.reports.raport') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+        {{-- <a href="{{ route('sekolah.reports.raport') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
             <div class="mb-4">
                 <svg class="h-16 w-16 text-green-300 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -47,10 +47,10 @@
             </div>
             <h3 class="text-xl font-bold text-center">Laporan Raport</h3>
             <p class="text-sm text-gray-300 text-center mt-2">Rekap raport siswa</p>
-        </a>
+        </a> --}}
 
         {{-- Laporan Tenaga Pendidik --}}
-        <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+        {{-- <a href="{{ route('sekolah.non-teaching-staff.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
             <div class="mb-4">
                 <svg class="h-16 w-16 text-green-300 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -58,10 +58,10 @@
             </div>
             <h3 class="text-xl font-bold text-center">Laporan Tenaga Pendidik</h3>
             <p class="text-sm text-gray-300 text-center mt-2">Data tenaga pendidik non guru</p>
-        </a>
+        </a> --}}
 
         {{-- Laporan Sertifikat --}}
-        <a href="{{ route('sekolah.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
+        {{-- <a href="{{ route('sekolah.students.index') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">
             <div class="mb-4">
                 <svg class="h-16 w-16 text-green-300 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
@@ -69,7 +69,7 @@
             </div>
             <h3 class="text-xl font-bold text-center">Laporan Sertifikat</h3>
             <p class="text-sm text-gray-300 text-center mt-2">Data sertifikat siswa</p>
-        </a>
+        </a> --}}
 
         {{-- Statistik Sekolah --}}
         <a href="{{ route('statistik') }}" class="bg-[#0E453F] hover:bg-[#0a403a] text-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center transition group border-2 border-transparent hover:border-blue-400 hover:shadow-blue-400/50">

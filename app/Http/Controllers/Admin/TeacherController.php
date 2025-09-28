@@ -29,16 +29,35 @@ class TeacherController extends Controller
     {
         $query = $this->getTeacherQuery();
 
-        if ($request->has('search')) {
+        // Filter by school
+        if ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
+        }
+
+        // Filter by subjects
+        if ($request->filled('subjects')) {
+            $query->where('subjects', 'like', '%' . $request->subjects . '%');
+        }
+
+        // Filter by employment status
+        if ($request->filled('employment_status')) {
+            $query->where('employment_status', $request->employment_status);
+        }
+
+        // Search
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('nuptk', 'like', "%{$search}%");
+                    ->orWhere('nuptk', 'like', "%{$search}%")
+                    ->orWhere('nip', 'like', "%{$search}%");
             });
         }
 
         $teachers = $query->with('school')->latest()->paginate(10);
-        return view('admin.teachers.index', compact('teachers'));
+        $schools = \App\Models\School::all();
+
+        return view('admin.teachers.index', compact('teachers', 'schools'));
     }
 
     public function create()
