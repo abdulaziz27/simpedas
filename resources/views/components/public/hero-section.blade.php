@@ -1,4 +1,4 @@
-@props(['title' => 'Selamat Datang', 'subtitle' => 'Di Sistem Pangkalan Data Dinas Pendidikan Kota Pematang Siantar'])
+@props(['title' => 'Selamat Datang', 'subtitle' => 'Di Sistem Informasi Dinas Pendidikan Kota Pematang Siantar'])
 <section class="bg-[#125047] py-16 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-8 lg:space-y-0">
         <div class="max-w-lg text-left">

@@ -47,8 +47,8 @@
                         <!-- Welcome Message - Left Side -->
                         <div class="max-w-lg text-left">
                             <h1 class="text-4xl sm:text-5xl font-bold leading-tight text-white">Selamat Datang Guru</h1>
-                            <p class="mt-4 text-2xl font-semibold text-green-300">Di Sistem Pangkalan Data Dinas</p>
-                            <p class="mt-2 text-xl text-green-300">Pendidikan Kota Pematang Siantar</p>
+                            <p class="mt-4 text-2xl font-semibold text-green-300">Di Sistem Informasi Dinas Pendidikan</p>
+                            <p class="mt-2 text-xl text-green-300">Kota Pematang Siantar</p>
                             <p class="mt-4 text-sm text-gray-200">Jl. Merdeka No.228c, Dwikora, Kec. Siantar Bar., Kota Pematang Siantar, Sumatera Utara 21146</p>
                         </div>
                         <!-- Image - Right Side -->
