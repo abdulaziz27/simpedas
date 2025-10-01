@@ -5,7 +5,7 @@
             <!-- Logo & Brand -->
             <div class="flex items-center space-x-2">
                 <a href="/">
-                    <img src="{{ asset('images/logo-simpedas.svg') }}" alt="Logo" class="h-8 w-auto">
+                    <img src="{{ asset('images/logo-simpedas.jpeg') }}" alt="Logo" class="h-12 w-24">
                 </a>
             </div>
             <!-- Navigation Links & User Dropdown -->
