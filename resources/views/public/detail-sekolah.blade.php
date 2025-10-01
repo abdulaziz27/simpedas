@@ -18,11 +18,15 @@
     <div class="bg-[#09443c] p-10 rounded-2xl shadow-lg print:bg-white print:text-black">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8 pb-8 border-b border-gray-700 print:border-gray-300">
             <div class="flex-shrink-0">
-                <div class="h-40 w-40 rounded-full bg-gray-300 flex items-center justify-center border-4 border-gray-200">
-                    <svg class="h-20 w-20 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-                    </svg>
-                </div>
+                @if($school->logo)
+                    <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="h-44 w-44 object-cover border-4 border-gray-200 rounded-xl">
+                @else
+                    <div class="h-44 w-44 bg-gray-300 flex items-center justify-center border-4 border-gray-200 rounded-xl">
+                        <svg class="h-20 w-20 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
+                        </svg>
+                    </div>
+                @endif
             </div>
             <div class="text-center md:text-left">
                 <h3 class="text-2xl font-bold text-white print:text-black">{{ $school->name }}</h3>

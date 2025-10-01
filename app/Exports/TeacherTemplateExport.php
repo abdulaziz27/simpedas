@@ -18,9 +18,10 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
     {
         return [
             'AKSI',
+            'NPSN_SEKOLAH',
+            'NAMA_LENGKAP',
             'NUPTK',
             'NIP',
-            'NAMA_LENGKAP',
             'JENIS_KELAMIN',
             'TEMPAT_LAHIR',
             'TANGGAL_LAHIR',
@@ -33,7 +34,6 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'STATUS_KE_PEGAWAIAN',
             'PANGKAT',
             'JABATAN',
-            'NPSN_SEKOLAH',
         ];
     }
 
@@ -41,22 +41,22 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
     {
         return [
             'A' => 15, // AKSI
-            'B' => 15, // NUPTK
-            'C' => 15, // NIP
-            'D' => 30, // NAMA_LENGKAP
-            'E' => 15, // JENIS_KELAMIN
-            'F' => 20, // TEMPAT_LAHIR
-            'G' => 15, // TANGGAL_LAHIR
-            'H' => 20, // AGAMA
-            'I' => 40, // ALAMAT
-            'J' => 20, // TELEPON
-            'K' => 25, // TINGKAT_PENDIDIKAN
-            'L' => 25, // JURUSAN_PENDIDIKAN
-            'M' => 30, // MATA_PELAJARAN
-            'N' => 20, // STATUS_KE_PEGAWAIAN
-            'O' => 20, // PANGKAT
-            'P' => 25, // JABATAN
-            'Q' => 15, // NPSN_SEKOLAH
+            'B' => 15, // NPSN_SEKOLAH
+            'C' => 30, // NAMA_LENGKAP
+            'D' => 15, // NUPTK
+            'E' => 15, // NIP
+            'F' => 15, // JENIS_KELAMIN
+            'G' => 20, // TEMPAT_LAHIR
+            'H' => 15, // TANGGAL_LAHIR
+            'I' => 20, // AGAMA
+            'J' => 40, // ALAMAT
+            'K' => 20, // TELEPON
+            'L' => 25, // TINGKAT_PENDIDIKAN
+            'M' => 25, // JURUSAN_PENDIDIKAN
+            'N' => 30, // MATA_PELAJARAN
+            'O' => 20, // STATUS_KE_PEGAWAIAN
+            'P' => 20, // PANGKAT
+            'Q' => 25, // JABATAN
             'S' => 60, // PETUNJUK
             'T' => 60,
             'U' => 60,
@@ -105,7 +105,7 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $actionValidation->setPrompt('Pilih CREATE, UPDATE, atau DELETE');
                 $actionValidation->setFormula1('"CREATE,UPDATE,DELETE"');
 
-                $genderValidation = $sheet->getCell('E2')->getDataValidation();
+                $genderValidation = $sheet->getCell('F2')->getDataValidation();
                 $genderValidation->setType(DataValidation::TYPE_LIST);
                 $genderValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $genderValidation->setAllowBlank(false);
@@ -118,7 +118,7 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $genderValidation->setPrompt('Pilih Laki-laki atau Perempuan');
                 $genderValidation->setFormula1('"Laki-laki,Perempuan"');
 
-                $religionValidation = $sheet->getCell('H2')->getDataValidation();
+                $religionValidation = $sheet->getCell('I2')->getDataValidation();
                 $religionValidation->setType(DataValidation::TYPE_LIST);
                 $religionValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $religionValidation->setAllowBlank(false);
@@ -131,7 +131,7 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $religionValidation->setPrompt('Pilih agama');
                 $religionValidation->setFormula1('"Islam,Kristen,Katolik,Hindu,Buddha,Konghucu"');
 
-                $statusValidation = $sheet->getCell('N2')->getDataValidation();
+                $statusValidation = $sheet->getCell('O2')->getDataValidation();
                 $statusValidation->setType(DataValidation::TYPE_LIST);
                 $statusValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $statusValidation->setAllowBlank(false);
@@ -147,9 +147,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 // Terapkan validasi ke seluruh kolom (baris 2-100)
                 $lastRow = 100;
                 $sheet->duplicateStyle($sheet->getStyle('A2'), 'A2:A' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('E2'), 'E2:E' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('H2'), 'H2:H' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('N2'), 'N2:N' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('F2'), 'F2:F' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('I2'), 'I2:I' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('O2'), 'O2:O' . $lastRow);
 
                 // Petunjuk penggunaan di kanan
                 $startCol = 'S';
@@ -157,13 +157,12 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
-                    '2. Kolom NUPTK: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NUPTK.',
-                    '3. Kolom NIP: Opsional',
-                    '4. Kolom NAMA_LENGKAP: Wajib diisi',
+                    '2. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah.',
+                    '3. Kolom NAMA_LENGKAP: Wajib diisi',
+                    '4. Kolom NUPTK: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NUPTK.',
                     '5. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan',
                     '6. Kolom AGAMA: Wajib diisi dengan agama yang valid',
                     '7. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian',
-                    '8. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah. Isi dengan NPSN sekolah',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);

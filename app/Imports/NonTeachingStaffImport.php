@@ -104,7 +104,29 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
             'status' => $row['status'] ?? null,
         ];
 
-        NonTeachingStaff::create($data);
+        $staff = NonTeachingStaff::create($data);
+
+        // Auto user creation for staff if email provided (optional policy)
+        if (!empty($row['email'])) {
+            try {
+                $randomPassword = \Illuminate\Support\Str::random(8);
+                $user = \App\Models\User::firstOrCreate(
+                    ['email' => $row['email']],
+                    [
+                        'name' => $row['nama_lengkap'] ?? $staff->full_name,
+                        'password' => \Illuminate\Support\Facades\Hash::make($randomPassword),
+                        'school_id' => $staff->school_id,
+                    ]
+                );
+                // Note: no special role assigned by default; adjust if needed
+                $user->school_id = $staff->school_id;
+                $user->save();
+                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+                $this->addWarning($index, "User staff dibuat. Reset link dikirim ke email: {$user->email}.");
+            } catch (\Exception $e) {
+                $this->addWarning($index, "Gagal membuat user staff: {$e->getMessage()}");
+            }
+        }
         return true;
     }
 
@@ -159,7 +181,7 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
 
     protected function validateRequired($row, $index)
     {
-        $required = ['nip_nik', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'jabatan', 'status_ke_pegawaian', 'status'];
+        $required = ['nip_nik', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'jabatan', 'status_ke_pegawaian', 'status', 'email'];
         if (Auth::user()->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }

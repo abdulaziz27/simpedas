@@ -30,7 +30,7 @@
         {{-- Photo and Name Section --}}
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8 pb-8 border-b border-gray-700 print:border-gray-300">
             <div class="flex-shrink-0">
-                <div class="h-40 w-40 rounded-full bg-gray-300 flex items-center justify-center border-4 border-gray-200">
+                <div class="h-44 w-44 bg-gray-300 flex items-center justify-center border-4 border-gray-200 rounded-xl">
                     <svg class="h-20 w-20 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
                     </svg>
@@ -60,6 +60,9 @@
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Agama</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->religion ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Nama Orang Tua</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->parent_name ?? '-' }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Kelas/Jurusan/Tingkat</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">

@@ -120,7 +120,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             ]);
         }
 
-        // Auto user creation if email provided
+        // Auto user creation if email provided (and send reset link)
         if (!empty($row['email'])) {
             try {
                 $randomPassword = Str::random(8);
@@ -141,7 +141,10 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 $user->school_id = $existing ? $existing->id : $school->id;
                 $user->save();
 
-                $this->addWarning($index, "User created with password: {$randomPassword}. Please change it immediately.");
+                // Kirim reset link password ke email
+                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+
+                $this->addWarning($index, "User admin sekolah dibuat. Reset link dikirim ke email: {$user->email}.");
             } catch (\Exception $e) {
                 $this->addWarning($index, "Failed to create user: {$e->getMessage()}");
             }
@@ -218,7 +221,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateRequired($row, $index)
     {
-        $required = ['npsn', 'nama_sekolah', 'jenjang_pendidikan', 'status', 'alamat'];
+        $required = ['npsn', 'nama_sekolah', 'jenjang_pendidikan', 'status', 'alamat', 'email'];
         $hasError = false;
         foreach ($required as $field) {
             if (empty($row[$field])) {

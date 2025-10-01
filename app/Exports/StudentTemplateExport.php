@@ -18,8 +18,9 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
     {
         return [
             'AKSI',
-            'NISN',
+            'NPSN_SEKOLAH',
             'NAMA_LENGKAP',
+            'NISN',
             'JENIS_KELAMIN',
             'TEMPAT_LAHIR',
             'TANGGAL_LAHIR',
@@ -27,7 +28,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'TINGKAT_KELAS',
             'STATUS_SISWA',
             'TAHUN_AJARAN',
-            'NPSN_SEKOLAH',
+            'NAMA_ORANG_TUA',
         ];
     }
 
@@ -35,16 +36,17 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
     {
         return [
             'A' => 15, // AKSI
-            'B' => 15, // NISN
+            'B' => 15, // NPSN_SEKOLAH
             'C' => 30, // NAMA_LENGKAP
-            'D' => 15, // JENIS_KELAMIN
-            'E' => 20, // TEMPAT_LAHIR
-            'F' => 15, // TANGGAL_LAHIR
-            'G' => 20, // AGAMA
-            'H' => 15, // TINGKAT_KELAS
-            'I' => 18, // STATUS_SISWA
-            'J' => 18, // TAHUN_AJARAN
-            'K' => 15, // NPSN_SEKOLAH
+            'D' => 15, // NISN
+            'E' => 15, // JENIS_KELAMIN
+            'F' => 20, // TEMPAT_LAHIR
+            'G' => 15, // TANGGAL_LAHIR
+            'H' => 20, // AGAMA
+            'I' => 15, // TINGKAT_KELAS
+            'J' => 18, // STATUS_SISWA
+            'K' => 18, // TAHUN_AJARAN
+            'L' => 25, // NAMA_ORANG_TUA
             'M' => 60, // PETUNJUK
             'N' => 60,
             'O' => 60,
@@ -93,7 +95,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $actionValidation->setPrompt('Pilih CREATE, UPDATE, atau DELETE');
                 $actionValidation->setFormula1('"CREATE,UPDATE,DELETE"');
 
-                $genderValidation = $sheet->getCell('D2')->getDataValidation();
+                $genderValidation = $sheet->getCell('E2')->getDataValidation();
                 $genderValidation->setType(DataValidation::TYPE_LIST);
                 $genderValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $genderValidation->setAllowBlank(false);
@@ -106,7 +108,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 $genderValidation->setPrompt('Pilih Laki-laki atau Perempuan');
                 $genderValidation->setFormula1('"Laki-laki,Perempuan"');
 
-                $statusValidation = $sheet->getCell('I2')->getDataValidation();
+                $statusValidation = $sheet->getCell('J2')->getDataValidation();
                 $statusValidation->setType(DataValidation::TYPE_LIST);
                 $statusValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $statusValidation->setAllowBlank(false);
@@ -122,8 +124,8 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 // Terapkan validasi ke seluruh kolom (baris 2-100)
                 $lastRow = 100;
                 $sheet->duplicateStyle($sheet->getStyle('A2'), 'A2:A' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('D2'), 'D2:D' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('I2'), 'I2:I' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('E2'), 'E2:E' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('J2'), 'J2:J' . $lastRow);
 
                 // Petunjuk penggunaan di kanan
                 $startCol = 'M';

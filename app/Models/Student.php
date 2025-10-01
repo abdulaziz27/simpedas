@@ -20,6 +20,7 @@ class Student extends Model
         'gender',
         'religion',
         'grade_level',
+        'parent_name',
         'major',
         'achievements',
         'student_status',

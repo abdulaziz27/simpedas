@@ -11,7 +11,7 @@
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         <a href="{{ route('public.search-guru') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-10 w-10"></div>
-            <span class="text-lg font-semibold">Lihat Data Guru</span>
+            <span class="text-lg font-semibold">Cari Guru</span>
         </a>
         <a href="{{ route('public.search-siswa') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Siswa" class="h-10 w-10"></div>
@@ -19,7 +19,7 @@
         </a>
         <a href="{{ route('public.search-guru') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-guru.png') }}" alt="Icon Guru" class="h-10 w-10"></div>
-            <span class="text-lg font-semibold">Cari Guru</span>
+            <span class="text-lg font-semibold">Cari Tutor</span>
         </a>
         <a href="{{ route('public.search-sekolah') }}" class="bg-white/90 hover:bg-white text-[#125047] rounded-xl shadow-lg p-4 flex items-center transition">
             <div class="icon-bg-green mr-6"><img src="{{ asset('images/icon-siswa.png') }}" alt="Icon Sekolah" class="h-10 w-10"></div>
@@ -84,7 +84,7 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('guru.students') }}" class="bg-[#0E453F] rounded-xl shadow-lg overflow-hidden hover:bg-[#0a403a] transition">
+                    {{-- <a href="{{ route('guru.students') }}" class="bg-[#0E453F] rounded-xl shadow-lg overflow-hidden hover:bg-[#0a403a] transition">
                         <div class="p-6 text-center">
                             <div class="icon-bg-green mx-auto mb-4 w-16 h-16 flex items-center justify-center rounded-full">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +94,7 @@
                             <h3 class="text-xl font-bold text-white mb-2">Data Siswa</h3>
                             <p class="text-gray-300 text-sm">Lihat data siswa yang Anda ajar</p>
                         </div>
-                    </a>
+                    </a> --}}
                 </div>
             </div>
         </div>

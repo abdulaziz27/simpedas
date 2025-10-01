@@ -71,6 +71,12 @@
                     </div>
 
                     <div>
+                        <label for="parent_name" class="block text-sm font-medium text-gray-700">Nama Orang Tua</label>
+                        <input type="text" name="parent_name" id="parent_name" value="{{ old('parent_name', $student->parent_name) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('parent_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
                         <label for="student_status" class="block text-sm font-medium text-gray-700">Status (Aktif / Tamat)</label>
                         <select name="student_status" id="student_status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             @foreach(config('student.student_statuses') as $value => $label)

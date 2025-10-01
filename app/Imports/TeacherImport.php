@@ -83,7 +83,37 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
             $this->addError($index, "NUPTK sudah terdaftar.", $row);
             return false;
         }
-        Teacher::create($row->toArray());
+        $teacher = Teacher::create($row->toArray());
+
+        // Auto user creation if email provided
+        if (!empty($row['email'])) {
+            try {
+                $randomPassword = \Illuminate\Support\Str::random(8);
+                $user = \App\Models\User::firstOrCreate(
+                    ['email' => $row['email']],
+                    [
+                        'name' => $row['nama_lengkap'] ?? $teacher->full_name,
+                        'password' => \Illuminate\Support\Facades\Hash::make($randomPassword),
+                        'school_id' => $teacher->school_id,
+                        'teacher_id' => $teacher->id,
+                    ]
+                );
+
+                if (!$user->hasRole('guru')) {
+                    $user->assignRole('guru');
+                }
+
+                // Ensure linkage
+                $user->school_id = $teacher->school_id;
+                $user->teacher_id = $teacher->id;
+                $user->save();
+
+                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
+                $this->addWarning($index, "User guru dibuat. Reset link dikirim ke email: {$user->email}.");
+            } catch (\Exception $e) {
+                $this->addWarning($index, "Gagal membuat user guru: {$e->getMessage()}");
+            }
+        }
         return true;
     }
 
@@ -119,7 +149,7 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateRequired($row, $index)
     {
-        $required = ['nuptk', 'nama_lengkap', 'jenis_kelamin', 'status_ke_pegawaian'];
+        $required = ['nuptk', 'nama_lengkap', 'jenis_kelamin', 'status_ke_pegawaian', 'email'];
         if (Auth::user()->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }

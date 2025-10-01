@@ -32,7 +32,6 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
     {
         return [
             'AKSI',
-            'ID',
             'NPSN',
             'NAMA_SEKOLAH',
             'JENJANG_PENDIDIKAN',
@@ -53,20 +52,19 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
     {
         return [
             'A' => 15, // AKSI
-            'B' => 10, // ID
-            'C' => 15, // NPSN
-            'D' => 30, // NAMA_SEKOLAH
-            'E' => 20, // JENJANG_PENDIDIKAN
-            'F' => 15, // STATUS
-            'G' => 40, // ALAMAT
-            'H' => 20, // TELEPON
-            'I' => 30, // EMAIL
-            'J' => 30, // WEBSITE
-            'K' => 30, // KEPALA_SEKOLAH
-            'L' => 20, // KECAMATAN
-            'N' => 60, // PETUNJUK (kolom utama)
+            'B' => 15, // NPSN
+            'C' => 30, // NAMA_SEKOLAH
+            'D' => 20, // JENJANG_PENDIDIKAN
+            'E' => 15, // STATUS
+            'F' => 40, // ALAMAT
+            'G' => 20, // TELEPON
+            'H' => 30, // EMAIL
+            'I' => 30, // WEBSITE
+            'J' => 30, // KEPALA_SEKOLAH
+            'K' => 20, // KECAMATAN
+            'M' => 60, // PETUNJUK (kolom utama)
+            'N' => 60, // PETUNJUK (merge, biar wrap text optimal)
             'O' => 60, // PETUNJUK (merge, biar wrap text optimal)
-            'P' => 60, // PETUNJUK (merge, biar wrap text optimal)
         ];
     }
 
@@ -120,7 +118,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $actionValidation->setFormula1('"CREATE,UPDATE,DELETE"');
 
                 // Tambahkan validasi untuk kolom EDUCATION_LEVEL
-                $educationLevelValidation = $sheet->getCell('E2')->getDataValidation();
+                $educationLevelValidation = $sheet->getCell('D2')->getDataValidation();
                 $educationLevelValidation->setType(DataValidation::TYPE_LIST);
                 $educationLevelValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $educationLevelValidation->setAllowBlank(false);
@@ -134,7 +132,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $educationLevelValidation->setFormula1('"TK,SD,SMP,Non Formal"');
 
                 // Tambahkan validasi untuk kolom STATUS
-                $statusValidation = $sheet->getCell('F2')->getDataValidation();
+                $statusValidation = $sheet->getCell('E2')->getDataValidation();
                 $statusValidation->setType(DataValidation::TYPE_LIST);
                 $statusValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $statusValidation->setAllowBlank(false);
@@ -148,7 +146,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $statusValidation->setFormula1('"Negeri,Swasta"');
 
                 // Tambahkan validasi untuk kolom REGION
-                $regionValidation = $sheet->getCell('L2')->getDataValidation();
+                $regionValidation = $sheet->getCell('K2')->getDataValidation();
                 $regionValidation->setType(DataValidation::TYPE_LIST);
                 $regionValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                 $regionValidation->setAllowBlank(false);
@@ -164,18 +162,17 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 // Terapkan validasi ke seluruh kolom
                 $lastRow = 100; // Jumlah baris yang akan memiliki validasi
                 $sheet->duplicateStyle($sheet->getStyle('A2'), 'A2:A' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('D2'), 'D2:D' . $lastRow);
                 $sheet->duplicateStyle($sheet->getStyle('E2'), 'E2:E' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('F2'), 'F2:F' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('L2'), 'L2:L' . $lastRow);
+                $sheet->duplicateStyle($sheet->getStyle('K2'), 'K2:K' . $lastRow);
 
                 // Pindahkan petunjuk ke sisi kanan, dua kolom setelah kolom paling kanan (kolom N)
-                $startCol = 'N'; // Dua kolom setelah L
+                $startCol = 'M'; // Dua kolom setelah K
                 $row = 2; // Mulai di bawah header
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
-                    '2. Kolom ID: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi ID, kolom NPSN boleh dikosongkan.',
-                    '3. Kolom NPSN: (Opsional) Bisa diisi untuk operasi UPDATE/DELETE, tapi cukup isi ID saja sudah cukup.',
+                    '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN.',
                     '4. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
                     '5. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, atau Non Formal',
                     '6. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta',

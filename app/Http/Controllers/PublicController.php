@@ -43,8 +43,9 @@ class PublicController extends Controller
             ->when($q, function ($query) use ($q) {
                 $query->search($q);
             })
-            ->limit(50)
-            ->get();
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         return view('public.search-guru', compact('teachers', 'q'));
     }
 
@@ -55,8 +56,9 @@ class PublicController extends Controller
             ->when($q, function ($query) use ($q) {
                 $query->search($q);
             })
-            ->limit(50)
-            ->get();
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         return view('public.search-siswa', compact('students', 'q'));
     }
 
@@ -69,8 +71,9 @@ class PublicController extends Controller
                     ->orWhere('nip_nik', 'like', '%' . $q . '%')
                     ->orWhere('position', 'like', '%' . $q . '%');
             })
-            ->limit(50)
-            ->get();
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
         return view('public.search-non-teaching-staff', compact('nonTeachingStaff', 'q'));
     }
 
@@ -83,8 +86,9 @@ class PublicController extends Controller
                 ->orWhere('headmaster', 'like', '%' . $q . '%')
                 ->orWhere('region', 'like', '%' . $q . '%');
         })
-            ->limit(50)
-            ->get();
+            ->latest()
+            ->paginate(9)
+            ->withQueryString();
         return view('public.search-sekolah', compact('schools', 'q'));
     }
 

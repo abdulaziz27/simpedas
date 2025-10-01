@@ -17,9 +17,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1. Admin Dinas
-        $adminDinas = User::create([
+        $adminDinas = User::firstOrCreate(['email' => 'admin@dinaspendidikanpematang.com'], [
             'name' => 'Admin Dinas Pendidikan',
-            'email' => 'admin@dinaspendidikanpematang.com',
             'password' => Hash::make('password'),
             'phone' => '0622-123456',
             'school_id' => null,
@@ -27,9 +26,8 @@ class UserSeeder extends Seeder
         ]);
         $adminDinas->assignRole('admin_dinas');
 
-        $adminDinas = User::create([
+        $adminDinas = User::firstOrCreate(['email' => 'itsabdulaziz3@gmail.com'], [
             'name' => 'Abdul Aziz',
-            'email' => 'itsabdulaziz3@gmail.com',
             'password' => Hash::make('password'),
             'phone' => '0852-1155-3430',
             'school_id' => null,
@@ -42,9 +40,8 @@ class UserSeeder extends Seeder
         $smpSchool = School::where('education_level', 'SMP')->first();
 
         if ($sdSchool) {
-            $adminSD = User::create([
+            $adminSD = User::firstOrCreate(['email' => 'admin@sdn122-pematangsiantar.sch.id'], [
                 'name' => 'Admin ' . $sdSchool->name,
-                'email' => 'admin@' . str_replace(' ', '', strtolower($sdSchool->name)) . '.sch.id',
                 'password' => Hash::make('password'),
                 'phone' => '0622-21349',
                 'school_id' => $sdSchool->id,
@@ -54,9 +51,8 @@ class UserSeeder extends Seeder
         }
 
         if ($smpSchool) {
-            $adminSMP = User::create([
+            $adminSMP = User::firstOrCreate(['email' => 'admin@' . str_replace(' ', '', strtolower($smpSchool->name)) . '.sch.id'], [
                 'name' => 'Admin ' . $smpSchool->name,
-                'email' => 'admin@' . str_replace(' ', '', strtolower($smpSchool->name)) . '.sch.id',
                 'password' => Hash::make('password'),
                 'phone' => '0622-21347',
                 'school_id' => $smpSchool->id,
@@ -72,9 +68,12 @@ class UserSeeder extends Seeder
             if (!$teacher) {
                 continue;
             }
-            $user = User::create([
+            $email = str_replace(' ', '.', strtolower($teacher->full_name)) . '@example.com';
+            if ($teacher->full_name === 'Siti Fatimah') {
+                $email = 'siti.fatimah@sdn122-pematangsiantar.sch.id';
+            }
+            $user = User::firstOrCreate(['email' => $email], [
                 'name' => $teacher->full_name,
-                'email' => str_replace(' ', '.', strtolower($teacher->full_name)) . '@example.com',
                 'password' => Hash::make('password'),
                 'phone' => '0812' . rand(100000000, 999999999),
                 'school_id' => $teacher->school_id,

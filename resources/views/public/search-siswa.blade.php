@@ -41,6 +41,11 @@
             @endphp
             <div class="bg-[#09443c] rounded-2xl shadow-lg px-0 py-8">
                 <x-public.data-table :headers="['Nama','NISN','Asal Sekolah','Jurusan','Aksi']" :rows="$rows" />
+                @if($students->hasPages())
+                <div class="px-8 pt-4">
+                    {{ $students->links() }}
+                </div>
+                @endif
             </div>
         @endif
     </div>

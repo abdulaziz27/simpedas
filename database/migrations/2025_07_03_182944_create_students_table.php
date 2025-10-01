@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->enum('religion', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu']);
             $table->string('grade_level', 20);
+            $table->string('parent_name')->nullable();
             $table->string('major', 100)->nullable();
             $table->text('achievements')->nullable();
             $table->enum('student_status', ['Aktif', 'Tamat', 'Pindah', 'Keluar']);
