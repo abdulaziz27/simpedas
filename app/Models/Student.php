@@ -49,10 +49,10 @@ class Student extends Model
     // Scope untuk pencarian
     public function scopeSearch($query, $search)
     {
-        return $query->where(function($q) use ($search) {
+        return $query->where(function ($q) use ($search) {
             $q->where('full_name', 'like', '%' . $search . '%')
-              ->orWhere('nisn', 'like', '%' . $search . '%')
-              ->orWhere('nis', 'like', '%' . $search . '%');
+                ->orWhere('nisn', 'like', '%' . $search . '%')
+                ->orWhere('nis', 'like', '%' . $search . '%');
         });
     }
 
@@ -64,5 +64,17 @@ class Student extends Model
     public function scopeBySchool($query, $schoolId)
     {
         return $query->where('school_id', $schoolId);
+    }
+
+    /**
+     * Calculate student age from birth date
+     */
+    public function getAgeAttribute()
+    {
+        if (!$this->birth_date) {
+            return null;
+        }
+
+        return $this->birth_date->age;
     }
 }

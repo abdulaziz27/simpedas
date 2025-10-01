@@ -13,12 +13,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RoleSeeder::class,      // Buat roles dan permissions
-            SchoolSeeder::class,    // Buat 2-3 sekolah untuk testing
-            TeacherSeeder::class,   // Buat 2 guru per sekolah
-            StudentSeeder::class,   // Buat 2-3 siswa per sekolah
-            NonTeachingStaffSeeder::class, // Buat 1 staf per sekolah
-            UserSeeder::class,      // Buat users untuk admin dan guru
+            RoleSeeder::class,
+            SchoolSeeder::class,
+            TeacherSeeder::class,
+            StudentSeeder::class,
+            NonTeachingStaffSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

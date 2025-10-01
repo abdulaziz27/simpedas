@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\School;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -25,81 +27,60 @@ class UserSeeder extends Seeder
         ]);
         $adminDinas->assignRole('admin_dinas');
 
-        // 2. Admin SD Negeri 122 (ID: 1)
-        $adminSD = User::create([
-            'name' => 'Admin SD Negeri 122',
-            'email' => 'admin@sdn122-pematangsiantar.sch.id',
+        $adminDinas = User::create([
+            'name' => 'Abdul Aziz',
+            'email' => 'itsabdulaziz3@gmail.com',
             'password' => Hash::make('password'),
-            'phone' => '0622-21349',
-            'school_id' => 1,
+            'phone' => '0852-1155-3430',
+            'school_id' => null,
             'teacher_id' => null
         ]);
-        $adminSD->assignRole('admin_sekolah');
+        $adminDinas->assignRole('admin_dinas');
 
-        // 3. Admin SMP Negeri 1 (ID: 2)
-        $adminSMP = User::create([
-            'name' => 'Admin SMP Negeri 1',
-            'email' => 'admin@smpn1-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '0622-21347',
-            'school_id' => 2,
-            'teacher_id' => null
-        ]);
-        $adminSMP->assignRole('admin_sekolah');
+        // 2. Admin Sekolah untuk dua sekolah pertama (SD dan SMP jika ada)
+        $sdSchool = School::where('education_level', 'SD')->first();
+        $smpSchool = School::where('education_level', 'SMP')->first();
 
-        // 4. Guru SD Negeri 122 (ID: 1)
-        $guru1 = User::create([
-            'name' => 'Siti Fatimah',
-            'email' => 'siti.fatimah@sdn122-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '081234567001',
-            'school_id' => 1,
-            'teacher_id' => 1
-        ]);
-        $guru1->assignRole('guru');
+        if ($sdSchool) {
+            $adminSD = User::create([
+                'name' => 'Admin ' . $sdSchool->name,
+                'email' => 'admin@' . str_replace(' ', '', strtolower($sdSchool->name)) . '.sch.id',
+                'password' => Hash::make('password'),
+                'phone' => '0622-21349',
+                'school_id' => $sdSchool->id,
+                'teacher_id' => null
+            ]);
+            $adminSD->assignRole('admin_sekolah');
+        }
 
-        // 5. Guru SMP Negeri 1 (ID: 3)
-        $guru2 = User::create([
-            'name' => 'Muhammad Yusuf',
-            'email' => 'muhammad.yusuf@smpn1-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '081234567003',
-            'school_id' => 2,
-            'teacher_id' => 3
-        ]);
-        $guru2->assignRole('guru');
+        if ($smpSchool) {
+            $adminSMP = User::create([
+                'name' => 'Admin ' . $smpSchool->name,
+                'email' => 'admin@' . str_replace(' ', '', strtolower($smpSchool->name)) . '.sch.id',
+                'password' => Hash::make('password'),
+                'phone' => '0622-21347',
+                'school_id' => $smpSchool->id,
+                'teacher_id' => null
+            ]);
+            $adminSMP->assignRole('admin_sekolah');
+        }
 
-        // 6. Admin SMA Swasta HKBP (ID: 6)
-        $adminHKBP = User::create([
-            'name' => 'Admin SMA Swasta HKBP',
-            'email' => 'admin@hkbp-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '0622-21352',
-            'school_id' => 6,
-            'teacher_id' => null
-        ]);
-        $adminHKBP->assignRole('admin_sekolah');
-
-        // 7. Guru SMA Swasta HKBP (ID: 11)
-        $guru3 = User::create([
-            'name' => 'Pardamean Siregar',
-            'email' => 'pardamean.siregar@hkbp-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '081234567011',
-            'school_id' => 6,
-            'teacher_id' => 11
-        ]);
-        $guru3->assignRole('guru');
-
-        // 8. Guru SMA Swasta HKBP (ID: 12)
-        $guru4 = User::create([
-            'name' => 'Yohana Simbolon',
-            'email' => 'yohana.simbolon@hkbp-pematangsiantar.sch.id',
-            'password' => Hash::make('password'),
-            'phone' => '081234567012',
-            'school_id' => 6,
-            'teacher_id' => 12
-        ]);
-        $guru4->assignRole('guru');
+        // 4-7. Buat user guru berdasarkan data teacher yang ada
+        $teacherNames = ['Siti Fatimah', 'Muhammad Yusuf', 'Dewi Lestari', 'Rudi Hartono'];
+        foreach ($teacherNames as $tName) {
+            $teacher = Teacher::where('full_name', $tName)->first();
+            if (!$teacher) {
+                continue;
+            }
+            $user = User::create([
+                'name' => $teacher->full_name,
+                'email' => str_replace(' ', '.', strtolower($teacher->full_name)) . '@example.com',
+                'password' => Hash::make('password'),
+                'phone' => '0812' . rand(100000000, 999999999),
+                'school_id' => $teacher->school_id,
+                'teacher_id' => $teacher->id
+            ]);
+            $user->assignRole('guru');
+        }
     }
 }

@@ -9,7 +9,7 @@ class SchoolSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * Membuat 9 sekolah manual untuk testing (SD, SMP, SMA, SMK, TK)
+     * Membuat sekolah manual untuk testing (SD, SMP, TK, Non Formal)
      */
     public function run(): void
     {
@@ -41,15 +41,28 @@ class SchoolSeeder extends Seeder
                 'logo' => null
             ],
             [
-                'name' => 'SMA Negeri 1 Pematang Siantar',
+                'name' => 'TK Negeri Pembina Pematang Siantar',
                 'npsn' => '10258122',
-                'education_level' => 'SMA',
+                'education_level' => 'TK',
                 'status' => 'Negeri',
-                'address' => 'Jl. Sudirman No. 20, Pematang Siantar',
+                'address' => 'Jl. Hang Tuah No. 8, Pematang Siantar',
                 'phone' => '0622-21346',
-                'email' => 'sman1@pematangsiantar.sch.id',
-                'website' => 'https://sman1-pematangsiantar.sch.id',
-                'headmaster' => 'Dr. Siti Aminah',
+                'email' => 'tk.pembina@pematangsiantar.sch.id',
+                'website' => 'https://tkpembina-pematangsiantar.sch.id',
+                'headmaster' => 'Nurhasanah, S.Pd.AUD',
+                'region' => 'Siantar Tengah',
+                'logo' => null
+            ],
+            [
+                'name' => 'TK Swasta Melati',
+                'npsn' => '10258132',
+                'education_level' => 'TK',
+                'status' => 'Swasta',
+                'address' => 'Jl. Mawar No. 3, Pematang Siantar',
+                'phone' => '0622-21357',
+                'email' => 'tk.melati@pematangsiantar.sch.id',
+                'website' => 'https://tkmelati-pematangsiantar.sch.id',
+                'headmaster' => 'Siti Nurlaila, S.Pd.AUD',
                 'region' => 'Siantar Timur',
                 'logo' => null
             ],
@@ -80,57 +93,43 @@ class SchoolSeeder extends Seeder
                 'logo' => null
             ],
             [
-                'name' => 'SMA Swasta HKBP',
+                'name' => 'PKBM Harapan Bangsa',
                 'npsn' => '10258128',
-                'education_level' => 'SMA',
+                'education_level' => 'Non Formal',
                 'status' => 'Swasta',
                 'address' => 'Jl. Melanthon Siregar No. 30, Pematang Siantar',
                 'phone' => '0622-21352',
-                'email' => 'hkbp@pematangsiantar.sch.id',
-                'website' => 'https://hkbp-pematangsiantar.sch.id',
+                'email' => 'harapanbangsa@pematangsiantar.sch.id',
+                'website' => 'https://pkbm-harapanbangsa.sch.id',
                 'headmaster' => 'Pardamean, S.Pd',
                 'region' => 'Siantar Martoba',
                 'logo' => null
             ],
-            // SMK Schools
+            // Non Formal Schools
             [
-                'name' => 'SMK Negeri 1 Pematang Siantar',
+                'name' => 'SKB Negeri Pematang Siantar',
                 'npsn' => '10258129',
-                'education_level' => 'SMK',
+                'education_level' => 'Non Formal',
                 'status' => 'Negeri',
                 'address' => 'Jl. Kapten Sumarsono No. 15, Pematang Siantar',
                 'phone' => '0622-21353',
-                'email' => 'smkn1@pematangsiantar.sch.id',
-                'website' => 'https://smkn1-pematangsiantar.sch.id',
+                'email' => 'skb@pematangsiantar.sch.id',
+                'website' => 'https://skb-pematangsiantar.sch.id',
                 'headmaster' => 'Drs. Mangasi Situmorang',
                 'region' => 'Siantar Selatan',
                 'logo' => null
             ],
             [
-                'name' => 'SMK Swasta Teknologi Mandiri',
+                'name' => 'PKBM Cerdas Mandiri',
                 'npsn' => '10258130',
-                'education_level' => 'SMK',
+                'education_level' => 'Non Formal',
                 'status' => 'Swasta',
                 'address' => 'Jl. Veteran No. 45, Pematang Siantar',
                 'phone' => '0622-21354',
-                'email' => 'teknologi.mandiri@pematangsiantar.sch.id',
-                'website' => 'https://teknologimandiri-pematangsiantar.sch.id',
+                'email' => 'cerdas.mandiri@pematangsiantar.sch.id',
+                'website' => 'https://pkbmcerdasmandiri-pematangsiantar.sch.id',
                 'headmaster' => 'Rizki Harahap, S.T',
                 'region' => 'Siantar Sitalasari',
-                'logo' => null
-            ],
-            // TK School
-            [
-                'name' => 'TK Negeri Pembina Pematang Siantar',
-                'npsn' => '10258131',
-                'education_level' => 'TK',
-                'status' => 'Negeri',
-                'address' => 'Jl. Hang Tuah No. 8, Pematang Siantar',
-                'phone' => '0622-21355',
-                'email' => 'tk.pembina@pematangsiantar.sch.id',
-                'website' => 'https://tkpembina-pematangsiantar.sch.id',
-                'headmaster' => 'Nurhasanah, S.Pd.AUD',
-                'region' => 'Siantar Tengah',
                 'logo' => null
             ]
         ];

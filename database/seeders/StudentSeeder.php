@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Student;
+use App\Models\School;
 
 class StudentSeeder extends Seeder
 {
@@ -13,10 +14,14 @@ class StudentSeeder extends Seeder
      */
     public function run(): void
     {
+        $schools = School::pluck('id')->all();
+        if (empty($schools)) {
+            return;
+        }
+
         $students = [
-            // SD Negeri 122 (ID: 1) - 5 siswa
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Budi Santoso',
                 'nisn' => '1234567001',
                 'nis' => '2024001',
@@ -32,7 +37,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Siti Aisyah',
                 'nisn' => '1234567002',
                 'nis' => '2024002',
@@ -48,7 +53,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Rizky Pratama',
                 'nisn' => '1234567003',
                 'nis' => '2024003',
@@ -64,7 +69,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Dewi Lestari',
                 'nisn' => '1234567004',
                 'nis' => '2024004',
@@ -80,7 +85,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Andi Saputra',
                 'nisn' => '1234567005',
                 'nis' => '2024005',
@@ -95,9 +100,8 @@ class StudentSeeder extends Seeder
                 'graduation_status' => null,
                 'academic_year' => '2024/2025'
             ],
-            // SMP Negeri 1 (ID: 2) - 5 siswa
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Ahmad Rizki',
                 'nisn' => '1234567006',
                 'nis' => '2024006',
@@ -113,7 +117,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Putri Rahmawati',
                 'nisn' => '1234567007',
                 'nis' => '2024007',
@@ -129,7 +133,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Dian Pratiwi',
                 'nisn' => '1234567008',
                 'nis' => '2024008',
@@ -145,7 +149,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Rizal Maulana',
                 'nisn' => '1234567009',
                 'nis' => '2024009',
@@ -161,7 +165,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Nina Kartika',
                 'nisn' => '1234567010',
                 'nis' => '2024010',
@@ -176,9 +180,8 @@ class StudentSeeder extends Seeder
                 'graduation_status' => null,
                 'academic_year' => '2024/2025'
             ],
-            // SMA Negeri 1 (ID: 3) - 4 siswa
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Muhammad Farhan',
                 'nisn' => '1234567011',
                 'nis' => '2024011',
@@ -194,7 +197,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Annisa Putri',
                 'nisn' => '1234567012',
                 'nis' => '2024012',
@@ -210,7 +213,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Rina Sari',
                 'nisn' => '1234567013',
                 'nis' => '2024013',
@@ -226,7 +229,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Dimas Prakoso',
                 'nisn' => '1234567014',
                 'nis' => '2024014',
@@ -241,9 +244,8 @@ class StudentSeeder extends Seeder
                 'graduation_status' => null,
                 'academic_year' => '2024/2025'
             ],
-            // SD Swasta Budi Mulia (ID: 4) - 4 siswa
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Lina Marlina',
                 'nisn' => '1234567015',
                 'nis' => '2024015',
@@ -259,7 +261,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Rizky Ramadhan',
                 'nisn' => '1234567016',
                 'nis' => '2024016',
@@ -275,7 +277,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Dewi Sartika',
                 'nisn' => '1234567017',
                 'nis' => '2024017',
@@ -291,7 +293,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Andi Wijaya',
                 'nisn' => '1234567018',
                 'nis' => '2024018',
@@ -306,9 +308,8 @@ class StudentSeeder extends Seeder
                 'graduation_status' => null,
                 'academic_year' => '2024/2025'
             ],
-            // SMP Swasta Methodist (ID: 5) - 4 siswa
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Yuliana Sari',
                 'nisn' => '1234567019',
                 'nis' => '2024019',
@@ -324,7 +325,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Rudi Hartono',
                 'nisn' => '1234567020',
                 'nis' => '2024020',
@@ -340,7 +341,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Dewi Anggraini',
                 'nisn' => '1234567021',
                 'nis' => '2024021',
@@ -356,7 +357,7 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Andi Simanjuntak',
                 'nisn' => '1234567022',
                 'nis' => '2024022',
@@ -371,92 +372,8 @@ class StudentSeeder extends Seeder
                 'graduation_status' => null,
                 'academic_year' => '2024/2025'
             ],
-            // SMA Swasta HKBP (ID: 6) - 3 siswa
             [
-                'school_id' => 6,
-                'full_name' => 'Pardamean Siregar',
-                'nisn' => '1234567023',
-                'nis' => '2024023',
-                'birth_place' => 'Pematang Siantar',
-                'birth_date' => '2008-09-10',
-                'gender' => 'Laki-laki',
-                'religion' => 'Kristen',
-                'grade_level' => '12 IPA 1',
-                'major' => 'IPA',
-                'achievements' => 'Juara 1 Olimpiade Fisika SMA 2023',
-                'student_status' => 'Aktif',
-                'graduation_status' => null,
-                'academic_year' => '2024/2025'
-            ],
-            [
-                'school_id' => 6,
-                'full_name' => 'Yohana Simbolon',
-                'nisn' => '1234567024',
-                'nis' => '2024024',
-                'birth_place' => 'Medan',
-                'birth_date' => '2008-10-15',
-                'gender' => 'Perempuan',
-                'religion' => 'Kristen',
-                'grade_level' => '12 IPA 1',
-                'major' => 'IPA',
-                'achievements' => null,
-                'student_status' => 'Aktif',
-                'graduation_status' => null,
-                'academic_year' => '2024/2025'
-            ],
-            [
-                'school_id' => 6,
-                'full_name' => 'Rina Simanjuntak',
-                'nisn' => '1234567025',
-                'nis' => '2024025',
-                'birth_place' => 'Pematang Siantar',
-                'birth_date' => '2008-11-20',
-                'gender' => 'Perempuan',
-                'religion' => 'Kristen',
-                'grade_level' => '12 IPA 2',
-                'major' => 'IPA',
-                'achievements' => null,
-                'student_status' => 'Aktif',
-                'graduation_status' => null,
-                'academic_year' => '2024/2025'
-            ],
-            // SMK Negeri 1 (ID: 7) - 1 siswa
-            [
-                'school_id' => 7,
-                'full_name' => 'Bayu Nugroho',
-                'nisn' => '1234567026',
-                'nis' => '2024026',
-                'birth_place' => 'Pematang Siantar',
-                'birth_date' => '2008-12-10',
-                'gender' => 'Laki-laki',
-                'religion' => 'Islam',
-                'grade_level' => '12 TKJ 1',
-                'major' => 'TKJ',
-                'achievements' => 'Juara 1 LKS TKJ Tingkat Provinsi 2023',
-                'student_status' => 'Aktif',
-                'graduation_status' => null,
-                'academic_year' => '2024/2025'
-            ],
-            // SMK Swasta Teknologi Mandiri (ID: 8) - 1 siswa
-            [
-                'school_id' => 8,
-                'full_name' => 'Sari Indah Pratiwi',
-                'nisn' => '1234567027',
-                'nis' => '2024027',
-                'birth_place' => 'Medan',
-                'birth_date' => '2009-01-15',
-                'gender' => 'Perempuan',
-                'religion' => 'Islam',
-                'grade_level' => '12 RPL 1',
-                'major' => 'RPL',
-                'achievements' => 'Juara 2 Lomba Programming 2023',
-                'student_status' => 'Aktif',
-                'graduation_status' => null,
-                'academic_year' => '2024/2025'
-            ],
-            // TK Negeri Pembina (ID: 9) - 1 siswa
-            [
-                'school_id' => 9,
+                'school_id' => null,
                 'full_name' => 'Kirana Aulia',
                 'nisn' => '1234567028',
                 'nis' => '2024028',
@@ -472,7 +389,9 @@ class StudentSeeder extends Seeder
                 'academic_year' => '2024/2025'
             ]
         ];
+
         foreach ($students as $student) {
+            $student['school_id'] = $schools[array_rand($schools)];
             Student::create($student);
         }
     }

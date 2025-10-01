@@ -34,13 +34,19 @@
                         <div class="text-sm text-gray-500 mb-1">Welcome to SIMPEDAS</div>
                         <h2 class="text-4xl font-bold text-gray-900">Sign in</h2>
                     </div>
+                    {{-- Registration disabled for internal system --}}
                     <div class="text-right text-sm">
-                        <span class="text-gray-500">No Account ?</span>
-                        <a href="{{ route('register') }}" class="text-[#17695a] font-semibold hover:underline ml-1">Sign up</a>
+                        <span class="text-gray-500">Login with your internal account</span>
                     </div>
                 </div>
                 <form method="POST" action="{{ route('login') }}" class="space-y-5">
                     @csrf
+                    {{-- Session status (e.g., password reset success) --}}
+                    @if (session('status'))
+                        <div class="text-green-700 bg-green-100 rounded-md p-3 text-sm">
+                            {{ session('status') }}
+                        </div>
+                    @endif
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Enter your username or email address</label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="Username or email address" class="w-full border border-[#17695a] rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#17695a] focus:outline-none">

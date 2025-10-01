@@ -155,7 +155,7 @@ class PublicController extends Controller
 
         $data = $query->groupBy('label')->get();
 
-        $allLabels = ['TK', 'SD', 'SMP', 'SMA', 'SMK'];
+        $allLabels = ['TK', 'SD', 'SMP', 'Non Formal'];
         $dataMap = $data->pluck('value', 'label')->all();
 
         $values = [];

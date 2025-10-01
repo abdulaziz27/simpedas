@@ -168,7 +168,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         // Validasi education level
-        if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'SMA', 'SMK'])) {
+        if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'Non Formal'])) {
             $this->addError($index, "ERROR KRITIS: Jenjang pendidikan tidak valid");
             return false;
         }
@@ -262,8 +262,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             'TK' => ['TK', 'Taman Kanak'],
             'SD' => ['SD', 'Sekolah Dasar'],
             'SMP' => ['SMP'],
-            'SMA' => ['SMA'],
-            'SMK' => ['SMK']
+            'Non Formal' => ['Non Formal', 'Nonformal', 'PKBM', 'SKB']
         ];
 
         $matchFound = false;
@@ -316,7 +315,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         return [
             '*.npsn' => ['nullable', 'max:20'],
             '*.nama_sekolah' => ['nullable', 'string', 'max:255'],
-            '*.jenjang_pendidikan' => ['nullable', 'string', 'in:TK,SD,SMP,SMA,SMK'],
+            '*.jenjang_pendidikan' => ['nullable', 'string', 'in:TK,SD,SMP,Non Formal'],
             '*.status' => ['nullable', 'string', 'in:Negeri,Swasta'],
             '*.alamat' => ['nullable', 'string'],
             '*.telepon' => ['nullable', 'max:20'],

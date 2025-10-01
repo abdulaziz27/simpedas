@@ -4,11 +4,10 @@ return [
     'education_levels' => [
         'TK' => 'TK',
         'SD' => 'SD',
-        'SMP' => 'SMP', 
-        'SMA' => 'SMA',
-        'SMK' => 'SMK'
+        'SMP' => 'SMP',
+        'Non Formal' => 'Non Formal'
     ],
-    
+
     'regions' => [
         'Siantar Utara' => 'Siantar Utara',
         'Siantar Selatan' => 'Siantar Selatan',
@@ -24,4 +23,4 @@ return [
         'Negeri' => 'Negeri',
         'Swasta' => 'Swasta'
     ]
-]; 
+];

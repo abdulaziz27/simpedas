@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Teacher;
+use App\Models\School;
 
 class TeacherSeeder extends Seeder
 {
@@ -13,10 +14,14 @@ class TeacherSeeder extends Seeder
      */
     public function run(): void
     {
+        $schools = School::pluck('id')->all();
+        if (empty($schools)) {
+            return;
+        }
+
         $teachers = [
-            // SD Negeri 122 (ID: 1)
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Siti Fatimah',
                 'nuptk' => '1234567001',
                 'nip' => '196701012007011001',
@@ -38,7 +43,7 @@ class TeacherSeeder extends Seeder
                 'photo' => null
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Ahmad Rasyid',
                 'nuptk' => '1234567002',
                 'nip' => '196801012007011002',
@@ -59,9 +64,8 @@ class TeacherSeeder extends Seeder
                 'academic_year' => '2024/2025',
                 'photo' => null
             ],
-            // SMP Negeri 1 (ID: 2)
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Muhammad Yusuf',
                 'nuptk' => '1234567003',
                 'nip' => '196901012007011003',
@@ -83,7 +87,7 @@ class TeacherSeeder extends Seeder
                 'photo' => null
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Sri Wahyuni',
                 'nuptk' => '1234567004',
                 'nip' => '197001012007011004',
@@ -104,54 +108,8 @@ class TeacherSeeder extends Seeder
                 'academic_year' => '2024/2025',
                 'photo' => null
             ],
-            // SMA Negeri 1 (ID: 3)
             [
-                'school_id' => 3,
-                'full_name' => 'Abdul Rahman',
-                'nuptk' => '1234567005',
-                'nip' => '197101012007011005',
-                'birth_place' => 'Pematang Siantar',
-                'birth_date' => '1971-01-01',
-                'gender' => 'Laki-laki',
-                'religion' => 'Islam',
-                'address' => 'Jl. Imam Bonjol No. 30, Pematang Siantar',
-                'phone' => '081234567005',
-                'education_level' => 'S2 Pendidikan',
-                'education_major' => 'Pendidikan Fisika',
-                'subjects' => 'Fisika',
-                'employment_status' => 'PNS',
-                'rank' => 'IV/a',
-                'position' => 'Guru Fisika',
-                'tmt' => '2007-01-01',
-                'status' => 'Aktif',
-                'academic_year' => '2024/2025',
-                'photo' => null
-            ],
-            [
-                'school_id' => 3,
-                'full_name' => 'Nurul Hidayah',
-                'nuptk' => '1234567006',
-                'nip' => '197201012007011006',
-                'birth_place' => 'Medan',
-                'birth_date' => '1972-01-01',
-                'gender' => 'Perempuan',
-                'religion' => 'Islam',
-                'address' => 'Jl. Sutomo No. 35, Pematang Siantar',
-                'phone' => '081234567006',
-                'education_level' => 'S2 Pendidikan',
-                'education_major' => 'Pendidikan Kimia',
-                'subjects' => 'Kimia',
-                'employment_status' => 'PNS',
-                'rank' => 'IV/a',
-                'position' => 'Guru Kimia',
-                'tmt' => '2007-01-01',
-                'status' => 'Aktif',
-                'academic_year' => '2024/2025',
-                'photo' => null
-            ],
-            // SD Swasta Budi Mulia (ID: 4)
-            [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Dewi Lestari',
                 'nuptk' => '1234567007',
                 'nip' => '197301012007011007',
@@ -173,7 +131,7 @@ class TeacherSeeder extends Seeder
                 'photo' => null
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Bambang Sutrisno',
                 'nuptk' => '1234567008',
                 'nip' => '197401012007011008',
@@ -194,9 +152,8 @@ class TeacherSeeder extends Seeder
                 'academic_year' => '2024/2025',
                 'photo' => null
             ],
-            // SMP Swasta Methodist (ID: 5)
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Yuliana Simanjuntak',
                 'nuptk' => '1234567009',
                 'nip' => '197501012007011009',
@@ -218,7 +175,7 @@ class TeacherSeeder extends Seeder
                 'photo' => null
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Rudi Hartono',
                 'nuptk' => '1234567010',
                 'nip' => '197601012007011010',
@@ -238,55 +195,11 @@ class TeacherSeeder extends Seeder
                 'status' => 'Aktif',
                 'academic_year' => '2024/2025',
                 'photo' => null
-            ],
-            // SMA Swasta HKBP (ID: 6)
-            [
-                'school_id' => 6,
-                'full_name' => 'Pardamean Siregar',
-                'nuptk' => '1234567011',
-                'nip' => '197701012007011011',
-                'birth_place' => 'Pematang Siantar',
-                'birth_date' => '1977-01-01',
-                'gender' => 'Laki-laki',
-                'religion' => 'Kristen',
-                'address' => 'Jl. Melanthon Siregar No. 30, Pematang Siantar',
-                'phone' => '081234567011',
-                'education_level' => 'S1 Pendidikan',
-                'education_major' => 'Pendidikan Fisika',
-                'subjects' => 'Fisika',
-                'employment_status' => 'PNS',
-                'rank' => 'III/d',
-                'position' => 'Guru Fisika',
-                'tmt' => '2007-01-01',
-                'status' => 'Aktif',
-                'academic_year' => '2024/2025',
-                'photo' => null
-            ],
-            [
-                'school_id' => 6,
-                'full_name' => 'Yohana Simbolon',
-                'nuptk' => '1234567012',
-                'nip' => '197801012007011012',
-                'birth_place' => 'Medan',
-                'birth_date' => '1978-01-01',
-                'gender' => 'Perempuan',
-                'religion' => 'Kristen',
-                'address' => 'Jl. Melanthon Siregar No. 31, Pematang Siantar',
-                'phone' => '081234567012',
-                'education_level' => 'S1 Pendidikan',
-                'education_major' => 'Pendidikan Kimia',
-                'subjects' => 'Kimia',
-                'employment_status' => 'PNS',
-                'rank' => 'III/c',
-                'position' => 'Guru Kimia',
-                'tmt' => '2007-01-01',
-                'status' => 'Aktif',
-                'academic_year' => '2024/2025',
-                'photo' => null
             ]
         ];
 
         foreach ($teachers as $teacher) {
+            $teacher['school_id'] = $schools[array_rand($schools)];
             Teacher::create($teacher);
         }
     }

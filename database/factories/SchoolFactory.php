@@ -19,7 +19,7 @@ class SchoolFactory extends Factory
         return [
             'name' => 'SM' . $this->faker->randomElement(['A', 'P']) . ' Negeri ' . $this->faker->numberBetween(1, 10) . ' ' . $this->faker->city,
             'npsn' => $this->faker->unique()->numerify('########'),
-            'education_level' => $this->faker->randomElement(['SMP', 'SMA', 'SMK']),
+            'education_level' => $this->faker->randomElement(['TK', 'SD', 'SMP', 'Non Formal']),
             'status' => 'Negeri',
             'address' => $this->faker->address,
             'phone' => $this->faker->phoneNumber,

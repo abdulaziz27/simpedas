@@ -38,6 +38,9 @@
                 <p class="text-sm text-gray-400 print:text-gray-600">Tempat, Tanggal Lahir</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ strtoupper($student->birth_place) }}, {{ $student->birth_date->translatedFormat('d - F - Y') }}</p>
 
+                <p class="text-sm text-gray-400 print:text-gray-600">Umur</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->age ?? '-' }} tahun</p>
+
                 <p class="text-sm text-gray-400 print:text-gray-600">Jenis Kelamin</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->gender }}</p>
 

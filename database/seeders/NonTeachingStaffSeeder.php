@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\NonTeachingStaff;
+use App\Models\School;
 
 class NonTeachingStaffSeeder extends Seeder
 {
@@ -13,10 +14,14 @@ class NonTeachingStaffSeeder extends Seeder
      */
     public function run(): void
     {
+        $schools = School::pluck('id')->all();
+        if (empty($schools)) {
+            return;
+        }
+
         $staffs = [
-            // SD Negeri 122 (ID: 1) - 5 pegawai
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Dewi Safitri',
                 'nip_nik' => '198501012010012001',
                 'nuptk' => '198501012010012001',
@@ -35,7 +40,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Rina Marlina',
                 'nip_nik' => '198601012010012002',
                 'nuptk' => '198601012010012002',
@@ -54,7 +59,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Andi Pratama',
                 'nip_nik' => '198701012010012003',
                 'nuptk' => '198701012010012003',
@@ -73,7 +78,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Budi Santoso',
                 'nip_nik' => '198801012010012004',
                 'nuptk' => '198801012010012004',
@@ -92,7 +97,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 1,
+                'school_id' => null,
                 'full_name' => 'Siti Aminah',
                 'nip_nik' => '198901012010012005',
                 'nuptk' => '198901012010012005',
@@ -110,9 +115,8 @@ class NonTeachingStaffSeeder extends Seeder
                 'tmt' => '2014-01-01',
                 'status' => 'Aktif'
             ],
-            // SMP Negeri 1 (ID: 2) - 5 pegawai
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Rudi Hartono',
                 'nip_nik' => '198601012010011001',
                 'nuptk' => '198601012010011001',
@@ -131,7 +135,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Dewi Anggraini',
                 'nip_nik' => '199001012010011002',
                 'nuptk' => '199001012010011002',
@@ -150,7 +154,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Andi Wijaya',
                 'nip_nik' => '199101012010011003',
                 'nuptk' => '199101012010011003',
@@ -169,7 +173,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Budi Prakoso',
                 'nip_nik' => '199201012010011004',
                 'nuptk' => '199201012010011004',
@@ -188,7 +192,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 2,
+                'school_id' => null,
                 'full_name' => 'Siti Nurhaliza',
                 'nip_nik' => '199301012010011005',
                 'nuptk' => '199301012010011005',
@@ -206,9 +210,8 @@ class NonTeachingStaffSeeder extends Seeder
                 'tmt' => '2014-01-01',
                 'status' => 'Aktif'
             ],
-            // SMA Negeri 1 (ID: 3) - 4 pegawai
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Ahmad Fauzi',
                 'nip_nik' => '198701012010011002',
                 'nuptk' => '198701012010011002',
@@ -227,7 +230,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Dewi Sartika',
                 'nip_nik' => '199401012010011003',
                 'nuptk' => '199401012010011003',
@@ -246,7 +249,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Andi Simbolon',
                 'nip_nik' => '199501012010011004',
                 'nuptk' => '199501012010011004',
@@ -265,7 +268,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 3,
+                'school_id' => null,
                 'full_name' => 'Budi Simanjuntak',
                 'nip_nik' => '199601012010011005',
                 'nuptk' => '199601012010011005',
@@ -283,9 +286,8 @@ class NonTeachingStaffSeeder extends Seeder
                 'tmt' => '2013-01-01',
                 'status' => 'Aktif'
             ],
-            // SD Swasta Budi Mulia (ID: 4) - 4 pegawai
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Lina Marlina',
                 'nip_nik' => '199701012010012001',
                 'nuptk' => '199701012010012001',
@@ -304,7 +306,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Rizky Ramadhan',
                 'nip_nik' => '199801012010012002',
                 'nuptk' => '199801012010012002',
@@ -323,7 +325,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Dewi Sartika',
                 'nip_nik' => '199901012010012003',
                 'nuptk' => '199901012010012003',
@@ -342,7 +344,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 4,
+                'school_id' => null,
                 'full_name' => 'Andi Wijaya',
                 'nip_nik' => '200001012010012004',
                 'nuptk' => '200001012010012004',
@@ -360,9 +362,8 @@ class NonTeachingStaffSeeder extends Seeder
                 'tmt' => '2012-01-01',
                 'status' => 'Aktif'
             ],
-            // SMP Swasta Methodist (ID: 5) - 4 pegawai
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Yuliana Sari',
                 'nip_nik' => '200101012010011001',
                 'nuptk' => '200101012010011001',
@@ -381,7 +382,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Rudi Hartono',
                 'nip_nik' => '200201012010011002',
                 'nuptk' => '200201012010011002',
@@ -400,7 +401,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Dewi Anggraini',
                 'nip_nik' => '200301012010011003',
                 'nuptk' => '200301012010011003',
@@ -419,7 +420,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 5,
+                'school_id' => null,
                 'full_name' => 'Andi Simanjuntak',
                 'nip_nik' => '200401012010011004',
                 'nuptk' => '200401012010011004',
@@ -437,9 +438,8 @@ class NonTeachingStaffSeeder extends Seeder
                 'tmt' => '2012-01-01',
                 'status' => 'Aktif'
             ],
-            // SMA Swasta HKBP (ID: 6) - 3 pegawai
             [
-                'school_id' => 6,
+                'school_id' => null,
                 'full_name' => 'Pardamean Siregar',
                 'nip_nik' => '200501012010011001',
                 'nuptk' => '200501012010011001',
@@ -458,7 +458,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 6,
+                'school_id' => null,
                 'full_name' => 'Yohana Simbolon',
                 'nip_nik' => '200601012010011002',
                 'nuptk' => '200601012010011002',
@@ -477,7 +477,7 @@ class NonTeachingStaffSeeder extends Seeder
                 'status' => 'Aktif'
             ],
             [
-                'school_id' => 6,
+                'school_id' => null,
                 'full_name' => 'Rina Simanjuntak',
                 'nip_nik' => '200701012010011003',
                 'nuptk' => '200701012010011003',
@@ -498,6 +498,7 @@ class NonTeachingStaffSeeder extends Seeder
         ];
 
         foreach ($staffs as $staff) {
+            $staff['school_id'] = $schools[array_rand($schools)];
             NonTeachingStaff::create($staff);
         }
     }

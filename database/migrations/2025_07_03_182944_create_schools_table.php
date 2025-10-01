@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('npsn', 20)->unique();
-            $table->enum('education_level', ['TK', 'SD', 'SMP', 'SMA', 'SMK']);
+            $table->enum('education_level', ['TK', 'SD', 'SMP', 'Non Formal']);
             $table->enum('status', ['Negeri', 'Swasta']);
             $table->text('address');
             $table->string('phone', 20)->nullable();

@@ -131,7 +131,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $educationLevelValidation->setError('Nilai tidak valid. Pilih dari daftar.');
                 $educationLevelValidation->setPromptTitle('Pilih dari daftar');
                 $educationLevelValidation->setPrompt('Pilih jenjang pendidikan');
-                $educationLevelValidation->setFormula1('"TK,SD,SMP,SMA,SMK"');
+                $educationLevelValidation->setFormula1('"TK,SD,SMP,Non Formal"');
 
                 // Tambahkan validasi untuk kolom STATUS
                 $statusValidation = $sheet->getCell('F2')->getDataValidation();
@@ -177,7 +177,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                     '2. Kolom ID: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi ID, kolom NPSN boleh dikosongkan.',
                     '3. Kolom NPSN: (Opsional) Bisa diisi untuk operasi UPDATE/DELETE, tapi cukup isi ID saja sudah cukup.',
                     '4. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
-                    '5. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, SMA, atau SMK',
+                    '5. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, atau Non Formal',
                     '6. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta',
                     '7. Kolom ALAMAT: Wajib diisi',
                     '8. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
