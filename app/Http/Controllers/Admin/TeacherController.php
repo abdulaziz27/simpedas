@@ -54,8 +54,10 @@ class TeacherController extends Controller
             });
         }
 
-        $teachers = $query->with('school')->latest()->paginate(10);
-        $schools = \App\Models\School::all();
+        $teachers = $query->with('school')->latest()->paginate(10)->withQueryString();
+        $schools = Auth::user()->hasRole('admin_sekolah')
+            ? \App\Models\School::where('id', Auth::user()->school_id)->get()
+            : \App\Models\School::all();
 
         return view('admin.teachers.index', compact('teachers', 'schools'));
     }

@@ -103,83 +103,93 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // Tambahkan validasi untuk kolom ACTION
-                $actionValidation = $sheet->getCell('A2')->getDataValidation();
-                $actionValidation->setType(DataValidation::TYPE_LIST);
-                $actionValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                $actionValidation->setAllowBlank(false);
-                $actionValidation->setShowInputMessage(true);
-                $actionValidation->setShowErrorMessage(true);
-                $actionValidation->setShowDropDown(true);
-                $actionValidation->setErrorTitle('Input error');
-                $actionValidation->setError('Nilai tidak valid. Pilih dari daftar.');
-                $actionValidation->setPromptTitle('Pilih dari daftar');
-                $actionValidation->setPrompt('Pilih CREATE, UPDATE, atau DELETE');
-                $actionValidation->setFormula1('"CREATE,UPDATE,DELETE"');
+                // Data validation dropdown untuk semua baris (2-1000)
+                $lastRow = 1000;
 
-                // Tambahkan validasi untuk kolom EDUCATION_LEVEL
-                $educationLevelValidation = $sheet->getCell('D2')->getDataValidation();
-                $educationLevelValidation->setType(DataValidation::TYPE_LIST);
-                $educationLevelValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                $educationLevelValidation->setAllowBlank(false);
-                $educationLevelValidation->setShowInputMessage(true);
-                $educationLevelValidation->setShowErrorMessage(true);
-                $educationLevelValidation->setShowDropDown(true);
-                $educationLevelValidation->setErrorTitle('Input error');
-                $educationLevelValidation->setError('Nilai tidak valid. Pilih dari daftar.');
-                $educationLevelValidation->setPromptTitle('Pilih dari daftar');
-                $educationLevelValidation->setPrompt('Pilih jenjang pendidikan');
-                $educationLevelValidation->setFormula1('"TK,SD,SMP,Non Formal"');
+                // 1. AKSI (Column A) - CREATE, UPDATE, DELETE
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $validation = $sheet->getCell('A' . $row)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input error');
+                    $validation->setError('Nilai tidak valid. Pilih dari daftar.');
+                    $validation->setPromptTitle('Pilih Aksi');
+                    $validation->setPrompt('Pilih CREATE, UPDATE, atau DELETE');
+                    $validation->setFormula1('"CREATE,UPDATE,DELETE"');
+                }
 
-                // Tambahkan validasi untuk kolom STATUS
-                $statusValidation = $sheet->getCell('E2')->getDataValidation();
-                $statusValidation->setType(DataValidation::TYPE_LIST);
-                $statusValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                $statusValidation->setAllowBlank(false);
-                $statusValidation->setShowInputMessage(true);
-                $statusValidation->setShowErrorMessage(true);
-                $statusValidation->setShowDropDown(true);
-                $statusValidation->setErrorTitle('Input error');
-                $statusValidation->setError('Nilai tidak valid. Pilih dari daftar.');
-                $statusValidation->setPromptTitle('Pilih dari daftar');
-                $statusValidation->setPrompt('Pilih Negeri atau Swasta');
-                $statusValidation->setFormula1('"Negeri,Swasta"');
+                // 2. JENJANG_PENDIDIKAN (Column D) - TK, SD, SMP, Non Formal
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $validation = $sheet->getCell('D' . $row)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input error');
+                    $validation->setError('Nilai tidak valid. Pilih jenjang pendidikan.');
+                    $validation->setPromptTitle('Pilih Jenjang Pendidikan');
+                    $validation->setPrompt('Pilih TK, SD, SMP, atau Non Formal');
+                    $validation->setFormula1('"TK,SD,SMP,Non Formal"');
+                }
 
-                // Tambahkan validasi untuk kolom REGION
-                $regionValidation = $sheet->getCell('K2')->getDataValidation();
-                $regionValidation->setType(DataValidation::TYPE_LIST);
-                $regionValidation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                $regionValidation->setAllowBlank(false);
-                $regionValidation->setShowInputMessage(true);
-                $regionValidation->setShowErrorMessage(true);
-                $regionValidation->setShowDropDown(true);
-                $regionValidation->setErrorTitle('Input error');
-                $regionValidation->setError('Nilai tidak valid. Pilih dari daftar.');
-                $regionValidation->setPromptTitle('Pilih dari daftar');
-                $regionValidation->setPrompt('Pilih kecamatan');
-                $regionValidation->setFormula1('"Siantar Utara,Siantar Selatan,Siantar Barat,Siantar Timur,Siantar Marihat,Siantar Martoba,Siantar Sitalasari,Siantar Marimbun"');
+                // 3. STATUS (Column E) - Negeri, Swasta
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $validation = $sheet->getCell('E' . $row)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input error');
+                    $validation->setError('Nilai tidak valid. Pilih status sekolah.');
+                    $validation->setPromptTitle('Pilih Status');
+                    $validation->setPrompt('Pilih Negeri atau Swasta');
+                    $validation->setFormula1('"Negeri,Swasta"');
+                }
 
-                // Terapkan validasi ke seluruh kolom
-                $lastRow = 100; // Jumlah baris yang akan memiliki validasi
-                $sheet->duplicateStyle($sheet->getStyle('A2'), 'A2:A' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('D2'), 'D2:D' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('E2'), 'E2:E' . $lastRow);
-                $sheet->duplicateStyle($sheet->getStyle('K2'), 'K2:K' . $lastRow);
+                // 4. KECAMATAN (Column K) - Daftar kecamatan
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $validation = $sheet->getCell('K' . $row)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input error');
+                    $validation->setError('Nilai tidak valid. Pilih kecamatan.');
+                    $validation->setPromptTitle('Pilih Kecamatan');
+                    $validation->setPrompt('Pilih kecamatan yang sesuai');
+                    $validation->setFormula1('"Siantar Utara,Siantar Selatan,Siantar Barat,Siantar Timur,Siantar Marihat,Siantar Martoba,Siantar Sitalasari,Siantar Marimbun"');
+                }
 
                 // Pindahkan petunjuk ke sisi kanan, dua kolom setelah kolom paling kanan (kolom N)
                 $startCol = 'M'; // Dua kolom setelah K
                 $row = 2; // Mulai di bawah header
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
-                    '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE',
-                    '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN.',
-                    '4. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
-                    '5. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, atau Non Formal',
-                    '6. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta',
-                    '7. Kolom ALAMAT: Wajib diisi',
-                    '8. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
-                    '9. Kolom KEPALA_SEKOLAH: Wajib diisi',
-                    '10. Kolom KECAMATAN: Wajib diisi dengan kecamatan yang valid',
+                    '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
+                    '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN',
+                    '3. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
+                    '4. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, atau Non Formal (dropdown)',
+                    '5. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta (dropdown)',
+                    '6. Kolom ALAMAT: Wajib diisi',
+                    '7. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
+                    '8. Kolom KEPALA_SEKOLAH: Wajib diisi',
+                    '9. Kolom KECAMATAN: Wajib diisi dengan kecamatan yang valid (dropdown)',
+                    '',
+                    'CATATAN:',
+                    '• Dropdown tersedia di semua baris (2-1000)',
+                    '• NPSN harus unik, tidak boleh duplikat',
+                    '• Format email: user@domain.com',
+                    '• Format website: https://www.example.com',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);

@@ -31,7 +31,7 @@ class School extends Model
 
     public function students()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'sekolah_id');
     }
 
     public function nonTeachingStaff()

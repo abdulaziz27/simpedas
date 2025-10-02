@@ -39,7 +39,7 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Pengguna</h2>
-                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.user-management.index') : route('dinas.user-management.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form id="filtersForm" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.user-management.index') : route('dinas.user-management.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
                         <div class="relative">
@@ -66,13 +66,6 @@
                         <div class="relative">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau email..."
                                 class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <button type="submit" class="text-gray-700 hover:text-gray-900">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </form>
@@ -187,6 +180,19 @@
     </div>
 
     <script>
+        (function(){
+            const form = document.getElementById('filtersForm');
+            if (!form) return;
+            const selects = form.querySelectorAll('select');
+            const inputs = form.querySelectorAll('input[type="text"]');
+            let t;
+            const debounce = (fn, delay) => {
+                clearTimeout(t);
+                t = setTimeout(fn, delay);
+            };
+            selects.forEach(el => el.addEventListener('change', () => form.submit()));
+            inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
+        })();
         function openDeleteModal(userId, userName) {
             const modal = document.getElementById('deleteModal');
             const form = document.getElementById('deleteForm');

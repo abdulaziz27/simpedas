@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('user-management', App\Http\Controllers\Admin\UserManagementController::class)->parameters([
             'user-management' => 'user'
         ]);
+        Route::get('user-management/{user}/print', [App\Http\Controllers\Admin\UserManagementController::class, 'print'])->name('user-management.print');
 
         // Reports routes
         Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
@@ -144,6 +145,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('user-management', App\Http\Controllers\Admin\UserManagementController::class)->parameters([
             'user-management' => 'user'
         ]);
+        Route::get('user-management/{user}/print', [App\Http\Controllers\Admin\UserManagementController::class, 'print'])->name('user-management.print');
 
         // Reports routes
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -151,6 +153,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/students', [App\Http\Controllers\Admin\ReportController::class, 'schoolStudentsReport'])->name('students');
             Route::get('/teachers', [App\Http\Controllers\Admin\ReportController::class, 'schoolTeachersReport'])->name('teachers');
             Route::get('/raport', [App\Http\Controllers\Admin\ReportController::class, 'schoolReportsReport'])->name('raport');
+            Route::get('/students/export', [App\Http\Controllers\Admin\ReportController::class, 'exportSchoolStudents'])->name('students.export');
+            Route::get('/teachers/export', [App\Http\Controllers\Admin\ReportController::class, 'exportSchoolTeachers'])->name('teachers.export');
         });
 
         // Student Certificate Routes

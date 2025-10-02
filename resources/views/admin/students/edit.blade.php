@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-[#125047] py-8" x-data="{ graduationStatus: '{{ old('graduation_status', $student->graduation_status) }}' }">
+<div class="min-h-screen bg-[#125047] py-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Breadcrumb --}}
         <nav class="flex items-center space-x-2 text-white mb-6">
@@ -13,134 +13,236 @@
         </nav>
 
         <div class="bg-white rounded-xl p-8 shadow-lg">
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Data Siswa</h1>
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Data Siswa - {{ $student->nama_lengkap }}</h1>
 
             <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.update', $student) : route('dinas.students.update', $student) }}" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-                    @if(Auth::user()->hasRole('admin_dinas'))
-                    <div class="md:col-span-2">
-                        <label for="school_id" class="block text-sm font-medium text-gray-700">Sekolah</label>
-                        <select name="school_id" id="school_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            @foreach($schools as $school)
-                                <option value="{{ $school->id }}" {{ old('school_id', $student->school_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('school_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    @endif
+                {{-- Data Wajib --}}
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Data Wajib</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
-                    <div>
-                        <label for="nisn" class="block text-sm font-medium text-gray-700">NIS / NISN</label>
-                        <input type="text" name="nisn" id="nisn" value="{{ old('nisn', $student->nisn) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('nisn') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label for="full_name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input type="text" name="full_name" id="full_name" value="{{ old('full_name', $student->full_name) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('full_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div>
-                        <label for="birth_place_date" class="block text-sm font-medium text-gray-700">Tempat, Tanggal Lahir</label>
-                        <div class="flex space-x-2">
-                            <input type="text" name="birth_place" value="{{ old('birth_place', $student->birth_place) }}" required class="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <input type="date" name="birth_date" value="{{ old('birth_date', $student->birth_date->format('Y-m-d')) }}" required class="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @if(Auth::user()->hasRole('admin_dinas'))
+                        <div class="md:col-span-2">
+                            <label for="sekolah_id" class="block text-sm font-medium text-gray-700">Sekolah</label>
+                            <select name="sekolah_id" id="sekolah_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                @foreach($schools as $school)
+                                    <option value="{{ $school->id }}" {{ old('sekolah_id', $student->sekolah_id) == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('sekolah_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
-                        @error('birth_place') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        @error('birth_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        @endif
 
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select name="gender" id="gender" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            @foreach(config('student.genders') as $value => $label)
-                                <option value="{{ $value }}" {{ old('gender', $student->gender) == $value ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('gender') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        <div>
+                            <label for="nisn" class="block text-sm font-medium text-gray-700">NISN <span class="text-red-500">*</span></label>
+                            <input type="text" name="nisn" id="nisn" value="{{ old('nisn', $student->nisn) }}" required maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('nisn') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div>
-                        <label for="grade_level" class="block text-sm font-medium text-gray-700">Kelas / Jurusan / Tingkat</label>
-                        <input type="text" name="grade_level" id="grade_level" value="{{ old('grade_level', $student->grade_level) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('grade_level') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        <div>
+                            <label for="nipd" class="block text-sm font-medium text-gray-700">NIPD</label>
+                            <input type="text" name="nipd" id="nipd" value="{{ old('nipd', $student->nipd) }}" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('nipd') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div>
-                        <label for="parent_name" class="block text-sm font-medium text-gray-700">Nama Orang Tua</label>
-                        <input type="text" name="parent_name" id="parent_name" value="{{ old('parent_name', $student->parent_name) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('parent_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        <div class="md:col-span-2">
+                            <label for="nama_lengkap" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
+                            <input type="text" name="nama_lengkap" id="nama_lengkap" value="{{ old('nama_lengkap', $student->nama_lengkap) }}" required maxlength="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('nama_lengkap') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div>
-                        <label for="student_status" class="block text-sm font-medium text-gray-700">Status (Aktif / Tamat)</label>
-                        <select name="student_status" id="student_status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            @foreach(config('student.student_statuses') as $value => $label)
-                                <option value="{{ $value }}" {{ old('student_status', $student->student_status) == $value ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('student_status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        <div>
+                            <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
+                            <select name="jenis_kelamin" id="jenis_kelamin" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <option value="">Pilih</option>
+                                <option value="L" {{ old('jenis_kelamin', $student->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                <option value="P" {{ old('jenis_kelamin', $student->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
+                            </select>
+                            @error('jenis_kelamin') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div class="md:col-span-2">
-                        <label for="achievements" class="block text-sm font-medium text-gray-700">Riwayat Prestasi</label>
-                        <textarea name="achievements" id="achievements" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('achievements', $student->achievements) }}</textarea>
-                        @error('achievements') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        <div>
+                            <label for="tempat_lahir" class="block text-sm font-medium text-gray-700">Tempat Lahir <span class="text-red-500">*</span></label>
+                            <input type="text" name="tempat_lahir" id="tempat_lahir" value="{{ old('tempat_lahir', $student->tempat_lahir) }}" required maxlength="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('tempat_lahir') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                    <div class="md:col-span-2">
-                        <label for="graduation_status" class="block text-sm font-medium text-gray-700">Status Kelulusan</label>
-                        <select name="graduation_status" id="graduation_status" x-model="graduationStatus" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            @foreach(config('student.graduation_statuses') as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('graduation_status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div>
+                            <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir <span class="text-red-500">*</span></label>
+                            <input type="date" name="tanggal_lahir" id="tanggal_lahir" value="{{ old('tanggal_lahir', $student->tanggal_lahir?->format('Y-m-d')) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('tanggal_lahir') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-                        <div x-show="graduationStatus === 'Lulus'" class="mt-4 bg-green-50 border-l-4 border-green-400 p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm text-green-700">
-                                        Data Ijazah dapat di-upload setelah menyimpan perubahan.
-                                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.certificate.create', $student) : route('dinas.students.certificate.create', $student) }}" class="font-medium underline hover:text-green-600">
-                                            Klik di sini untuk upload ijazah.
-                                        </a>
-                                    </p>
-                                </div>
-                            </div>
+                        <div>
+                            <label for="agama" class="block text-sm font-medium text-gray-700">Agama <span class="text-red-500">*</span></label>
+                            <select name="agama" id="agama" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <option value="">Pilih Agama</option>
+                                <option value="Islam" {{ old('agama', $student->agama) == 'Islam' ? 'selected' : '' }}>Islam</option>
+                                <option value="Kristen" {{ old('agama', $student->agama) == 'Kristen' ? 'selected' : '' }}>Kristen</option>
+                                <option value="Katolik" {{ old('agama', $student->agama) == 'Katolik' ? 'selected' : '' }}>Katolik</option>
+                                <option value="Hindu" {{ old('agama', $student->agama) == 'Hindu' ? 'selected' : '' }}>Hindu</option>
+                                <option value="Buddha" {{ old('agama', $student->agama) == 'Buddha' ? 'selected' : '' }}>Buddha</option>
+                                <option value="Konghucu" {{ old('agama', $student->agama) == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
+                            </select>
+                            @error('agama') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="rombel" class="block text-sm font-medium text-gray-700">Rombel <span class="text-red-500">*</span></label>
+                            <input type="text" name="rombel" id="rombel" value="{{ old('rombel', $student->rombel) }}" required maxlength="50" placeholder="Contoh: 6A, 9B, 12 IPA 1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('rombel') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="status_siswa" class="block text-sm font-medium text-gray-700">Status Siswa</label>
+                            <select name="status_siswa" id="status_siswa" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <option value="aktif" {{ old('status_siswa', $student->status_siswa) == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="tamat" {{ old('status_siswa', $student->status_siswa) == 'tamat' ? 'selected' : '' }}>Tamat</option>
+                                <option value="pindah" {{ old('status_siswa', $student->status_siswa) == 'pindah' ? 'selected' : '' }}>Pindah</option>
+                            </select>
+                            @error('status_siswa') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8 flex justify-between items-center">
-                    <button type="button" x-data @click.prevent="$dispatch('open-modal', 'confirm-student-deletion')" class="text-red-600 hover:text-red-800 font-bold transition text-sm">Hapus Siswa</button>
-                    <div class="flex space-x-3">
-                        <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Batal</a>
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition">Update</button>
+                {{-- Data Domisili --}}
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Data Domisili</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="md:col-span-2">
+                            <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
+                            <textarea name="alamat" id="alamat" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('alamat', $student->alamat) }}</textarea>
+                            @error('alamat') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="kelurahan" class="block text-sm font-medium text-gray-700">Kelurahan</label>
+                            <input type="text" name="kelurahan" id="kelurahan" value="{{ old('kelurahan', $student->kelurahan) }}" maxlength="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('kelurahan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                            <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan', $student->kecamatan) }}" maxlength="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('kecamatan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="kode_pos" class="block text-sm font-medium text-gray-700">Kode Pos</label>
+                            <input type="text" name="kode_pos" id="kode_pos" value="{{ old('kode_pos', $student->kode_pos) }}" maxlength="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('kode_pos') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
                     </div>
+                </div>
+
+                {{-- Data Keluarga --}}
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Data Keluarga</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                            <label for="nama_ayah" class="block text-sm font-medium text-gray-700">Nama Ayah</label>
+                            <input type="text" name="nama_ayah" id="nama_ayah" value="{{ old('nama_ayah', $student->nama_ayah) }}" maxlength="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('nama_ayah') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="pekerjaan_ayah" class="block text-sm font-medium text-gray-700">Pekerjaan Ayah</label>
+                            <input type="text" name="pekerjaan_ayah" id="pekerjaan_ayah" value="{{ old('pekerjaan_ayah', $student->pekerjaan_ayah) }}" maxlength="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('pekerjaan_ayah') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="nama_ibu" class="block text-sm font-medium text-gray-700">Nama Ibu</label>
+                            <input type="text" name="nama_ibu" id="nama_ibu" value="{{ old('nama_ibu', $student->nama_ibu) }}" maxlength="150" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('nama_ibu') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="pekerjaan_ibu" class="block text-sm font-medium text-gray-700">Pekerjaan Ibu</label>
+                            <input type="text" name="pekerjaan_ibu" id="pekerjaan_ibu" value="{{ old('pekerjaan_ibu', $student->pekerjaan_ibu) }}" maxlength="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('pekerjaan_ibu') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="anak_ke" class="block text-sm font-medium text-gray-700">Anak Ke-</label>
+                            <input type="number" name="anak_ke" id="anak_ke" value="{{ old('anak_ke', $student->anak_ke) }}" min="1" max="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('anak_ke') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="jumlah_saudara" class="block text-sm font-medium text-gray-700">Jumlah Saudara</label>
+                            <input type="number" name="jumlah_saudara" id="jumlah_saudara" value="{{ old('jumlah_saudara', $student->jumlah_saudara) }}" min="0" max="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('jumlah_saudara') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Data Kontak & Sosial Ekonomi --}}
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Kontak & Sosial Ekonomi</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                            <label for="no_hp" class="block text-sm font-medium text-gray-700">No. HP</label>
+                            <input type="text" name="no_hp" id="no_hp" value="{{ old('no_hp', $student->no_hp) }}" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('no_hp') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="kip" class="block text-sm font-medium text-gray-700">KIP</label>
+                            <select name="kip" id="kip" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <option value="">Pilih</option>
+                                <option value="1" {{ old('kip', $student->kip ? '1' : '0') == '1' ? 'selected' : '' }}>Ya</option>
+                                <option value="0" {{ old('kip', $student->kip ? '1' : '0') == '0' ? 'selected' : '' }}>Tidak</option>
+                            </select>
+                            @error('kip') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="transportasi" class="block text-sm font-medium text-gray-700">Transportasi</label>
+                            <input type="text" name="transportasi" id="transportasi" value="{{ old('transportasi', $student->transportasi) }}" maxlength="50" placeholder="Contoh: Sepeda, Motor, Jalan Kaki" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('transportasi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="jarak_rumah_sekolah" class="block text-sm font-medium text-gray-700">Jarak Rumah ke Sekolah (km)</label>
+                            <input type="number" name="jarak_rumah_sekolah" id="jarak_rumah_sekolah" value="{{ old('jarak_rumah_sekolah', $student->jarak_rumah_sekolah) }}" step="0.01" min="0" max="999.99" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('jarak_rumah_sekolah') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Data Kesehatan --}}
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Data Kesehatan</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div>
+                            <label for="tinggi_badan" class="block text-sm font-medium text-gray-700">Tinggi Badan (cm)</label>
+                            <input type="number" name="tinggi_badan" id="tinggi_badan" value="{{ old('tinggi_badan', $student->tinggi_badan) }}" min="50" max="250" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('tinggi_badan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label for="berat_badan" class="block text-sm font-medium text-gray-700">Berat Badan (kg)</label>
+                            <input type="number" name="berat_badan" id="berat_badan" value="{{ old('berat_badan', $student->berat_badan) }}" min="10" max="200" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                            @error('berat_badan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Buttons --}}
+                <div class="flex justify-end space-x-4">
+                    <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student) : route('dinas.students.show', $student) }}" class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                        Batal
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        Update Data
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<x-modal name="confirm-student-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-    <form method="post" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.destroy', $student) : route('dinas.students.destroy', $student) }}" class="p-6">
-        @csrf
-        @method('delete')
-        <h2 class="text-lg font-medium text-gray-900">Apakah Anda yakin ingin menghapus data siswa ini?</h2>
-        <p class="mt-1 text-sm text-gray-600">Semua data terkait siswa ini akan dihapus secara permanen.</p>
-        <div class="mt-6 flex justify-end">
-            <x-secondary-button x-on:click="$dispatch('close')">Batal</x-secondary-button>
-            <x-danger-button class="ml-3">Hapus Siswa</x-danger-button>
-        </div>
-    </form>
-</x-modal>
 @endsection

@@ -45,8 +45,8 @@ class ReportController extends Controller
         // Data sekolah dengan pagination
         $schools = School::withCount(['teachers', 'students', 'nonTeachingStaff'])
             ->with(['students' => function ($query) {
-                $query->select('school_id', 'student_status', DB::raw('count(*) as total'))
-                    ->groupBy('school_id', 'student_status');
+                $query->select('sekolah_id', 'status_siswa', DB::raw('count(*) as total'))
+                    ->groupBy('sekolah_id', 'status_siswa');
             }])
             ->paginate(10);
 
@@ -291,10 +291,10 @@ class ReportController extends Controller
         // Data siswa per sekolah dengan format yang diminta
         $schoolsWithStudents = School::withCount([
             'students as total_aktif' => function ($query) {
-                $query->where('student_status', 'Aktif');
+                $query->where('status_siswa', 'aktif');
             },
             'students as total_tamat' => function ($query) {
-                $query->where('student_status', 'Tamat');
+                $query->where('status_siswa', 'tamat');
             }
         ])
             ->having('total_aktif', '>', 0)
@@ -304,8 +304,8 @@ class ReportController extends Controller
 
         // Statistik total siswa
         $totalStudents = Student::count();
-        $totalAktif = Student::where('student_status', 'Aktif')->count();
-        $totalTamat = Student::where('student_status', 'Tamat')->count();
+        $totalAktif = Student::where('status_siswa', 'aktif')->count();
+        $totalTamat = Student::where('status_siswa', 'tamat')->count();
 
         return view('admin.reports.students', compact(
             'schoolsWithStudents',
@@ -325,12 +325,10 @@ class ReportController extends Controller
         // Data kelulusan per sekolah dengan format yang diminta
         $schoolsWithGraduation = School::withCount([
             'students as total_lulus' => function ($query) {
-                $query->where('student_status', 'Tamat')
-                    ->where('graduation_status', 'Lulus');
+                $query->where('status_siswa', 'tamat');
             },
             'students as total_tidak_lulus' => function ($query) {
-                $query->where('student_status', 'Tamat')
-                    ->where('graduation_status', 'Tidak Lulus');
+                $query->where('status_siswa', 'tamat');
             }
         ])
             ->having('total_lulus', '>', 0)
@@ -339,13 +337,9 @@ class ReportController extends Controller
             ->paginate(10);
 
         // Statistik total kelulusan
-        $totalGraduates = Student::where('student_status', 'Tamat')->count();
-        $totalLulus = Student::where('student_status', 'Tamat')
-            ->where('graduation_status', 'Lulus')
-            ->count();
-        $totalTidakLulus = Student::where('student_status', 'Tamat')
-            ->where('graduation_status', 'Tidak Lulus')
-            ->count();
+        $totalGraduates = Student::where('status_siswa', 'tamat')->count();
+        $totalLulus = Student::where('status_siswa', 'tamat')->count();
+        $totalTidakLulus = 0; // No graduation_status column, so set to 0
 
         return view('admin.reports.graduation', compact(
             'schoolsWithGraduation',
@@ -374,12 +368,10 @@ class ReportController extends Controller
             // Get schools with graduation counts
             $schoolsWithGraduation = School::withCount([
                 'students as total_lulus' => function ($query) {
-                    $query->where('student_status', 'Tamat')
-                        ->where('graduation_status', 'Lulus');
+                    $query->where('status_siswa', 'tamat');
                 },
                 'students as total_tidak_lulus' => function ($query) {
-                    $query->where('student_status', 'Tamat')
-                        ->where('graduation_status', 'Tidak Lulus');
+                    $query->where('status_siswa', 'tamat');
                 }
             ])
                 ->having('total_lulus', '>', 0)
@@ -520,9 +512,9 @@ class ReportController extends Controller
         $this->authorizeRole('admin_sekolah');
 
         $user = Auth::user();
-        $students = Student::where('school_id', $user->school_id)
+        $students = Student::where('sekolah_id', $user->school_id)
             ->with('school')
-            ->orderBy('full_name')
+            ->orderBy('nama_lengkap')
             ->get();
 
         return view('admin.reports.school-students', compact('students'));
@@ -563,6 +555,314 @@ class ReportController extends Controller
     }
 
     /**
+     * Export Laporan Siswa Sekolah ke Excel (Admin Sekolah)
+     */
+    public function exportSchoolStudents()
+    {
+        try {
+            $this->authorizeRole('admin_sekolah');
+
+            // Set memory limit and timeout for exports
+            ini_set('memory_limit', '512M');
+            set_time_limit(300); // 5 minutes
+
+            $user = Auth::user();
+            $filename = 'Laporan_Siswa_Sekolah_' . $user->school->name . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+            \Log::info('Exporting school students report to Excel');
+
+            // Get students data for the school
+            $students = Student::where('sekolah_id', $user->school_id)
+                ->with('school')
+                ->orderBy('nama_lengkap')
+                ->get();
+
+            \Log::info('Students loaded: ' . $students->count());
+
+            // Create new Spreadsheet
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set metadata spreadsheet
+            $spreadsheet->getProperties()
+                ->setCreator('SIMPeDAS')
+                ->setLastModifiedBy('SIMPeDAS')
+                ->setTitle('Laporan Siswa Sekolah')
+                ->setSubject('Data Siswa Sekolah')
+                ->setDescription('Dibuat oleh Sistem Informasi Manajemen Pendidikan Dasar');
+
+            // Headers
+            $headers = ['NO', 'NAMA LENGKAP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'NISN', 'ROMBEL', 'STATUS SISWA', 'JENIS KELAMIN', 'AGAMA', 'ALAMAT'];
+            $lastCol = 'J';
+
+            // Set headers
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValue(chr(65 + $index) . '1', $header);
+            }
+
+            // Styling header
+            $headerStyle = [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '0d524a']
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            // Apply header style
+            $sheet->getStyle('A1:' . $lastCol . '1')->applyFromArray($headerStyle);
+
+            // Set row height for header
+            $sheet->getRowDimension(1)->setRowHeight(25);
+
+            // Set column widths
+            $columnWidths = [
+                'A' => 8,   // NO
+                'B' => 25,  // NAMA LENGKAP
+                'C' => 15,  // TEMPAT LAHIR
+                'D' => 15,  // TANGGAL LAHIR
+                'E' => 15,  // NISN
+                'F' => 12,  // ROMBEL
+                'G' => 15,  // STATUS SISWA
+                'H' => 12,  // JENIS KELAMIN
+                'I' => 12,  // AGAMA
+                'J' => 30   // ALAMAT
+            ];
+
+            foreach ($columnWidths as $column => $width) {
+                $sheet->getColumnDimension($column)->setWidth($width);
+            }
+
+            // Add data rows
+            $row = 2;
+            foreach ($students as $index => $student) {
+                $sheet->setCellValue('A' . $row, $index + 1);
+                $sheet->setCellValue('B' . $row, $student->nama_lengkap);
+                $sheet->setCellValue('C' . $row, $student->tempat_lahir);
+                $sheet->setCellValue('D' . $row, $student->tanggal_lahir->format('d/m/Y'));
+                $sheet->setCellValue('E' . $row, $student->nisn);
+                $sheet->setCellValue('F' . $row, $student->rombel);
+                $sheet->setCellValue('G' . $row, ucfirst($student->status_siswa));
+                $sheet->setCellValue('H' . $row, $student->jenis_kelamin_label);
+                $sheet->setCellValue('I' . $row, $student->agama ?? '-');
+                $sheet->setCellValue('J' . $row, $student->alamat ?? '-');
+
+                $row++;
+            }
+
+            // Style data rows
+            $dataStyle = [
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            // Apply data style
+            if ($students->count() > 0) {
+                $sheet->getStyle('A2:' . $lastCol . ($row - 1))->applyFromArray($dataStyle);
+            }
+
+            // Set row heights for data
+            for ($i = 2; $i < $row; $i++) {
+                $sheet->getRowDimension($i)->setRowHeight(20);
+            }
+
+            // Create writer
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+            // Set headers for download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            // Save to output
+            $writer->save('php://output');
+            exit();
+        } catch (\Exception $e) {
+            \Log::error('Error exporting school students report: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat export: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Laporan Guru Sekolah ke Excel (Admin Sekolah)
+     */
+    public function exportSchoolTeachers()
+    {
+        try {
+            $this->authorizeRole('admin_sekolah');
+
+            // Set memory limit and timeout for exports
+            ini_set('memory_limit', '512M');
+            set_time_limit(300); // 5 minutes
+
+            $user = Auth::user();
+            $filename = 'Laporan_Guru_Sekolah_' . $user->school->name . '_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+            \Log::info('Exporting school teachers report to Excel');
+
+            // Get teachers data for the school
+            $teachers = Teacher::where('school_id', $user->school_id)
+                ->with('school')
+                ->orderBy('full_name')
+                ->get();
+
+            \Log::info('Teachers loaded: ' . $teachers->count());
+
+            // Create new Spreadsheet
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set metadata spreadsheet
+            $spreadsheet->getProperties()
+                ->setCreator('SIMPeDAS')
+                ->setLastModifiedBy('SIMPeDAS')
+                ->setTitle('Laporan Guru Sekolah')
+                ->setSubject('Data Guru Sekolah')
+                ->setDescription('Dibuat oleh Sistem Informasi Manajemen Pendidikan Dasar');
+
+            // Headers
+            $headers = ['NO', 'NAMA LENGKAP', 'NUPTK', 'NIP', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 'JENIS KELAMIN', 'AGAMA', 'STATUS KEPEGAWAIAN', 'JABATAN', 'MATA PELAJARAN'];
+            $lastCol = 'K';
+
+            // Set headers
+            foreach ($headers as $index => $header) {
+                $sheet->setCellValue(chr(65 + $index) . '1', $header);
+            }
+
+            // Styling header
+            $headerStyle = [
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '0d524a']
+                ],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            // Apply header style
+            $sheet->getStyle('A1:' . $lastCol . '1')->applyFromArray($headerStyle);
+
+            // Set row height for header
+            $sheet->getRowDimension(1)->setRowHeight(25);
+
+            // Set column widths
+            $columnWidths = [
+                'A' => 8,   // NO
+                'B' => 25,  // NAMA LENGKAP
+                'C' => 15,  // NUPTK
+                'D' => 15,  // NIP
+                'E' => 15,  // TEMPAT LAHIR
+                'F' => 15,  // TANGGAL LAHIR
+                'G' => 12,  // JENIS KELAMIN
+                'H' => 12,  // AGAMA
+                'I' => 18,  // STATUS KEPEGAWAIAN
+                'J' => 15,  // JABATAN
+                'K' => 25   // MATA PELAJARAN
+            ];
+
+            foreach ($columnWidths as $column => $width) {
+                $sheet->getColumnDimension($column)->setWidth($width);
+            }
+
+            // Add data rows
+            $row = 2;
+            foreach ($teachers as $index => $teacher) {
+                $sheet->setCellValue('A' . $row, $index + 1);
+                $sheet->setCellValue('B' . $row, $teacher->full_name);
+                $sheet->setCellValue('C' . $row, $teacher->nuptk ?? '-');
+                $sheet->setCellValue('D' . $row, $teacher->nip ?? '-');
+                $sheet->setCellValue('E' . $row, $teacher->birth_place ?? '-');
+                $sheet->setCellValue('F' . $row, $teacher->birth_date ? $teacher->birth_date->format('d/m/Y') : '-');
+                $sheet->setCellValue('G' . $row, $teacher->gender ?? '-');
+                $sheet->setCellValue('H' . $row, $teacher->religion ?? '-');
+                $sheet->setCellValue('I' . $row, $teacher->employment_status ?? '-');
+                $sheet->setCellValue('J' . $row, $teacher->position ?? '-');
+                $sheet->setCellValue('K' . $row, $teacher->subjects ?? '-');
+
+                $row++;
+            }
+
+            // Style data rows
+            $dataStyle = [
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            // Apply data style
+            if ($teachers->count() > 0) {
+                $sheet->getStyle('A2:' . $lastCol . ($row - 1))->applyFromArray($dataStyle);
+            }
+
+            // Set row heights for data
+            for ($i = 2; $i < $row; $i++) {
+                $sheet->getRowDimension($i)->setRowHeight(20);
+            }
+
+            // Create writer
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+            // Set headers for download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            // Save to output
+            $writer->save('php://output');
+            exit();
+        } catch (\Exception $e) {
+            \Log::error('Error exporting school teachers report: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat export: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Export Laporan Siswa ke Excel
      */
     public function exportStudents()
@@ -581,10 +881,10 @@ class ReportController extends Controller
             // Get schools with student counts
             $schoolsWithStudents = School::withCount([
                 'students as total_aktif' => function ($query) {
-                    $query->where('student_status', 'Aktif');
+                    $query->where('status_siswa', 'aktif');
                 },
                 'students as total_tamat' => function ($query) {
-                    $query->where('student_status', 'Tamat');
+                    $query->where('status_siswa', 'tamat');
                 }
             ])
                 ->having('total_aktif', '>', 0)

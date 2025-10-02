@@ -62,11 +62,13 @@ class UserManagementController extends Controller
     {
         $user = Auth::user();
         $roles = Role::all();
-        $schools = School::all();
 
-        // Filter role berdasarkan user yang login
+        // Filter schools berdasarkan user yang login
         if ($user->hasRole('admin_sekolah')) {
+            $schools = School::where('id', $user->school_id)->get();
             $roles = $roles->where('name', 'guru');
+        } else {
+            $schools = School::all();
         }
 
         return view('admin.user-management.create', compact('roles', 'schools'));
@@ -155,11 +157,13 @@ class UserManagementController extends Controller
         }
 
         $roles = Role::all();
-        $schools = School::all();
-
         $currentUser = Auth::user();
+
         if ($currentUser->hasRole('admin_sekolah')) {
+            $schools = School::where('id', $currentUser->school_id)->get();
             $roles = $roles->where('name', 'guru');
+        } else {
+            $schools = School::all();
         }
 
         return view('admin.user-management.edit', compact('user', 'roles', 'schools'));
@@ -287,6 +291,15 @@ class UserManagementController extends Controller
                 abort(403, 'Anda tidak memiliki akses ke user ini.');
             }
         }
+    }
+
+    /**
+     * Print user data
+     */
+    public function print(User $user)
+    {
+        $this->authorizeAccess($user);
+        return view('admin.user-management.print', compact('user'));
     }
 
     private function isFirstAdminDinas(User $user)

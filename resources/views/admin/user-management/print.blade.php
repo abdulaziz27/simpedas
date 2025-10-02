@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biodata Guru - {{ $teacher->full_name }}</title>
+    <title>Biodata Pengguna - {{ $user->name }}</title>
     <style>
         @media print {
             body { margin: 0; }
@@ -131,21 +131,32 @@
             font-size: 12px;
             color: #666;
         }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #0d524a;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
     <button class="print-btn no-print" onclick="window.print()">Cetak Dokumen</button>
 
     <div class="header">
-        <h1>BIODATA GURU</h1>
+        <h1>BIODATA PENGGUNA SISTEM</h1>
         <p>Dinas Pendidikan Kota Pematang Siantar</p>
         <p>Jl. Merdeka No.228c, Dwikora, Kec. Siantar Bar., Kota Pematang Siantar, Sumatera Utara 21146</p>
     </div>
 
     <div class="profile-section">
         <div class="photo-section">
-            @if($teacher->photo)
-                <img src="{{ asset('storage/' . $teacher->photo) }}" alt="Foto {{ $teacher->full_name }}">
+            @if($user->profile_photo_path)
+                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="Foto {{ $user->name }}">
             @else
                 <div class="photo-placeholder">
                     <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
@@ -156,9 +167,10 @@
         </div>
 
         <div class="info-section">
-            <h2>{{ $teacher->full_name }}</h2>
-            <p><strong>{{ $teacher->subjects ?? 'Mata Pelajaran tidak tersedia' }}</strong></p>
-            <p>{{ $teacher->school->name ?? 'Sekolah tidak tersedia' }}</p>
+            <h2>{{ $user->name }}</h2>
+            <p><strong>{{ $user->school->name ?? 'Tidak Terdaftar di Sekolah' }}</strong></p>
+            <p>Email: {{ $user->email }}</p>
+            <p>Role: <span class="role-badge">{{ $user->roles->first()->name ?? 'Belum Ada Role' }}</span></p>
         </div>
     </div>
 
@@ -166,75 +178,57 @@
         <div class="column-left">
             <div class="detail-item">
                 <div class="detail-label">Nama Lengkap</div>
-                <div class="detail-value">{{ $teacher->full_name ?? '-' }}</div>
+                <div class="detail-value">{{ $user->name ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">NUPTK</div>
-                <div class="detail-value">{{ $teacher->nuptk ?? '-' }}</div>
+                <div class="detail-label">Email</div>
+                <div class="detail-value">{{ $user->email ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">NIP</div>
-                <div class="detail-value">{{ $teacher->nip ?? '-' }}</div>
+                <div class="detail-label">Role</div>
+                <div class="detail-value">{{ $user->roles->first()->name ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Tempat, Tanggal Lahir</div>
-                <div class="detail-value">{{ strtoupper($teacher->birth_place ?? '-') }}, {{ $teacher->birth_date ? $teacher->birth_date->translatedFormat('d - F - Y') : '-' }}</div>
+                <div class="detail-label">Sekolah</div>
+                <div class="detail-value">{{ $user->school->name ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Jenis Kelamin</div>
-                <div class="detail-value">{{ $teacher->gender ?? '-' }}</div>
-            </div>
-
-            <div class="detail-item">
-                <div class="detail-label">Agama</div>
-                <div class="detail-value">{{ $teacher->religion ?? '-' }}</div>
-            </div>
-
-            <div class="detail-item">
-                <div class="detail-label">Alamat</div>
-                <div class="detail-value">{{ $teacher->address ?? '-' }}</div>
-            </div>
-
-            <div class="detail-item">
-                <div class="detail-label">Tenaga Pendidikan Satuan Kerja</div>
-                <div class="detail-value">{{ $teacher->school->name ?? '-' }}</div>
+                <div class="detail-label">Email Terverifikasi</div>
+                <div class="detail-value">{{ $user->email_verified_at ? 'Ya' : 'Tidak' }}</div>
             </div>
         </div>
 
         <div class="column-right">
             <div class="detail-item">
-                <div class="detail-label">Status Kepegawaian</div>
-                <div class="detail-value">{{ $teacher->employment_status ?? '-' }}</div>
+                <div class="detail-label">Tanggal Dibuat</div>
+                <div class="detail-value">{{ $user->created_at->translatedFormat('d - F - Y') ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Golongan</div>
-                <div class="detail-value">{{ $teacher->rank ?? '-' }}</div>
+                <div class="detail-label">Terakhir Diperbarui</div>
+                <div class="detail-value">{{ $user->updated_at->translatedFormat('d - F - Y') ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Jabatan</div>
-                <div class="detail-value">{{ $teacher->position ?? '-' }}</div>
+                <div class="detail-label">Status Akun</div>
+                <div class="detail-value">{{ $user->email_verified_at ? 'Aktif' : 'Belum Diverifikasi' }}</div>
+            </div>
+
+            @if($user->school)
+            <div class="detail-item">
+                <div class="detail-label">NPSN Sekolah</div>
+                <div class="detail-value">{{ $user->school->npsn ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">TMT Mengajar</div>
-                <div class="detail-value">{{ $teacher->tmt ? $teacher->tmt->translatedFormat('d - F - Y') : '-' }}</div>
+                <div class="detail-label">Jenjang Pendidikan</div>
+                <div class="detail-value">{{ $user->school->education_level ?? '-' }}</div>
             </div>
-
-            <div class="detail-item">
-                <div class="detail-label">Mata Pelajaran Yang Di Ajar</div>
-                <div class="detail-value">{{ $teacher->subjects ?? '-' }}</div>
-            </div>
-
-            <div class="detail-item">
-                <div class="detail-label">Pendidikan Terakhir</div>
-                <div class="detail-value">{{ $teacher->education_level ?? '' }} {{ $teacher->education_major ?? '' }}</div>
-            </div>
+            @endif
         </div>
     </div>
 

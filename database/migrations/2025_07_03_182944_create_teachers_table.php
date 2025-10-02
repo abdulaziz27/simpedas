@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('gender', ['Laki-laki', 'Perempuan']);
             $table->enum('religion', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
             $table->text('address')->nullable();
+            $table->string('email')->nullable();
             $table->string('phone', 20)->nullable();
             $table->string('education_level', 100)->nullable();
             $table->string('education_major', 100)->nullable();

@@ -52,8 +52,10 @@ class NonTeachingStaffController extends Controller
             });
         }
 
-        $staff = $query->with('school')->latest()->paginate(10);
-        $schools = \App\Models\School::all();
+        $staff = $query->with('school')->latest()->paginate(10)->withQueryString();
+        $schools = Auth::user()->hasRole('admin_sekolah')
+            ? \App\Models\School::where('id', Auth::user()->school_id)->get()
+            : \App\Models\School::all();
 
         return view('admin.non-teaching-staff.index', compact('staff', 'schools'));
     }

@@ -9,7 +9,7 @@
 
     <div class="absolute top-0 left-0 p-8 z-20">
         <a href="/">
-            <img src="{{ asset('images/logo-simpedas.jpeg') }}" alt="SIMPEDAS" class="h-10">
+            <img src="{{ asset('images/logo-simpedas.png') }}" alt="SIMPEDAS" class="h-10">
         </a>
         </div>
 

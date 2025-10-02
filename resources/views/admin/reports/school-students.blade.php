@@ -14,12 +14,12 @@
     {{-- Header Card --}}
     <div class="bg-[#136e67] rounded-2xl shadow-lg px-8 py-5 mb-8 border-b-4 border-white flex items-center justify-between">
         <h2 class="text-3xl font-bold text-white">Laporan Siswa Sekolah</h2>
-        <button onclick="window.print()" class="bg-white text-[#136e67] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+        <a href="{{ route('sekolah.reports.students.export') }}" class="bg-white text-[#136e67] px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            Cetak
-        </button>
+            Cetak Excel
+        </a>
     </div>
 
     {{-- Summary Cards --}}
@@ -42,7 +42,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-300">Aktif</p>
-                    <p class="text-2xl font-bold">{{ $students->where('student_status', 'Aktif')->count() }}</p>
+                    <p class="text-2xl font-bold">{{ $students->where('status_siswa', 'aktif')->count() }}</p>
                 </div>
                 <div class="bg-green-500 p-3 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-300">Tamat</p>
-                    <p class="text-2xl font-bold">{{ $students->where('student_status', 'Tamat')->count() }}</p>
+                    <p class="text-2xl font-bold">{{ $students->where('status_siswa', 'tamat')->count() }}</p>
                 </div>
                 <div class="bg-yellow-500 p-3 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-300">Pindah</p>
-                    <p class="text-2xl font-bold">{{ $students->where('student_status', 'Pindah')->count() }}</p>
+                    <p class="text-2xl font-bold">{{ $students->where('status_siswa', 'pindah')->count() }}</p>
                 </div>
                 <div class="bg-red-500 p-3 rounded-full">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,20 +105,20 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $student->full_name }}</div>
-                            <div class="text-sm text-gray-500">{{ $student->place_of_birth }}, {{ $student->date_of_birth }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ $student->nama_lengkap }}</div>
+                            <div class="text-sm text-gray-500">{{ $student->tempat_lahir }}, {{ $student->tanggal_lahir->format('d/m/Y') }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->nisn }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->grade_level }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->rombel }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                @if($student->student_status == 'Aktif') bg-green-100 text-green-800
-                                @elseif($student->student_status == 'Tamat') bg-yellow-100 text-yellow-800
+                                @if($student->status_siswa == 'aktif') bg-green-100 text-green-800
+                                @elseif($student->status_siswa == 'tamat') bg-yellow-100 text-yellow-800
                                 @else bg-red-100 text-red-800 @endif">
-                                {{ $student->student_status }}
+                                {{ ucfirst($student->status_siswa) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->gender }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->jenis_kelamin_label }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student->id) : route('dinas.students.show', $student->id) }}" class="text-indigo-600 hover:text-indigo-900">
                                 Detail

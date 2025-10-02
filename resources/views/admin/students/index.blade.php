@@ -18,7 +18,7 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Siswa</h2>
-                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('dinas.students.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form id="filtersForm" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.index') : route('dinas.students.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Sekolah</label>
                         <div class="relative">
@@ -36,13 +36,18 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Kelas</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Rombel</label>
                         <div class="relative">
-                            <select name="grade_level" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
-                                <option value="">Semua Kelas</option>
-                                <option value="X" {{ request('grade_level') == 'X' ? 'selected' : '' }}>Kelas X</option>
-                                <option value="XI" {{ request('grade_level') == 'XI' ? 'selected' : '' }}>Kelas XI</option>
-                                <option value="XII" {{ request('grade_level') == 'XII' ? 'selected' : '' }}>Kelas XII</option>
+                            <select name="rombel" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                                <option value="">Semua Rombel</option>
+                                <option value="6A" {{ request('rombel') == '6A' ? 'selected' : '' }}>6A</option>
+                                <option value="6B" {{ request('rombel') == '6B' ? 'selected' : '' }}>6B</option>
+                                <option value="6C" {{ request('rombel') == '6C' ? 'selected' : '' }}>6C</option>
+                                <option value="9A" {{ request('rombel') == '9A' ? 'selected' : '' }}>9A</option>
+                                <option value="9B" {{ request('rombel') == '9B' ? 'selected' : '' }}>9B</option>
+                                <option value="9C" {{ request('rombel') == '9C' ? 'selected' : '' }}>9C</option>
+                                <option value="12 IPA 1" {{ request('rombel') == '12 IPA 1' ? 'selected' : '' }}>12 IPA 1</option>
+                                <option value="12 IPA 2" {{ request('rombel') == '12 IPA 2' ? 'selected' : '' }}>12 IPA 2</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,10 +59,11 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
                         <div class="relative">
-                            <select name="student_status" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                            <select name="status_siswa" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                                 <option value="">Semua Status</option>
-                                <option value="Aktif" {{ request('student_status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="Tamat" {{ request('student_status') == 'Tamat' ? 'selected' : '' }}>Tamat</option>
+                                <option value="aktif" {{ request('status_siswa') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="tamat" {{ request('status_siswa') == 'tamat' ? 'selected' : '' }}>Tamat</option>
+                                <option value="pindah" {{ request('status_siswa') == 'pindah' ? 'selected' : '' }}>Pindah</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,14 +75,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">&nbsp;</label>
                         <div class="relative">
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NISN..." class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
-                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                                <button type="submit" class="text-gray-700 hover:text-gray-900">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NISN, atau NIPD..." class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                         </div>
                     </div>
                 </form>
@@ -151,23 +150,19 @@
                 @else
                     @php
                         $rows = $students->map(function($student){
-                            $classAndMajor = $student->grade_level
-                                ? ($student->major
-                                    ? $student->grade_level . ' ' . $student->major
-                                    : $student->grade_level)
-                                : ($student->major ?? '-');
-
                             return [
-                                $student->full_name,
                                 $student->nisn,
+                                $student->nama_lengkap,
+                                $student->jenis_kelamin_label,
+                                $student->rombel,
+                                $student->status_siswa_label,
                                 $student->school->name ?? '-',
-                                $classAndMajor,
                                 '<a href="'.(auth()->user()->hasRole('admin_sekolah') ? route('sekolah.students.show', $student->id) : route('dinas.students.show', $student->id)).'" class="text-green-300 hover:underline">Lihat detail</a>'
                             ];
                         });
                     @endphp
                     <div class="bg-[#09443c] rounded-xl shadow-lg px-0 py-8">
-                        <x-public.data-table :headers="['Nama','NISN','Asal Sekolah','Kelas/Jurusan','Aksi']" :rows="$rows" />
+                        <x-public.data-table :headers="['NISN','Nama Lengkap','Jenis Kelamin','Rombel','Status','Sekolah','Aksi']" :rows="$rows" />
                     </div>
                 @endif
 
@@ -221,4 +216,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function(){
+            const form = document.getElementById('filtersForm');
+            if (!form) return;
+            const selects = form.querySelectorAll('select');
+            const inputs = form.querySelectorAll('input[type="text"]');
+            let t;
+            const debounce = (fn, delay) => {
+                clearTimeout(t);
+                t = setTimeout(fn, delay);
+            };
+            selects.forEach(el => el.addEventListener('change', () => form.submit()));
+            inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
+        })();
+    </script>
 @endsection

@@ -11,30 +11,62 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id',
-        'full_name',
+        // ==== W A J I B ====
         'nisn',
-        'nis',
-        'birth_place',
-        'birth_date',
-        'gender',
-        'religion',
-        'grade_level',
-        'parent_name',
-        'major',
-        'achievements',
-        'student_status',
-        'graduation_status',
-        'academic_year'
+        'nipd',
+        'nama_lengkap',
+        'jenis_kelamin',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'agama',
+        'rombel',
+        'sekolah_id',
+        'foto',
+
+        // ==== O P S I O N A L ====
+        // Domisili
+        'alamat',
+        'kelurahan',
+        'kecamatan',
+        'kode_pos',
+
+        // Status
+        'status_siswa',
+
+        // Data keluarga
+        'nama_ayah',
+        'pekerjaan_ayah',
+        'nama_ibu',
+        'pekerjaan_ibu',
+        'anak_ke',
+        'jumlah_saudara',
+
+        // Kontak
+        'no_hp',
+
+        // Sosial-ekonomi
+        'kip',
+        'transportasi',
+        'jarak_rumah_sekolah',
+
+        // Kesehatan
+        'tinggi_badan',
+        'berat_badan',
     ];
 
     protected $casts = [
-        'birth_date' => 'date'
+        'tanggal_lahir' => 'date',
+        'kip' => 'boolean',
+        'anak_ke' => 'integer',
+        'jumlah_saudara' => 'integer',
+        'tinggi_badan' => 'integer',
+        'berat_badan' => 'integer',
+        'jarak_rumah_sekolah' => 'decimal:2',
     ];
 
     public function school()
     {
-        return $this->belongsTo(School::class);
+        return $this->belongsTo(School::class, 'sekolah_id');
     }
 
     public function reports()
@@ -51,20 +83,30 @@ class Student extends Model
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
-            $q->where('full_name', 'like', '%' . $search . '%')
+            $q->where('nama_lengkap', 'like', '%' . $search . '%')
                 ->orWhere('nisn', 'like', '%' . $search . '%')
-                ->orWhere('nis', 'like', '%' . $search . '%');
+                ->orWhere('nipd', 'like', '%' . $search . '%');
         });
     }
 
     public function scopeActive($query)
     {
-        return $query->where('student_status', 'Aktif');
+        return $query->where('status_siswa', 'aktif');
     }
 
     public function scopeBySchool($query, $schoolId)
     {
-        return $query->where('school_id', $schoolId);
+        return $query->where('sekolah_id', $schoolId);
+    }
+
+    public function scopeByRombel($query, $rombel)
+    {
+        return $query->where('rombel', $rombel);
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status_siswa', $status);
     }
 
     /**
@@ -72,10 +114,34 @@ class Student extends Model
      */
     public function getAgeAttribute()
     {
-        if (!$this->birth_date) {
+        if (!$this->tanggal_lahir) {
             return null;
         }
 
-        return $this->birth_date->age;
+        return $this->tanggal_lahir->age;
+    }
+
+    /**
+     * Get gender label
+     */
+    public function getJenisKelaminLabelAttribute()
+    {
+        return $this->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan';
+    }
+
+    /**
+     * Get status label
+     */
+    public function getStatusSiswaLabelAttribute()
+    {
+        return ucfirst($this->status_siswa);
+    }
+
+    /**
+     * Get KIP status label
+     */
+    public function getKipLabelAttribute()
+    {
+        return $this->kip ? 'Ya' : 'Tidak';
     }
 }

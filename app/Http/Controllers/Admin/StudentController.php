@@ -20,7 +20,7 @@ class StudentController extends Controller
         $query = Student::query();
 
         if ($user->hasRole('admin_sekolah')) {
-            $query->where('school_id', $user->school_id);
+            $query->where('sekolah_id', $user->school_id);
         }
 
         return $query;
@@ -32,30 +32,33 @@ class StudentController extends Controller
 
         // Filter by school
         if ($request->filled('school_id')) {
-            $query->where('school_id', $request->school_id);
+            $query->where('sekolah_id', $request->school_id);
         }
 
-        // Filter by grade level
-        if ($request->filled('grade_level')) {
-            $query->where('grade_level', $request->grade_level);
+        // Filter by rombel
+        if ($request->filled('rombel')) {
+            $query->where('rombel', $request->rombel);
         }
 
         // Filter by student status
-        if ($request->filled('student_status')) {
-            $query->where('student_status', $request->student_status);
+        if ($request->filled('status_siswa')) {
+            $query->where('status_siswa', $request->status_siswa);
         }
 
         // Search
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%");
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('nipd', 'like', "%{$search}%");
             });
         }
 
-        $students = $query->with('school')->latest()->paginate(10);
-        $schools = \App\Models\School::all();
+        $students = $query->with('school')->latest()->paginate(15)->withQueryString();
+        $schools = Auth::user()->hasRole('admin_sekolah')
+            ? \App\Models\School::where('id', Auth::user()->school_id)->get()
+            : \App\Models\School::all();
 
         return view('admin.students.index', compact('students', 'schools'));
     }
@@ -70,21 +73,40 @@ class StudentController extends Controller
     {
         $user = Auth::user();
         $data = $request->validate([
-            'full_name' => 'required|string|max:255',
+            // ==== W A J I B ====
             'nisn' => 'required|string|max:20|unique:students,nisn',
-            'gender' => 'required|in:Laki-laki,Perempuan',
-            'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'religion' => 'nullable|string|max:50',
-            'parent_name' => 'nullable|string|max:255',
-            'grade_level' => 'required|string|max:20',
-            'student_status' => 'required|in:Aktif,Tamat',
-            'academic_year' => 'required|string|max:20',
-            'school_id' => 'required_if:auth()->user()->hasRole("admin_dinas"),exists:schools,id',
+            'nama_lengkap' => 'required|string|max:150',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tempat_lahir' => 'required|string|max:100',
+            'tanggal_lahir' => 'required|date',
+            'agama' => 'required|string|max:50',
+            'rombel' => 'required|string|max:50',
+            'sekolah_id' => 'required|exists:schools,id',
+
+            // ==== O P S I O N A L ====
+            'nipd' => 'nullable|string|max:20',
+            'foto' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'kelurahan' => 'nullable|string|max:100',
+            'kecamatan' => 'nullable|string|max:100',
+            'kode_pos' => 'nullable|string|max:10',
+            'status_siswa' => 'nullable|in:aktif,tamat,pindah',
+            'nama_ayah' => 'nullable|string|max:150',
+            'pekerjaan_ayah' => 'nullable|string|max:100',
+            'nama_ibu' => 'nullable|string|max:150',
+            'pekerjaan_ibu' => 'nullable|string|max:100',
+            'anak_ke' => 'nullable|integer|min:1|max:20',
+            'jumlah_saudara' => 'nullable|integer|min:0|max:20',
+            'no_hp' => 'nullable|string|max:20',
+            'kip' => 'nullable|boolean',
+            'transportasi' => 'nullable|string|max:50',
+            'jarak_rumah_sekolah' => 'nullable|numeric|min:0|max:999.99',
+            'tinggi_badan' => 'nullable|integer|min:50|max:250',
+            'berat_badan' => 'nullable|integer|min:10|max:200',
         ]);
 
         if ($user->hasRole('admin_sekolah')) {
-            $data['school_id'] = $user->school_id;
+            $data['sekolah_id'] = $user->school_id;
         }
 
         $student = Student::create($data);
@@ -111,24 +133,40 @@ class StudentController extends Controller
         $this->authorizeAccess($student);
 
         $data = $request->validate([
-            'full_name' => 'sometimes|required|string|max:255',
-            'nisn' => 'sometimes|required|string|max:20|unique:students,nisn,' . $student->id,
-            'gender' => 'sometimes|required|in:Laki-laki,Perempuan',
-            'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'religion' => 'nullable|string|max:50',
-            'parent_name' => 'nullable|string|max:255',
-            'grade_level' => 'sometimes|required|string|max:20',
-            'student_status' => 'sometimes|required|in:Aktif,Tamat',
-            'academic_year' => 'sometimes|required|string|max:20',
-            'major' => 'nullable|string|max:100',
-            'achievements' => 'nullable|string',
-            'graduation_status' => 'nullable|in:Belum Lulus,Lulus,Tidak Lulus',
-            'school_id' => 'sometimes|required_if:auth()->user()->hasRole("admin_dinas"),exists:schools,id',
+            // ==== W A J I B ====
+            'nisn' => 'required|string|max:20|unique:students,nisn,' . $student->id,
+            'nama_lengkap' => 'required|string|max:150',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tempat_lahir' => 'required|string|max:100',
+            'tanggal_lahir' => 'required|date',
+            'agama' => 'required|string|max:50',
+            'rombel' => 'required|string|max:50',
+            'sekolah_id' => 'required|exists:schools,id',
+
+            // ==== O P S I O N A L ====
+            'nipd' => 'nullable|string|max:20',
+            'foto' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'kelurahan' => 'nullable|string|max:100',
+            'kecamatan' => 'nullable|string|max:100',
+            'kode_pos' => 'nullable|string|max:10',
+            'status_siswa' => 'nullable|in:aktif,tamat,pindah',
+            'nama_ayah' => 'nullable|string|max:150',
+            'pekerjaan_ayah' => 'nullable|string|max:100',
+            'nama_ibu' => 'nullable|string|max:150',
+            'pekerjaan_ibu' => 'nullable|string|max:100',
+            'anak_ke' => 'nullable|integer|min:1|max:20',
+            'jumlah_saudara' => 'nullable|integer|min:0|max:20',
+            'no_hp' => 'nullable|string|max:20',
+            'kip' => 'nullable|boolean',
+            'transportasi' => 'nullable|string|max:50',
+            'jarak_rumah_sekolah' => 'nullable|numeric|min:0|max:999.99',
+            'tinggi_badan' => 'nullable|integer|min:50|max:250',
+            'berat_badan' => 'nullable|integer|min:10|max:200',
         ]);
 
         if (Auth::user()->hasRole('admin_sekolah')) {
-            $data['school_id'] = Auth::user()->school_id;
+            $data['sekolah_id'] = Auth::user()->school_id;
         }
 
         $student->update($data);
@@ -172,7 +210,7 @@ class StudentController extends Controller
         // Simpan data ijazah
         $certificate = StudentCertificate::create([
             'student_id' => $student->id,
-            'student_name' => $student->full_name,
+            'student_name' => $student->nama_lengkap,
             'graduation_date' => $request->graduation_date,
             'graduation_status' => $request->graduation_status,
             'certificate_file' => $filePath,
@@ -181,8 +219,7 @@ class StudentController extends Controller
 
         // Update status siswa
         $student->update([
-            'student_status' => $request->graduation_status === 'Lulus' ? 'Tamat' : $student->student_status,
-            'graduation_status' => $request->graduation_status,
+            'status_siswa' => $request->graduation_status === 'Lulus' ? 'tamat' : $student->status_siswa,
         ]);
 
         return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.students.show' : 'dinas.students.show', $student)
@@ -225,15 +262,49 @@ class StudentController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $importService = new StudentImportService();
-        $results = $importService->processExcel($request->file('file'));
+        try {
+            \Log::info('[STUDENT_IMPORT] Import dimulai', [
+                'user_id' => auth()->id(),
+                'user_email' => auth()->user()->email,
+                'file_name' => $request->file('file')->getClientOriginalName(),
+                'file_size' => $request->file('file')->getSize(),
+            ]);
 
-        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+            $import = new \App\Imports\StudentImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'), null, \Maatwebsite\Excel\Excel::XLSX, [
+                'validate' => false
+            ]);
+            $results = $import->getResults();
 
-        return redirect()->back()
-            ->with('success', $message)
-            ->with('import_errors', $results['errors'])
-            ->with('import_warnings', $results['warnings']);
+            \Log::info('[STUDENT_IMPORT] Import selesai', [
+                'user_id' => auth()->id(),
+                'success_count' => $results['success'],
+                'failed_count' => $results['failed'],
+                'errors' => $results['errors'],
+                'warnings' => $results['warnings'],
+            ]);
+
+            $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+            if ($results['failed'] > 0) {
+                $message .= " Silakan periksa error di bawah ini.";
+            }
+
+            return redirect()->back()
+                ->with('success', $message)
+                ->with('import_errors', $results['errors'])
+                ->with('import_warnings', $results['warnings'])
+                ->with('import_results', $results);
+        } catch (\Exception $e) {
+            \Log::error('[STUDENT_IMPORT] Import gagal', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -251,7 +322,7 @@ class StudentController extends Controller
     private function authorizeAccess(Student $student)
     {
         $user = Auth::user();
-        if ($user->hasRole('admin_sekolah') && $student->school_id !== $user->school_id) {
+        if ($user->hasRole('admin_sekolah') && $student->sekolah_id !== $user->school_id) {
             abort(404);
         }
     }

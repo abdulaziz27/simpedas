@@ -30,20 +30,17 @@
         @else
             @php
                 $rows = $students->map(function($s){
-                    $kelasJurusan = $s->grade_level
-                        ? ($s->major ? ($s->grade_level.' / '.$s->major) : $s->grade_level)
-                        : ($s->major ?? '-');
                     return [
-                        $s->full_name,
+                        $s->nama_lengkap,
                         $s->nisn,
                         $s->school->name ?? '-',
-                        $kelasJurusan,
+                        $s->rombel,
                         '<a href="'.route('public.detail-siswa',$s->id).'" class="text-green-300 hover:underline">Lihat detail</a>'
                     ];
                 });
             @endphp
             <div class="bg-[#09443c] rounded-2xl shadow-lg px-0 py-8">
-                <x-public.data-table :headers="['Nama','NISN','Asal Sekolah','Kelas/Jurusan','Aksi']" :rows="$rows" />
+                <x-public.data-table :headers="['Nama','NISN','Asal Sekolah','Rombel','Aksi']" :rows="$rows" />
                 @if($students->hasPages())
                 <div class="px-8 pt-4">
                     {{ $students->links() }}

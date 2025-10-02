@@ -8,7 +8,7 @@
         <span class="mx-2">&gt;</span>
         <a href="{{ route('public.search-siswa') }}" class="font-semibold hover:underline">Cari Data Siswa</a>
         <span class="mx-2">&gt;</span>
-        <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Siswa / {{ strtoupper($student->full_name) }}</span>
+        <span class="text-green-300 border-b-2 border-green-300 pb-1">Detail Siswa / {{ strtoupper($student->nama_lengkap) }}</span>
     </nav>
     {{-- Header Card --}}
     <div class="bg-[#136e67] rounded-2xl shadow-lg px-8 py-5 mb-8 border-b-4 border-white flex items-center print:bg-white print:text-black">
@@ -20,15 +20,19 @@
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8 pb-8 border-b border-gray-700 print:border-gray-300">
             <div class="flex-shrink-0">
                 <div class="h-44 w-44 bg-gray-300 flex items-center justify-center border-4 border-gray-200 rounded-xl">
-                    <svg class="h-20 w-20 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-                    </svg>
+                    @if($student->foto)
+                        <img src="{{ asset('storage/' . $student->foto) }}" alt="Foto {{ $student->nama_lengkap }}" class="h-full w-full object-cover rounded-xl">
+                    @else
+                        <svg class="h-20 w-20 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+                        </svg>
+                    @endif
                 </div>
             </div>
-            <div class="text-center md:text-left">
-                <h3 class="text-2xl font-bold text-white print:text-black">{{ $student->full_name }}</h3>
-                <p class="text-green-300 text-lg print:text-green-800">{{ $student->school->name ?? '-' }}</p>
-                <p class="text-white print:text-gray-700">NISN: {{ $student->nisn }}</p>
+            <div class="text-center md:text-left flex-1">
+                <h3 class="text-3xl font-bold text-white print:text-black mb-2">{{ $student->nama_lengkap }}</h3>
+                <p class="text-green-300 text-xl print:text-green-800 mb-2">{{ $student->school->name ?? '-' }}</p>
+                <p class="text-white text-lg print:text-gray-700">NISN: {{ $student->nisn }}</p>
             </div>
         </div>
 
@@ -36,38 +40,53 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div>
                 <p class="text-sm text-gray-400 print:text-gray-600">Tempat, Tanggal Lahir</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ strtoupper($student->birth_place) }}, {{ $student->birth_date->translatedFormat('d - F - Y') }}</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ strtoupper($student->tempat_lahir) }}, {{ $student->tanggal_lahir->translatedFormat('d - F - Y') }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Umur</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->age ?? '-' }} tahun</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Jenis Kelamin</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->gender }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">NIS</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->nis ?? '-' }}</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->jenis_kelamin_label }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Agama</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->religion ?? '-' }}</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->agama ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Nama Orang Tua</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->parent_name ?? '-' }}</p>
+                @if($student->nipd)
+                <p class="text-sm text-gray-400 print:text-gray-600">NIPD</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->nipd }}</p>
+                @endif
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Rombel</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->rombel }}</p>
+
+                @if($student->nama_ayah)
+                <p class="text-sm text-gray-400 print:text-gray-600">Nama Ayah</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->nama_ayah }}</p>
+                @endif
+
+                @if($student->nama_ibu)
+                <p class="text-sm text-gray-400 print:text-gray-600">Nama Ibu</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->nama_ibu }}</p>
+                @endif
             </div>
             <div>
-                <p class="text-sm text-gray-400 print:text-gray-600">Kelas/Jurusan/Tingkat</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->grade_level }}{{ $student->major ? ', '.$student->major : '' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Status Siswa</p>
+                <p class="font-bold text-green-300 text-lg mb-4 print:text-green-800">{{ $student->status_siswa_label }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Status Kelulusan</p>
-                <p class="font-bold text-green-300 text-lg mb-4 print:text-green-800">{{ $student->student_status }} - {{ $student->academic_year }}</p>
+                @if($student->alamat)
+                <p class="text-sm text-gray-400 print:text-gray-600">Alamat</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->alamat }}</p>
+                @endif
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Status Kelulusan Detil</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->graduation_status ?: '-' }}</p>
+                @if($student->kelurahan || $student->kecamatan)
+                <p class="text-sm text-gray-400 print:text-gray-600">Kelurahan/Kecamatan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->kelurahan }}, {{ $student->kecamatan }}</p>
+                @endif
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Prestasi</p>
-                <p class="font-bold text-white text-lg mb-2 print:text-black">{{ $student->achievements ?: '-' }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Nama Orang Tua</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->parent_name ?? '-' }}</p>
+                @if($student->no_hp)
+                <p class="text-sm text-gray-400 print:text-gray-600">No. HP</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $student->no_hp }}</p>
+                @endif
 
                 {{-- Admin Action Buttons - Only visible for admin_dinas --}}
                 @auth

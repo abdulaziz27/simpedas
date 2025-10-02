@@ -66,7 +66,7 @@
             {{-- Filter Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6 mb-8">
                 <h2 class="text-2xl font-bold text-white mb-6">Filter Sekolah</h2>
-                <form action="{{ route('dinas.schools.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form id="filtersForm" action="{{ route('dinas.schools.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {{-- Form Filters --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Jenjang Pendidikan</label>
@@ -154,7 +154,7 @@
                             <div class="flex items-center mb-4">
                                 <div class="w-16 h-16 rounded-full mr-4 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                     @if($school->logo)
-                                        <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="w-full h-full object-cover">
+                                        <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="w-16 h-16 object-cover">
                                     @else
                                         <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                                             <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
@@ -215,12 +215,12 @@
         </div>
         {{-- Import Modal --}}
     <div id="import-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="flex items-start justify-center min-h-screen pt-16 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="document.getElementById('import-modal').classList.add('hidden')"></div>
 
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <span class="hidden sm:inline-block sm:align-top sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div class="inline-block align-top bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-top sm:max-w-lg sm:w-full sm:p-6">
                 {{-- Hapus pesan error/success di dalam modal, hanya tampilkan di atas manajemen data sekolah --}}
                 <form action="{{ route('dinas.schools.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -241,18 +241,7 @@
                                         Download template Excel
                                     </a>
                                 </div>
-                                <div class="mt-3 text-xs text-gray-500">
-                                    <p class="font-semibold">Petunjuk Import:</p>
-                                    <ul class="list-disc pl-5 space-y-1 mt-1">
-                                        <li>Kolom ACTION: CREATE, UPDATE, atau DELETE</li>
-                                        <li>Kolom ID: Diisi untuk UPDATE/DELETE</li>
-                                        <li>Kolom NPSN: Wajib dan unik</li>
-                                        <li>Kolom NAME: Wajib, min 3 karakter</li>
-                                        <li>Kolom EDUCATION_LEVEL: TK, SD, SMP, SMA, SMK</li>
-                                        <li>Kolom STATUS: Negeri atau Swasta</li>
-                                        <li>Kolom ADDRESS: Wajib, min 10 karakter</li>
-                                    </ul>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -269,5 +258,19 @@
         </div>
         </div>
     </div>
-
+    <script>
+        (function(){
+            const form = document.getElementById('filtersForm');
+            if (!form) return;
+            const selects = form.querySelectorAll('select');
+            const inputs = form.querySelectorAll('input[type="text"]');
+            let t;
+            const debounce = (fn, delay) => {
+                clearTimeout(t);
+                t = setTimeout(fn, delay);
+            };
+            selects.forEach(el => el.addEventListener('change', () => form.submit()));
+            inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
+        })();
+    </script>
 @endsection

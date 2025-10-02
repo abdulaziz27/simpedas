@@ -19,15 +19,15 @@ class PublicController extends Controller
                 $stats = [
                     'total_sekolah' => School::count(),
                     'total_guru' => Teacher::count(),
-                    'total_siswa_aktif' => Student::where('student_status', 'Aktif')->count(),
-                    'total_siswa_tamat' => Student::where('student_status', 'Tamat')->count(),
+                    'total_siswa_aktif' => Student::where('status_siswa', 'aktif')->count(),
+                    'total_siswa_tamat' => Student::where('status_siswa', 'tamat')->count(),
                     'total_non_teaching_staff' => NonTeachingStaff::count(),
                 ];
             } elseif (auth()->user()->hasRole('admin_sekolah') && auth()->user()->school_id) {
                 $schoolId = auth()->user()->school_id;
                 $stats = [
                     'total_guru' => Teacher::where('school_id', $schoolId)->count(),
-                    'total_siswa' => Student::where('school_id', $schoolId)->count(),
+                    'total_siswa' => Student::where('sekolah_id', $schoolId)->count(),
                     'total_non_teaching_staff' => NonTeachingStaff::where('school_id', $schoolId)->count(),
                 ];
             }
@@ -142,7 +142,7 @@ class PublicController extends Controller
     {
         switch ($type) {
             case 'siswa':
-                $query = Student::join('schools', 'students.school_id', '=', 'schools.id')
+                $query = Student::join('schools', 'students.sekolah_id', '=', 'schools.id')
                     ->select(DB::raw('schools.education_level as label'), DB::raw('count(students.id) as value'));
                 break;
             case 'guru':

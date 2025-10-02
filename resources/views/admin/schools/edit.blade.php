@@ -26,7 +26,9 @@
                         <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label>
                         @if($school->logo)
                             <div class="mt-2 mb-4">
-                                <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="h-32 w-32 object-cover rounded-lg border-2 border-gray-200">
+                                <div class="h-32 w-32 rounded-lg border-2 border-gray-200 overflow-hidden">
+                                    <img src="{{ asset('storage/' . $school->logo) }}" alt="Logo {{ $school->name }}" class="h-32 w-32 object-cover">
+                                </div>
                             </div>
                         @endif
                         <input type="file" name="logo" id="logo" accept="image/jpeg,image/png,image/jpg"
