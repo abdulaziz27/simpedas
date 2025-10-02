@@ -20,7 +20,6 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'AKSI',
             'NPSN_SEKOLAH',
             'NAMA_LENGKAP',
-            'EMAIL',
             'NUPTK',
             'NIP',
             'JENIS_KELAMIN',
@@ -35,6 +34,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'STATUS_KE_PEGAWAIAN',
             'PANGKAT',
             'JABATAN',
+            'TMT',
+            'STATUS',
+            'EMAIL',
         ];
     }
 
@@ -44,24 +46,26 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'A' => 15, // AKSI
             'B' => 15, // NPSN_SEKOLAH
             'C' => 30, // NAMA_LENGKAP
-            'D' => 30, // EMAIL
-            'E' => 15, // NUPTK
-            'F' => 15, // NIP
-            'G' => 15, // JENIS_KELAMIN
-            'H' => 20, // TEMPAT_LAHIR
-            'I' => 15, // TANGGAL_LAHIR
-            'J' => 20, // AGAMA
-            'K' => 40, // ALAMAT
-            'L' => 20, // TELEPON
-            'M' => 25, // TINGKAT_PENDIDIKAN
-            'N' => 25, // JURUSAN_PENDIDIKAN
-            'O' => 30, // MATA_PELAJARAN
-            'P' => 20, // STATUS_KE_PEGAWAIAN
-            'Q' => 20, // PANGKAT
-            'R' => 25, // JABATAN
-            'T' => 60, // PETUNJUK
-            'U' => 60,
+            'D' => 15, // NUPTK
+            'E' => 15, // NIP
+            'F' => 15, // JENIS_KELAMIN
+            'G' => 20, // TEMPAT_LAHIR
+            'H' => 15, // TANGGAL_LAHIR
+            'I' => 20, // AGAMA
+            'J' => 40, // ALAMAT
+            'K' => 20, // TELEPON
+            'L' => 25, // TINGKAT_PENDIDIKAN
+            'M' => 25, // JURUSAN_PENDIDIKAN
+            'N' => 30, // MATA_PELAJARAN
+            'O' => 20, // STATUS_KE_PEGAWAIAN
+            'P' => 20, // PANGKAT
+            'Q' => 25, // JABATAN
+            'R' => 15, // TMT
+            'S' => 15, // STATUS
+            'T' => 30, // EMAIL
+            'U' => 60, // PETUNJUK
             'V' => 60,
+            'W' => 60,
         ];
     }
 
@@ -112,9 +116,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"CREATE,UPDATE,DELETE"');
                 }
 
-                // 2. JENIS_KELAMIN (Column G) - Laki-laki, Perempuan
+                // 2. JENIS_KELAMIN (Column F) - Laki-laki, Perempuan
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('G' . $row)->getDataValidation();
+                    $validation = $sheet->getCell('F' . $row)->getDataValidation();
                     $validation->setType(DataValidation::TYPE_LIST);
                     $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                     $validation->setAllowBlank(false);
@@ -128,9 +132,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"Laki-laki,Perempuan"');
                 }
 
-                // 3. AGAMA (Column J) - Islam, Kristen, Katolik, Hindu, Buddha, Konghucu
+                // 3. AGAMA (Column I) - Islam, Kristen, Katolik, Hindu, Buddha, Konghucu
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('J' . $row)->getDataValidation();
+                    $validation = $sheet->getCell('I' . $row)->getDataValidation();
                     $validation->setType(DataValidation::TYPE_LIST);
                     $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                     $validation->setAllowBlank(false);
@@ -144,9 +148,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"Islam,Kristen,Katolik,Hindu,Buddha,Konghucu"');
                 }
 
-                // 4. STATUS_KE_PEGAWAIAN (Column P) - PNS, PPPK, GTY, PTY
+                // 4. STATUS_KE_PEGAWAIAN (Column O) - PNS, PPPK, GTY, PTY
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('P' . $row)->getDataValidation();
+                    $validation = $sheet->getCell('O' . $row)->getDataValidation();
                     $validation->setType(DataValidation::TYPE_LIST);
                     $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                     $validation->setAllowBlank(false);
@@ -160,19 +164,38 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"PNS,PPPK,GTY,PTY"');
                 }
 
+                // 5. STATUS (Column S) - Aktif, Tidak Aktif
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $validation = $sheet->getCell('S' . $row)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowInputMessage(true);
+                    $validation->setShowErrorMessage(true);
+                    $validation->setShowDropDown(true);
+                    $validation->setErrorTitle('Input error');
+                    $validation->setError('Nilai tidak valid. Pilih status aktif.');
+                    $validation->setPromptTitle('Pilih Status');
+                    $validation->setPrompt('Pilih Aktif atau Tidak Aktif');
+                    $validation->setFormula1('"Aktif,Tidak Aktif"');
+                }
+
                 // Petunjuk penggunaan di kanan
-                $startCol = 'T';
+                $startCol = 'U';
                 $row = 2;
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
                     '2. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah',
                     '3. Kolom NAMA_LENGKAP: Wajib diisi',
-                    '4. Kolom EMAIL: Wajib diisi dan valid untuk akun login guru',
-                    '5. Kolom NUPTK: Wajib diisi (unik) untuk identifikasi',
-                    '6. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan (dropdown)',
-                    '7. Kolom AGAMA: Wajib diisi dengan agama yang valid (dropdown)',
-                    '8. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian (dropdown)',
+                    '4. Kolom NUPTK: Wajib diisi (unik) untuk identifikasi',
+                    '5. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan (dropdown)',
+                    '6. Kolom TEMPAT_LAHIR: Wajib diisi',
+                    '7. Kolom TANGGAL_LAHIR: Wajib diisi (format: YYYY-MM-DD)',
+                    '8. Kolom AGAMA: Wajib diisi dengan agama yang valid (dropdown)',
+                    '9. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian (dropdown)',
+                    '10. Kolom STATUS: Wajib diisi dengan Aktif atau Tidak Aktif (dropdown)',
+                    '11. Kolom EMAIL: Opsional, untuk akun login guru',
                     '',
                     'CATATAN:',
                     '• Dropdown tersedia di semua baris (2-1000)',

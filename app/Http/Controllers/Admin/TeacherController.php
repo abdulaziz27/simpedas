@@ -232,19 +232,58 @@ class TeacherController extends Controller
      */
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-        ]);
+        try {
+            \Log::info('Teacher import started', [
+                'user_id' => Auth::id(),
+                'user_email' => Auth::user()->email,
+                'request_method' => $request->method(),
+                'has_file' => $request->hasFile('file'),
+                'file_size' => $request->hasFile('file') ? $request->file('file')->getSize() : 'no file',
+                'all_input' => $request->all()
+            ]);
 
-        $importService = new TeacherImportService();
-        $results = $importService->processExcel($request->file('file'));
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            ]);
 
-        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+            \Log::info('File validation passed', [
+                'file_name' => $request->file('file')->getClientOriginalName(),
+                'file_size' => $request->file('file')->getSize(),
+                'file_mime' => $request->file('file')->getMimeType()
+            ]);
 
-        return redirect()->back()
-            ->with('success', $message)
-            ->with('import_errors', $results['errors'])
-            ->with('import_warnings', $results['warnings']);
+            $importService = new TeacherImportService();
+            $results = $importService->processExcel($request->file('file'));
+
+            \Log::info('Import completed', $results);
+
+            $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+            return redirect()->back()
+                ->with('success', $message)
+                ->with('import_errors', $results['errors'])
+                ->with('import_warnings', $results['warnings']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Teacher import validation error: ' . $e->getMessage());
+            \Log::error('Validation errors: ' . json_encode($e->errors()));
+
+            $errorMessages = [];
+            foreach ($e->errors() as $field => $errors) {
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error;
+                }
+            }
+
+            return redirect()->back()
+                ->with('error', 'Validasi gagal: ' . implode(' | ', $errorMessages))
+                ->with('import_errors', $errorMessages);
+        } catch (\Exception $e) {
+            \Log::error('Teacher import error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
     }
 
     /**

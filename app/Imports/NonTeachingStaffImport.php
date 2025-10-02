@@ -21,11 +21,36 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
     public function collection(Collection $rows)
     {
         $user = Auth::user();
+        \Log::info('NonTeachingStaffImport: Starting collection processing', [
+            'total_rows' => $rows->count(),
+            'user_id' => $user->id
+        ]);
+
         foreach ($rows as $index => $row) {
-            if (collect($row)->filter()->isEmpty()) continue;
+            \Log::info('NonTeachingStaffImport: Processing row ' . ($index + 1), [
+                'row_data' => $row->toArray(),
+                'has_data' => !collect($row)->filter(function ($value) {
+                    return !empty(trim($value));
+                })->isEmpty()
+            ]);
+
+            // Skip baris kosong atau baris yang hanya berisi whitespace
+            if (collect($row)->filter(function ($value) {
+                return !empty(trim($value));
+            })->isEmpty()) {
+                \Log::info('NonTeachingStaffImport: Skipping empty row ' . ($index + 1));
+                continue;
+            }
+
+            // Skip baris yang tidak memiliki data penting (nama_lengkap atau nip_nik)
+            if (empty($row['nama_lengkap']) && empty($row['nip_nik'])) {
+                \Log::info('NonTeachingStaffImport: Skipping row without essential data ' . ($index + 1));
+                continue;
+            }
             // CASTING
             if (isset($row['nip_nik'])) $row['nip_nik'] = (string) $row['nip_nik'];
             if (isset($row['nuptk'])) $row['nuptk'] = (string) $row['nuptk'];
+            if (isset($row['npsn_sekolah'])) $row['npsn_sekolah'] = (string) $row['npsn_sekolah'];
             if ($user->hasRole('admin_sekolah')) {
                 $row['school_id'] = $user->school_id;
             } else {
@@ -181,7 +206,7 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
 
     protected function validateRequired($row, $index)
     {
-        $required = ['nip_nik', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'jabatan', 'status_ke_pegawaian', 'status', 'email'];
+        $required = ['nip_nik', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'jabatan', 'status_ke_pegawaian', 'status'];
         if (Auth::user()->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }
@@ -217,25 +242,132 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
         return $this->results;
     }
 
+    protected function isValidDate($dateValue)
+    {
+        if (empty($dateValue)) return true; // Allow empty dates
+
+        // Handle Excel serial number (integer)
+        if (is_numeric($dateValue)) {
+            try {
+                $excelDate = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateValue);
+                if ($excelDate) {
+                    return true;
+                }
+            } catch (\Exception $e) {
+                // If Excel conversion fails, continue with other methods
+            }
+        }
+
+        // Convert to string for other format checks
+        $dateString = trim((string) $dateValue);
+
+        // Coba berbagai format tanggal
+        $formats = [
+            'Y-m-d',           // 1985-07-10
+            'd/m/Y',           // 10/07/1985
+            'd/m/y',           // 10/07/85
+            'd-m-Y',           // 10-07-1985
+            'd-m-y',           // 10-07-85
+            'Y/m/d',           // 1985/07/10
+            'd.m.Y',           // 10.07.1985
+            'd.m.y',           // 10.07.85
+        ];
+
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $dateString);
+            if ($date !== false) {
+                return true;
+            }
+        }
+
+        // Jika semua format gagal, coba dengan strtotime sebagai fallback
+        $timestamp = strtotime($dateString);
+        if ($timestamp !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function parseDate($dateString)
+    {
+        if (empty($dateString)) return null;
+
+        // Trim whitespace
+        $dateString = trim($dateString);
+
+        // Handle Excel date conversion - jika Excel mengkonversi tanggal ke format lokal
+        // Cek apakah ini adalah format Excel (serial number atau format lokal)
+        if (is_numeric($dateString)) {
+            // Jika ini adalah serial number Excel (seperti 29584 untuk 1980-12-12)
+            $excelDate = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateString);
+            if ($excelDate) {
+                return $excelDate->format('Y-m-d');
+            }
+        }
+
+        // Coba berbagai format tanggal
+        $formats = [
+            'Y-m-d',           // 1985-07-10
+            'd/m/Y',           // 10/07/1985
+            'd/m/y',           // 10/07/85
+            'd-m-Y',           // 10-07-1985
+            'd-m-y',           // 10-07-85
+            'Y/m/d',           // 1985/07/10
+            'd.m.Y',           // 10.07.1985
+            'd.m.y',           // 10.07.85
+        ];
+
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $dateString);
+            if ($date !== false) {
+                // Jika tahun 2 digit, asumsikan 19xx untuk tahun < 50, 20xx untuk tahun >= 50
+                if (strpos($format, 'y') !== false) {
+                    $year = $date->format('Y');
+                    if ($year < 1950) {
+                        $date->add(new \DateInterval('P100Y')); // Tambah 100 tahun
+                    }
+                }
+                return $date->format('Y-m-d');
+            }
+        }
+
+        // Jika semua format gagal, coba dengan strtotime sebagai fallback
+        $timestamp = strtotime($dateString);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return null;
+    }
+
     public function rules(): array
     {
         return [
             '*.nip_nik' => ['nullable', 'max:20'],
             '*.nuptk' => ['nullable', 'max:20'],
-            '*.nama_lengkap' => ['nullable', 'string', 'max:255'],
-            '*.jenis_kelamin' => ['nullable', 'string', 'in:Laki-laki,Perempuan'],
-            '*.tempat_lahir' => ['nullable', 'string', 'max:100'],
-            '*.tanggal_lahir' => ['nullable', 'date'],
-            '*.agama' => ['nullable', 'string', 'max:50'],
-            '*.alamat' => ['nullable', 'string'],
-            '*.jabatan' => ['nullable', 'string', 'max:100'],
-            '*.tingkat_pendidikan' => ['nullable', 'string', 'max:100'],
-            '*.jurusan_pendidikan' => ['nullable', 'string', 'max:100'],
-            '*.status_ke_pegawaian' => ['nullable', 'string', 'in:PNS,PPPK,GTY,PTY'],
-            '*.pangkat' => ['nullable', 'string', 'max:50'],
-            '*.tmt' => ['nullable', 'date'],
-            '*.status' => ['nullable', 'string', 'in:Aktif,Tidak Aktif'],
-            '*.npsn_sekolah' => ['nullable', 'string'],
+            '*.nama_lengkap' => ['nullable', 'max:255'],
+            '*.jenis_kelamin' => ['nullable', 'in:Laki-laki,Perempuan'],
+            '*.tempat_lahir' => ['nullable', 'max:100'],
+            '*.tanggal_lahir' => ['nullable', function ($attribute, $value, $fail) {
+                if (!empty($value) && !$this->isValidDate($value)) {
+                    $fail('Format tanggal tidak valid: ' . $value . '. Gunakan format DD/MM/YY atau YYYY-MM-DD.');
+                }
+            }],
+            '*.agama' => ['nullable', 'max:50'],
+            '*.alamat' => ['nullable'],
+            '*.jabatan' => ['nullable', 'max:100'],
+            '*.tingkat_pendidikan' => ['nullable', 'max:100'],
+            '*.jurusan_pendidikan' => ['nullable', 'max:100'],
+            '*.status_ke_pegawaian' => ['nullable', 'in:PNS,PPPK,GTY,PTY'],
+            '*.pangkat' => ['nullable', 'max:50'],
+            '*.tmt' => ['nullable', function ($attribute, $value, $fail) {
+                if (!empty($value) && !$this->isValidDate($value)) {
+                    $fail('Format TMT tidak valid: ' . $value . '. Gunakan format DD/MM/YY atau YYYY-MM-DD.');
+                }
+            }],
+            '*.status' => ['nullable', 'in:Aktif,Tidak Aktif'],
+            '*.npsn_sekolah' => ['nullable', 'max:20'],
         ];
     }
 }

@@ -113,6 +113,15 @@
                 </div>
             @endif
 
+            {{-- Error umum --}}
+            @if(session('error'))
+                <div class="mb-6">
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong>Error:</strong> {{ session('error') }}
+                    </div>
+                </div>
+            @endif
+
             {{-- Daftar Guru Section --}}
             <div class="bg-[#0d524a] rounded-xl p-6">
                 <div class="flex justify-between items-center mb-6">
@@ -178,7 +187,7 @@
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="document.getElementById('import-modal').classList.add('hidden')"></div>
 
             <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-                <form action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.import') : route('dinas.teachers.import') }}" method="POST" enctype="multipart/form-data">
+                <form id="import-form" action="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.import') : route('dinas.teachers.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="sm:flex sm:items-start">
                         <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -215,17 +224,50 @@
 
     <script>
         (function(){
+            // Filter form handling
             const form = document.getElementById('filtersForm');
-            if (!form) return;
-            const selects = form.querySelectorAll('select');
-            const inputs = form.querySelectorAll('input[type="text"]');
-            let t;
-            const debounce = (fn, delay) => {
-                clearTimeout(t);
-                t = setTimeout(fn, delay);
-            };
-            selects.forEach(el => el.addEventListener('change', () => form.submit()));
-            inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
+            if (form) {
+                const selects = form.querySelectorAll('select');
+                const inputs = form.querySelectorAll('input[type="text"]');
+                let t;
+                const debounce = (fn, delay) => {
+                    clearTimeout(t);
+                    t = setTimeout(fn, delay);
+                };
+                selects.forEach(el => el.addEventListener('change', () => form.submit()));
+                inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
+            }
+
+            // Import form handling
+            const importForm = document.getElementById('import-form');
+            if (importForm) {
+                importForm.addEventListener('submit', function(e) {
+                    const fileInput = this.querySelector('input[type="file"]');
+                    const submitButton = this.querySelector('button[type="submit"]');
+
+                    if (!fileInput.files.length) {
+                        e.preventDefault();
+                        alert('Silakan pilih file Excel terlebih dahulu!');
+                        return;
+                    }
+
+                    // Show loading state
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = 'Mengimport...';
+                    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                    // Add loading indicator
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    loadingDiv.innerHTML = `
+                        <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <span class="text-gray-700">Sedang mengimport data...</span>
+                        </div>
+                    `;
+                    document.body.appendChild(loadingDiv);
+                });
+            }
         })();
     </script>
 @endsection
