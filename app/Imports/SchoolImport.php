@@ -322,7 +322,11 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             '*.status' => ['nullable', 'string', 'in:Negeri,Swasta'],
             '*.alamat' => ['nullable', 'string'],
             '*.telepon' => ['nullable', 'max:20'],
-            '*.email' => ['nullable', 'email'],
+            '*.email' => ['nullable', 'max:255', function ($attribute, $value, $fail) {
+                if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $fail('Format email tidak valid: ' . $value);
+                }
+            }],
             '*.kepala_sekolah' => ['nullable', 'string', 'max:255'],
         ];
     }

@@ -31,7 +31,11 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'max:255', 'unique:' . User::class, function ($attribute, $value, $fail) {
+                if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $fail('Format email tidak valid: ' . $value);
+                }
+            }],
             'phone' => ['required', 'string', 'max:20'],
             'password' => ['required', Rules\Password::defaults()],
         ]);

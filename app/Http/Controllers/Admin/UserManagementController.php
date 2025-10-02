@@ -83,7 +83,11 @@ class UserManagementController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => ['required', 'unique:users,email', function ($attribute, $value, $fail) {
+                if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $fail('Format email tidak valid: ' . $value);
+                }
+            }],
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,name',
             'school_id' => [
@@ -185,8 +189,12 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'email' => [
                 'required',
-                'email',
                 Rule::unique('users')->ignore($user->id),
+                function ($attribute, $value, $fail) {
+                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $fail('Format email tidak valid: ' . $value);
+                    }
+                }
             ],
             'role' => 'required|exists:roles,name',
             'school_id' => [
