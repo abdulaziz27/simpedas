@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Imports\SchoolImport;
 use App\Imports\UltraFastSchoolImport;
+use App\Imports\LightningFastSchoolImport;
 use App\Jobs\ProcessSchoolImportJob;
 use App\Models\ImportProgress;
 use Illuminate\Http\UploadedFile;
@@ -39,6 +40,9 @@ class OptimizedSchoolImportService
             case 'ultra_fast':
                 return $this->processUltraFast($filePath, $importId);
 
+            case 'lightning_fast':
+                return $this->processLightningFast($filePath, $importId);
+
             case 'chunked':
                 return $this->processChunked($filePath, $importId);
 
@@ -54,14 +58,14 @@ class OptimizedSchoolImportService
         $mediumFile = 5 * 1024 * 1024; // 5MB
         $largeFile = 20 * 1024 * 1024; // 20MB
 
-        if ($fileSize > $largeFile || $estimatedRows > 1000) {
-            return 'queue'; // Background processing for large files
-        } elseif ($fileSize > $mediumFile || $estimatedRows > 500) {
-            return 'ultra_fast'; // Ultra fast processing for medium files
-        } elseif ($fileSize > $smallFile || $estimatedRows > 100) {
-            return 'chunked'; // Chunked processing for small-medium files
+        if ($fileSize > $largeFile || $estimatedRows > 2000) {
+            return 'queue'; // Background processing for very large files
+        } elseif ($fileSize > $mediumFile || $estimatedRows > 1000) {
+            return 'ultra_fast'; // Ultra fast for large files
+        } elseif ($estimatedRows > 50) {
+            return 'lightning_fast'; // Lightning fast for most files (DEFAULT!)
         } else {
-            return 'standard'; // Standard processing for small files
+            return 'chunked'; // Chunked for very small files
         }
     }
 
@@ -104,6 +108,30 @@ class OptimizedSchoolImportService
 
         $results = $import->getResults();
         $results['strategy'] = 'ultra_fast';
+        $results['total'] = $results['success'] + $results['failed'];
+        $results['processed'] = $results['total'];
+
+        return $results;
+    }
+
+    protected function processLightningFast($filePath, $importId)
+    {
+        Log::info('[OPTIMIZED_SERVICE] Using LIGHTNING FAST strategy - Target: < 30 seconds');
+
+        // Lightning performance settings
+        set_time_limit(120); // 2 minutes max
+        ini_set('memory_limit', '1024M'); // 1GB
+
+        $import = new LightningFastSchoolImport();
+        $import->setImportId($importId);
+
+        Excel::import($import, $filePath);
+
+        // Clean up
+        Storage::delete($filePath);
+
+        $results = $import->getResults();
+        $results['strategy'] = 'lightning_fast';
         $results['total'] = $results['success'] + $results['failed'];
         $results['processed'] = $results['total'];
 
