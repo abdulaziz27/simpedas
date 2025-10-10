@@ -167,12 +167,12 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
 
                 if (!empty($finalUserInserts)) {
                     DB::table('users')->insert($finalUserInserts);
-                    
+
                     // Assign staff role if exists
                     $newUsers = DB::table('users')
                         ->whereIn('email', array_column($finalUserInserts, 'email'))
                         ->pluck('id');
-                    
+
                     $roleId = DB::table('roles')->where('name', 'staff')->value('id');
                     if ($roleId) {
                         $roleAssignments = [];
@@ -185,7 +185,7 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
                         }
                         DB::table('model_has_roles')->insert($roleAssignments);
                     }
-                    
+
                     Log::info('[TURBO_STAFF] Bulk created users', ['count' => count($finalUserInserts)]);
                 }
             }
