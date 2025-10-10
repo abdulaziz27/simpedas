@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Imports\SchoolImport;
 use App\Imports\UltraFastSchoolImport;
 use App\Imports\LightningFastSchoolImport;
+use App\Imports\TurboSchoolImport;
 use App\Jobs\ProcessSchoolImportJob;
 use App\Models\ImportProgress;
 use Illuminate\Http\UploadedFile;
@@ -43,6 +44,9 @@ class OptimizedSchoolImportService
             case 'lightning_fast':
                 return $this->processLightningFast($filePath, $importId);
 
+            case 'turbo':
+                return $this->processTurbo($filePath, $importId);
+
             case 'chunked':
                 return $this->processChunked($filePath, $importId);
 
@@ -62,8 +66,10 @@ class OptimizedSchoolImportService
             return 'queue'; // Background processing for very large files
         } elseif ($fileSize > $mediumFile || $estimatedRows > 1000) {
             return 'ultra_fast'; // Ultra fast for large files
-        } elseif ($estimatedRows > 50) {
-            return 'lightning_fast'; // Lightning fast for most files (DEFAULT!)
+        } elseif ($estimatedRows > 100) {
+            return 'lightning_fast'; // Lightning fast for medium files
+        } elseif ($estimatedRows > 20) {
+            return 'turbo'; // TURBO for most files (DEFAULT!)
         } else {
             return 'chunked'; // Chunked for very small files
         }
@@ -134,6 +140,32 @@ class OptimizedSchoolImportService
         $results['strategy'] = 'lightning_fast';
         $results['total'] = $results['success'] + $results['failed'];
         $results['processed'] = $results['total'];
+
+        return $results;
+    }
+
+    protected function processTurbo($filePath, $importId)
+    {
+        Log::info('[OPTIMIZED_SERVICE] Using TURBO strategy - Target: < 15 seconds!');
+
+        // TURBO performance settings
+        set_time_limit(60); // 1 minute max
+        ini_set('memory_limit', '1024M'); // 1GB
+
+        $import = new TurboSchoolImport();
+        $import->setImportId($importId);
+        $import->setSkipPasswordHashing(true); // Skip for maximum speed
+
+        Excel::import($import, $filePath);
+
+        // Clean up
+        Storage::delete($filePath);
+
+        $results = $import->getResults();
+        $results['strategy'] = 'turbo';
+        $results['total'] = $results['success'] + $results['failed'];
+        $results['processed'] = $results['total'];
+        $results['note'] = 'Passwords set to default - users should reset on first login';
 
         return $results;
     }

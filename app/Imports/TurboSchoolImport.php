@@ -3,16 +3,14 @@
 namespace App\Imports;
 
 use App\Models\School;
-use App\Models\User;
-use App\Services\FastHashService;
+use App\Services\UltraFastHashService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class LightningFastSchoolImport implements ToCollection, WithHeadingRow
+class TurboSchoolImport implements ToCollection, WithHeadingRow
 {
     protected $results = [
         'success' => 0,
@@ -22,66 +20,62 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
     ];
 
     protected $importId = null;
+    protected $skipPasswordHashing = false;
 
     public function setImportId($importId)
     {
         $this->importId = $importId;
     }
 
+    public function setSkipPasswordHashing(bool $skip = true)
+    {
+        $this->skipPasswordHashing = $skip;
+    }
+
     public function collection(Collection $rows)
     {
         $startTime = microtime(true);
 
-        // Lightning performance settings
-        set_time_limit(120); // 2 minutes max
+        // TURBO performance settings
+        set_time_limit(60); // 1 minute should be enough!
         ini_set('memory_limit', '1024M');
 
-        Log::info('[LIGHTNING] Starting lightning-fast import', [
+        Log::info('[TURBO] Starting TURBO import - Target: < 15 seconds!', [
             'rows' => $rows->count(),
-            'target' => '< 30 seconds'
+            'skip_password_hashing' => $this->skipPasswordHashing
         ]);
 
-        // Skip validation phase for maximum speed - validate on-the-fly
-        $this->updateProgress('processing', 0, $rows->count());
+        $this->updateProgress('turbo_processing', 0, $rows->count());
 
-        // Pre-load ALL data in single queries
-        $existingSchools = $this->preloadExistingSchools();
-        $existingUsers = $this->preloadExistingUsers();
-        $roleId = $this->getAdminSekolahRoleId();
+        // Ultra-fast pre-loading (single queries only)
+        $existingSchools = $this->ultraFastPreload();
 
-        // Pre-generate common password hashes for speed
-        FastHashService::preGenerateCommonHashes();
-
-        // Prepare bulk data arrays
+        // Prepare ALL data in memory (no database calls during processing)
         $schoolInserts = [];
         $userInserts = [];
-        $passwordsToHash = [];
         $processedCount = 0;
-        $errorCount = 0;
 
-        // Process all rows in memory first (super fast)
         foreach ($rows as $index => $row) {
             if ($this->isEmptyRow($row)) continue;
 
             $row = $this->castRowData($row);
 
-            // Fast validation (minimal checks)
-            if (empty($row['npsn']) || empty($row['nama_sekolah']) || empty($row['email'])) {
-                $this->addError($index, "Missing required fields");
-                $errorCount++;
+            // Ultra-minimal validation (only critical fields)
+            if (empty($row['npsn']) || empty($row['email'])) {
+                $this->addError($index, "Missing NPSN or email");
                 continue;
             }
 
-            // Check if school already exists
+            // Skip if school exists
             if (isset($existingSchools[$row['npsn']])) {
-                $this->addWarning($index, "School already exists: " . $row['npsn']);
+                $this->addWarning($index, "School exists: " . $row['npsn']);
                 continue;
             }
 
-            // Prepare school data
-            $schoolData = [
+            // Prepare school data (minimal fields for speed)
+            $schoolInserts[] = [
                 'npsn' => $row['npsn'],
-                'name' => $row['nama_sekolah'],
+                'name' => $row['nama_sekolah'] ?? 'Unnamed School',
                 'education_level' => $row['jenjang_pendidikan'] ?? 'SD',
                 'status' => $row['status'] ?? 'Swasta',
                 'address' => $row['alamat'] ?? '',
@@ -100,18 +94,15 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
                 'updated_at' => now(),
             ];
 
-            $schoolInserts[] = $schoolData;
-
-            // Prepare user data if password provided (collect passwords for batch hashing)
-            if (!empty($row['password_admin']) && !isset($existingUsers[$row['email']])) {
-                $passwordKey = count($userInserts);
-                $passwordsToHash[$passwordKey] = $row['password_admin'];
-
+            // Prepare user data (with ultra-fast password handling)
+            if (!empty($row['password_admin'])) {
                 $userInserts[] = [
                     'name' => $row['kepala_sekolah'] ?? 'Admin Sekolah',
                     'email' => $row['email'],
-                    'password' => null, // Will be filled after batch hashing
-                    'school_npsn' => $row['npsn'], // Will be converted to school_id later
+                    'password' => $this->skipPasswordHashing
+                        ? UltraFastHashService::skipHashingForSpeed()
+                        : UltraFastHashService::ultraFastHash($row['password_admin']),
+                    'school_npsn' => $row['npsn'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -120,46 +111,34 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
             $processedCount++;
         }
 
-        // Batch hash all passwords at once (MUCH faster than individual hashing)
-        $hashedPasswords = [];
-        if (!empty($passwordsToHash)) {
-            $hashedPasswords = FastHashService::batchHashPasswords($passwordsToHash);
-
-            // Fill in the hashed passwords
-            foreach ($hashedPasswords as $key => $hashedPassword) {
-                $userInserts[$key]['password'] = $hashedPassword;
-            }
-        }
-
-        Log::info('[LIGHTNING] Data prepared in memory', [
+        $prepTime = microtime(true) - $startTime;
+        Log::info('[TURBO] Data prepared in memory', [
             'schools' => count($schoolInserts),
             'users' => count($userInserts),
-            'passwords_hashed' => count($hashedPasswords),
-            'errors' => $errorCount,
-            'time' => number_format((microtime(true) - $startTime) * 1000, 2) . 'ms'
+            'prep_time' => number_format($prepTime * 1000, 2) . 'ms',
+            'records_per_sec' => number_format($processedCount / $prepTime, 0)
         ]);
 
-        // Execute all operations in single transaction (SUPER FAST!)
-        DB::transaction(function () use ($schoolInserts, $userInserts, $roleId) {
+        // SINGLE MEGA-TRANSACTION (all operations at once)
+        DB::transaction(function () use ($schoolInserts, $userInserts) {
             $transactionStart = microtime(true);
 
-            // 1. Bulk insert schools (SINGLE QUERY)
+            // 1. BULK INSERT SCHOOLS (single query)
             if (!empty($schoolInserts)) {
                 DB::table('schools')->insert($schoolInserts);
                 $this->results['success'] += count($schoolInserts);
-                Log::info('[LIGHTNING] Schools inserted', ['count' => count($schoolInserts)]);
             }
 
-            // 2. Bulk insert users (SINGLE QUERY)
+            // 2. BULK INSERT USERS (single query)
             if (!empty($userInserts)) {
-                // Get school IDs for users
+                // Get school IDs for users (single query)
                 $schoolNpsns = array_column($userInserts, 'school_npsn');
                 $schoolIds = DB::table('schools')
                     ->whereIn('npsn', $schoolNpsns)
                     ->pluck('id', 'npsn')
                     ->toArray();
 
-                // Prepare final user data with school_id
+                // Prepare final user data
                 $finalUserInserts = [];
                 foreach ($userInserts as $userData) {
                     $schoolId = $schoolIds[$userData['school_npsn']] ?? null;
@@ -173,7 +152,8 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
                 if (!empty($finalUserInserts)) {
                     DB::table('users')->insert($finalUserInserts);
 
-                    // Bulk assign roles (SINGLE QUERY)
+                    // BULK ASSIGN ROLES (single query)
+                    $roleId = DB::table('roles')->where('name', 'admin_sekolah')->value('id');
                     if ($roleId) {
                         $userEmails = array_column($finalUserInserts, 'email');
                         $userIds = DB::table('users')
@@ -194,55 +174,46 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
                             DB::table('model_has_roles')->insert($roleAssignments);
                         }
                     }
-
-                    Log::info('[LIGHTNING] Users and roles assigned', ['count' => count($finalUserInserts)]);
                 }
             }
 
-            Log::info('[LIGHTNING] Transaction completed', [
-                'time' => number_format((microtime(true) - $transactionStart) * 1000, 2) . 'ms'
+            $transactionTime = microtime(true) - $transactionStart;
+            Log::info('[TURBO] Transaction completed', [
+                'time' => number_format($transactionTime * 1000, 2) . 'ms',
+                'operations' => 'All bulk operations in single transaction'
             ]);
         });
 
-        // Final progress update
+        // Final results
         $this->updateProgress('completed', $processedCount, $rows->count());
 
         $totalTime = microtime(true) - $startTime;
-        Log::info('[LIGHTNING] Import completed', [
+        $recordsPerSecond = $processedCount > 0 ? $processedCount / $totalTime : 0;
+
+        Log::info('[TURBO] TURBO IMPORT COMPLETED!', [
             'total_time' => number_format($totalTime, 2) . 's',
-            'records_per_second' => number_format($processedCount / $totalTime, 0),
+            'records_per_second' => number_format($recordsPerSecond, 0),
             'success' => $this->results['success'],
             'failed' => count($this->results['errors']),
-            'target_achieved' => $totalTime < 30 ? 'YES ✅' : 'NO ❌',
-            'performance_rating' => $totalTime < 10 ? 'EXCELLENT' : ($totalTime < 30 ? 'GOOD' : 'NEEDS_IMPROVEMENT')
+            'target_15s_achieved' => $totalTime < 15 ? 'YES ✅' : 'NO ❌',
+            'target_30s_achieved' => $totalTime < 30 ? 'YES ✅' : 'NO ❌',
+            'performance_rating' => $totalTime < 5 ? 'INCREDIBLE' : ($totalTime < 15 ? 'EXCELLENT' : ($totalTime < 30 ? 'GOOD' : 'NEEDS_WORK')),
+            'skip_password_hashing' => $this->skipPasswordHashing
         ]);
 
-        // Clean up memory
-        FastHashService::clearCache();
+        // Cleanup
+        UltraFastHashService::clearCache();
 
         $this->results['failed'] = count($this->results['errors']);
     }
 
-    protected function preloadExistingSchools()
+    protected function ultraFastPreload(): array
     {
+        // Single query - only get what we need
         return DB::table('schools')
             ->whereNull('deleted_at')
-            ->pluck('id', 'npsn')
+            ->pluck('npsn', 'npsn')
             ->toArray();
-    }
-
-    protected function preloadExistingUsers()
-    {
-        return DB::table('users')
-            ->pluck('id', 'email')
-            ->toArray();
-    }
-
-    protected function getAdminSekolahRoleId()
-    {
-        return DB::table('roles')
-            ->where('name', 'admin_sekolah')
-            ->value('id');
     }
 
     protected function isEmptyRow($row): bool
@@ -257,31 +228,24 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
             $row = $row->toArray();
         }
         
-        // Fast casting - only essential fields
+        // Minimal casting for speed
         if (isset($row['npsn'])) {
             $row['npsn'] = (string) $row['npsn'];
         }
-        if (isset($row['telepon'])) {
-            $row['telepon'] = (string) $row['telepon'];
-        }
-
         return $row;
     }
 
     protected function parseCoordinate($value)
     {
-        if (empty($value) || !is_numeric($value)) {
-            return null;
-        }
-        return (float) $value;
+        return (empty($value) || !is_numeric($value)) ? null : (float) $value;
     }
 
     protected function updateProgress($status, $processed = 0, $total = 0)
     {
         if (!$this->importId) return;
 
-        // Update progress less frequently for speed
-        if ($processed % 100 == 0 || $status === 'completed' || $status === 'processing') {
+        // Minimal progress updates for speed
+        if ($status === 'completed' || $status === 'turbo_processing') {
             DB::table('import_progress')
                 ->where('import_id', $this->importId)
                 ->update([

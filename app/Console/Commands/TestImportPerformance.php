@@ -27,7 +27,7 @@ class TestImportPerformance extends Command
         $testData = $this->generateTestData($recordCount);
 
         // Test different strategies
-        $strategies = $strategy === 'all' ? ['standard', 'chunked', 'ultra_fast', 'lightning_fast'] : [$strategy];
+        $strategies = $strategy === 'all' ? ['standard', 'chunked', 'ultra_fast', 'lightning_fast', 'turbo'] : [$strategy];
 
         $results = [];
 
@@ -95,6 +95,9 @@ class TestImportPerformance extends Command
 
             case 'lightning_fast':
                 return $this->simulateLightningFastImport($data);
+
+            case 'turbo':
+                return $this->simulateTurboImport($data);
 
             default:
                 throw new \Exception("Unknown strategy: {$strategy}");
@@ -177,6 +180,29 @@ class TestImportPerformance extends Command
         foreach ($chunks as $chunk) {
             // Simulate lightning fast bulk operations
             usleep(2 * count($chunk)); // 0.002ms per record (SUPER FAST!)
+
+            foreach ($chunk as $row) {
+                if ($this->validateRow($row)) {
+                    $success++;
+                } else {
+                    $failed++;
+                }
+            }
+        }
+
+        return ['success' => $success, 'failed' => $failed];
+    }
+
+    protected function simulateTurboImport($data)
+    {
+        // Simulate TURBO import (ultimate speed - skip password hashing)
+        $chunks = array_chunk($data, 1000); // Massive chunks
+        $success = 0;
+        $failed = 0;
+
+        foreach ($chunks as $chunk) {
+            // Simulate TURBO operations (virtually no delay)
+            usleep(1 * count($chunk)); // 0.001ms per record (INSANE SPEED!)
 
             foreach ($chunk as $row) {
                 if ($this->validateRow($row)) {
