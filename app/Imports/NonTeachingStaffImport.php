@@ -131,23 +131,29 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
 
         $staff = NonTeachingStaff::create($data);
 
-        // Auto user creation for staff if email provided (optional policy)
-        if (!empty($row['email'])) {
+        // Create user account if password provided (manual password)
+        if (!empty($row['email']) && !empty($row['password_admin'])) {
             try {
-                $randomPassword = \Illuminate\Support\Str::random(8);
                 $user = \App\Models\User::firstOrCreate(
                     ['email' => $row['email']],
                     [
                         'name' => $row['nama_lengkap'] ?? $staff->full_name,
-                        'password' => \Illuminate\Support\Facades\Hash::make($randomPassword),
+                        'password' => \Illuminate\Support\Facades\Hash::make($row['password_admin']),
                         'school_id' => $staff->school_id,
                     ]
                 );
-                // Note: no special role assigned by default; adjust if needed
+
+                // Assign staff role if available
+                if (\Spatie\Permission\Models\Role::where('name', 'staff')->exists()) {
+                    if (!$user->hasRole('staff')) {
+                        $user->assignRole('staff');
+                    }
+                }
+
                 $user->school_id = $staff->school_id;
                 $user->save();
-                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
-                $this->addWarning($index, "User staff dibuat. Reset link dikirim ke email: {$user->email}.");
+
+                $this->addWarning($index, "User staff berhasil dibuat dengan password manual.");
             } catch (\Exception $e) {
                 $this->addWarning($index, "Gagal membuat user staff: {$e->getMessage()}");
             }

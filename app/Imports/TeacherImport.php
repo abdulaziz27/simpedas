@@ -213,15 +213,14 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
 
         $teacher = Teacher::create($data);
 
-        // Auto user creation if email provided
-        if (!empty($row['email'])) {
+        // Create user account if password provided (manual password)
+        if (!empty($row['email']) && !empty($row['password_admin'])) {
             try {
-                $randomPassword = \Illuminate\Support\Str::random(8);
                 $user = \App\Models\User::firstOrCreate(
                     ['email' => $row['email']],
                     [
                         'name' => $row['nama_lengkap'] ?? $teacher->full_name,
-                        'password' => \Illuminate\Support\Facades\Hash::make($randomPassword),
+                        'password' => \Illuminate\Support\Facades\Hash::make($row['password_admin']),
                         'school_id' => $teacher->school_id,
                         'teacher_id' => $teacher->id,
                     ]
@@ -236,8 +235,7 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
                 $user->teacher_id = $teacher->id;
                 $user->save();
 
-                \Illuminate\Support\Facades\Password::sendResetLink(['email' => $user->email]);
-                $this->addWarning($index, "User guru dibuat. Reset link dikirim ke email: {$user->email}.");
+                $this->addWarning($index, "User guru berhasil dibuat dengan password manual.");
             } catch (\Exception $e) {
                 $this->addWarning($index, "Gagal membuat user guru: {$e->getMessage()}");
             }

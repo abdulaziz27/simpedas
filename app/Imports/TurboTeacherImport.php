@@ -42,6 +42,7 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
         $teacherInserts = [];
         $teacherUpdates = [];
         $deleteNuptks = [];
+        $userInserts = [];
         $processedCount = 0;
 
         // Process all rows in memory (super fast)
@@ -74,6 +75,19 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
                     }
 
                     $teacherInserts[] = $this->prepareTeacherData($row, $schoolId);
+
+                    // Prepare user data if password provided
+                    if (!empty($row['email']) && !empty($row['password_admin'])) {
+                        $userInserts[] = [
+                            'name' => $row['nama_lengkap'],
+                            'email' => $row['email'],
+                            'password' => \Hash::make($row['password_admin']),
+                            'school_id' => $schoolId,
+                            'teacher_nuptk' => $row['nuptk'], // Link to teacher
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                     break;
 
                 case 'UPDATE':
@@ -111,7 +125,7 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
         ]);
 
         // Execute all operations in single transaction (SUPER FAST!)
-        DB::transaction(function () use ($teacherInserts, $teacherUpdates, $deleteNuptks) {
+        DB::transaction(function () use ($teacherInserts, $teacherUpdates, $deleteNuptks, $userInserts) {
             $transactionStart = microtime(true);
 
             // 1. Bulk DELETE (single query)
@@ -133,6 +147,47 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
                 $this->bulkUpdateTeachers($teacherUpdates);
                 $this->results['success'] += count($teacherUpdates);
                 Log::info('[TURBO_TEACHER] Bulk updated', ['count' => count($teacherUpdates)]);
+            }
+
+            // 4. Bulk INSERT Users (if passwords provided)
+            if (!empty($userInserts)) {
+                // Link users to teachers after teachers are created
+                $newTeachers = DB::table('teachers')
+                    ->whereIn('nuptk', array_column($teacherInserts, 'nuptk'))
+                    ->pluck('id', 'nuptk');
+
+                $finalUserInserts = [];
+                foreach ($userInserts as $user) {
+                    if (isset($newTeachers[$user['teacher_nuptk']])) {
+                        $user['teacher_id'] = $newTeachers[$user['teacher_nuptk']];
+                        unset($user['teacher_nuptk']);
+                        $finalUserInserts[] = $user;
+                    }
+                }
+
+                if (!empty($finalUserInserts)) {
+                    DB::table('users')->insert($finalUserInserts);
+
+                    // Assign guru role to all new users
+                    $newUsers = DB::table('users')
+                        ->whereIn('email', array_column($finalUserInserts, 'email'))
+                        ->pluck('id');
+
+                    $roleId = DB::table('roles')->where('name', 'guru')->value('id');
+                    if ($roleId) {
+                        $roleAssignments = [];
+                        foreach ($newUsers as $userId) {
+                            $roleAssignments[] = [
+                                'role_id' => $roleId,
+                                'model_type' => 'App\\Models\\User',
+                                'model_id' => $userId,
+                            ];
+                        }
+                        DB::table('model_has_roles')->insert($roleAssignments);
+                    }
+
+                    Log::info('[TURBO_TEACHER] Bulk created users', ['count' => count($finalUserInserts)]);
+                }
             }
 
             $transactionTime = microtime(true) - $transactionStart;

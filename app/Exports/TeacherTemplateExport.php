@@ -37,6 +37,7 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'TMT',
             'STATUS',
             'EMAIL',
+            'PASSWORD_ADMIN',
         ];
     }
 
@@ -63,7 +64,8 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'R' => 15, // TMT
             'S' => 15, // STATUS
             'T' => 30, // EMAIL
-            'U' => 60, // PETUNJUK
+            'U' => 20, // PASSWORD_ADMIN
+            'V' => 60, // PETUNJUK
             'V' => 60,
             'W' => 60,
         ];

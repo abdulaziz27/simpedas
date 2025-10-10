@@ -42,6 +42,7 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
         $staffInserts = [];
         $staffUpdates = [];
         $deleteNips = [];
+        $userInserts = [];
         $processedCount = 0;
 
         // Process all rows in memory (super fast)
@@ -74,6 +75,19 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
                     }
 
                     $staffInserts[] = $this->prepareStaffData($row, $schoolId);
+
+                    // Prepare user data if password provided
+                    if (!empty($row['email']) && !empty($row['password_admin'])) {
+                        $userInserts[] = [
+                            'name' => $row['nama_lengkap'],
+                            'email' => $row['email'],
+                            'password' => \Hash::make($row['password_admin']),
+                            'school_id' => $schoolId,
+                            'staff_nip' => $row['nip_nik'], // Link to staff
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
                     break;
 
                 case 'UPDATE':
@@ -111,7 +125,7 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
         ]);
 
         // Execute all operations in single transaction (SUPER FAST!)
-        DB::transaction(function () use ($staffInserts, $staffUpdates, $deleteNips) {
+        DB::transaction(function () use ($staffInserts, $staffUpdates, $deleteNips, $userInserts) {
             $transactionStart = microtime(true);
 
             // 1. Bulk DELETE (single query)
@@ -133,6 +147,47 @@ class TurboNonTeachingStaffImport implements ToCollection, WithHeadingRow
                 $this->bulkUpdateStaff($staffUpdates);
                 $this->results['success'] += count($staffUpdates);
                 Log::info('[TURBO_STAFF] Bulk updated', ['count' => count($staffUpdates)]);
+            }
+
+            // 4. Bulk INSERT Users (if passwords provided)
+            if (!empty($userInserts)) {
+                // Link users to staff after staff are created
+                $newStaff = DB::table('non_teaching_staff')
+                    ->whereIn('nip_nik', array_column($staffInserts, 'nip_nik'))
+                    ->pluck('id', 'nip_nik');
+
+                $finalUserInserts = [];
+                foreach ($userInserts as $user) {
+                    if (isset($newStaff[$user['staff_nip']])) {
+                        // Remove temporary link field
+                        unset($user['staff_nip']);
+                        $finalUserInserts[] = $user;
+                    }
+                }
+
+                if (!empty($finalUserInserts)) {
+                    DB::table('users')->insert($finalUserInserts);
+                    
+                    // Assign staff role if exists
+                    $newUsers = DB::table('users')
+                        ->whereIn('email', array_column($finalUserInserts, 'email'))
+                        ->pluck('id');
+                    
+                    $roleId = DB::table('roles')->where('name', 'staff')->value('id');
+                    if ($roleId) {
+                        $roleAssignments = [];
+                        foreach ($newUsers as $userId) {
+                            $roleAssignments[] = [
+                                'role_id' => $roleId,
+                                'model_type' => 'App\\Models\\User',
+                                'model_id' => $userId,
+                            ];
+                        }
+                        DB::table('model_has_roles')->insert($roleAssignments);
+                    }
+                    
+                    Log::info('[TURBO_STAFF] Bulk created users', ['count' => count($finalUserInserts)]);
+                }
             }
 
             $transactionTime = microtime(true) - $transactionStart;

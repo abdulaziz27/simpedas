@@ -34,6 +34,8 @@ class NonTeachingStaffTemplateExport implements WithHeadings, WithEvents, WithSt
             'PANGKAT',
             'TMT',
             'STATUS',
+            'EMAIL',
+            'PASSWORD_ADMIN',
         ];
     }
 
@@ -57,7 +59,9 @@ class NonTeachingStaffTemplateExport implements WithHeadings, WithEvents, WithSt
             'O' => 20, // PANGKAT
             'P' => 15, // TMT
             'Q' => 15, // STATUS
-            'S' => 60, // PETUNJUK
+            'R' => 30, // EMAIL
+            'S' => 20, // PASSWORD_ADMIN
+            'T' => 60, // PETUNJUK
             'T' => 60,
             'U' => 60,
         ];
