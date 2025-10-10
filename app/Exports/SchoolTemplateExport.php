@@ -21,8 +21,29 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
      */
     public function array(): array
     {
-        // Template kosong, hanya berisi header
-        return [];
+        // Template dengan contoh data di baris pertama
+        return [
+            [
+                'CREATE',
+                '12345678',
+                'Contoh: SD Negeri 101 Pematang Siantar',
+                'SD',
+                'Negeri',
+                'Jl. Contoh No. 123',
+                'Desa Contoh',
+                'Siantar Utara',
+                'Pematang Siantar',
+                'Sumatera Utara',
+                '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!..." width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>',
+                '2.9707',
+                '99.0674',
+                '0622-123456',
+                'sekolah@example.com',
+                'https://www.example.com',
+                'Nama Kepala Sekolah',
+                'password123',
+            ],
+        ];
     }
 
     /**
@@ -47,7 +68,8 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
             'TELEPON',
             'EMAIL',
             'WEBSITE',
-            'KEPALA_SEKOLAH'
+            'KEPALA_SEKOLAH',
+            'PASSWORD_ADMIN'
         ];
     }
 
@@ -67,16 +89,18 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
             'H' => 20, // KECAMATAN
             'I' => 20, // KABUPATEN_KOTA
             'J' => 20, // PROVINSI
-            'K' => 50, // GOOGLE_MAPS_LINK
+            'K' => 60, // GOOGLE_MAPS_LINK (lebih lebar untuk iframe code)
             'L' => 15, // LATITUDE
             'M' => 15, // LONGITUDE
             'N' => 20, // TELEPON
             'O' => 30, // EMAIL
             'P' => 30, // WEBSITE
             'Q' => 30, // KEPALA_SEKOLAH
+            'R' => 20, // PASSWORD_ADMIN
             'S' => 60, // PETUNJUK (kolom utama)
             'T' => 60, // PETUNJUK (merge, biar wrap text optimal)
             'U' => 60, // PETUNJUK (merge, biar wrap text optimal)
+            'V' => 60, // PETUNJUK (merge, biar wrap text optimal)
         ];
     }
 
@@ -171,6 +195,8 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 $row = 2; // Mulai di bawah header
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
+                    'Baris 2 adalah CONTOH data. Hapus atau edit sesuai kebutuhan.',
+                    '',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
                     '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN',
                     '3. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
@@ -178,18 +204,29 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                     '5. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta (dropdown)',
                     '6. Kolom ALAMAT: Wajib diisi',
                     '7. Kolom DESA, KECAMATAN, KABUPATEN_KOTA, PROVINSI: Opsional',
-                    '8. Kolom GOOGLE_MAPS_LINK: Opsional (iframe code dari Google Maps - akan tampil embedded)',
+                    '8. Kolom GOOGLE_MAPS_LINK: Opsional (copy full iframe code dari Google Maps - text panjang akan otomatis wrap)',
                     '9. Kolom LATITUDE, LONGITUDE: Opsional (untuk lokasi di peta)',
                     '10. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
                     '11. Kolom KEPALA_SEKOLAH: Wajib diisi',
+                    '12. Kolom PASSWORD_ADMIN: Opsional (minimal 8 karakter - akan otomatis buat akun admin sekolah)',
                     '',
-                    'CATATAN:',
+                    'PANDUAN PENAMAAN SEKOLAH:',
+                    '• TK: Taman Kanak-kanak [Nama] atau TK [Nama]',
+                    '• SD: SD [Nama] atau SD Negeri/Swasta [Nama]',
+                    '• SMP: SMP [Nama] atau SMP Negeri/Swasta [Nama]',
+                    '• KB: Kelompok Bermain [Nama] atau KB [Nama]',
+                    '• PKBM: Pusat Kegiatan Belajar Masyarakat [Nama] atau PKBM [Nama]',
+                    '• Contoh: "SD Negeri 101 Pematang Siantar", "TK Al-Hidayah", "KB Tunas Bangsa"',
+                    '',
+                    'CATATAN TEKNIS:',
                     '• Dropdown tersedia di semua baris (2-1000)',
                     '• NPSN harus unik, tidak boleh duplikat',
                     '• Format email: user@domain.com',
                     '• Format website: https://www.example.com',
                     '• Format koordinat: Latitude (-90 hingga 90), Longitude (-180 hingga 180)',
-                    '• Format Google Maps: Copy iframe code dari "Embed a map" di Google Maps',
+                    '• Format Google Maps: Copy FULL iframe code dari "Embed a map" di Google Maps',
+                    '• Password admin: Jika diisi, akan otomatis membuat akun admin sekolah dengan email yang sama',
+                    '• Kolom GOOGLE_MAPS_LINK akan otomatis wrap text untuk iframe code panjang',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
@@ -200,6 +237,18 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                 }
                 // Format wrap text untuk petunjuk
                 $sheet->getStyle('S2:V' . ($row - 1))->getAlignment()->setWrapText(true);
+
+                // Format wrap text untuk kolom GOOGLE_MAPS_LINK (Column K)
+                // Set wrap text untuk semua baris data
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $sheet->getStyle('K' . $row)->getAlignment()->setWrapText(true);
+                    $sheet->getStyle('K' . $row)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                }
+
+                // Set row height auto untuk baris data
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $sheet->getRowDimension($row)->setRowHeight(-1); // -1 = auto height
+                }
             },
         ];
     }

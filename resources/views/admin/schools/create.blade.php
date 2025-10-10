@@ -194,6 +194,32 @@
                         @error('headmaster') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- Password Admin Sekolah (Optional) --}}
+                    <div class="md:col-span-2">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-blue-800 mb-2">🔐 Buat Akun Admin Sekolah</h4>
+                            <p class="text-xs text-blue-600 mb-3">Opsional: Jika diisi, akan otomatis membuat akun admin sekolah dengan email yang sama</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="admin_password" class="block text-sm font-medium text-gray-700">Password Admin Sekolah</label>
+                                    <input type="password" name="admin_password" id="admin_password" value="{{ old('admin_password') }}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                        placeholder="Minimal 8 karakter">
+                                    {{-- <p class="mt-1 text-xs text-gray-500">Password akan diberikan via WhatsApp</p> --}}
+                                    @error('admin_password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label for="admin_password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
+                                    <input type="password" name="admin_password_confirmation" id="admin_password_confirmation" value="{{ old('admin_password_confirmation') }}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                        placeholder="Ulangi password">
+                                    @error('admin_password_confirmation') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 

@@ -67,7 +67,7 @@ class SchoolController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:3|max:255',
             'npsn' => 'required|string|max:20|unique:schools,npsn',
             'education_level' => ['required', 'string', Rule::in(array_keys(config('school.education_levels')))],
             'status' => ['required', 'string', Rule::in(array_keys(config('school.status')))],
@@ -87,14 +87,40 @@ class SchoolController extends Controller
             }],
             'website' => 'nullable|url|max:255',
             'headmaster' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'admin_password' => 'nullable|string|min:8|confirmed',
+            'admin_password_confirmation' => 'nullable|string|min:8'
         ]);
 
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('school-logos', 'public');
         }
 
-        School::create($validated);
+        // Remove password fields from school data
+        $adminPassword = $validated['admin_password'] ?? null;
+        unset($validated['admin_password'], $validated['admin_password_confirmation']);
+
+        $school = School::create($validated);
+
+        // Create admin sekolah account if password provided
+        if ($adminPassword) {
+            try {
+                $user = \App\Models\User::create([
+                    'name' => $validated['headmaster'] ?? 'Admin Sekolah',
+                    'email' => $validated['email'],
+                    'password' => \Hash::make($adminPassword),
+                    'school_id' => $school->id,
+                ]);
+                $user->assignRole('admin_sekolah');
+
+                \Log::info("Admin sekolah account created for school: {$school->name} with email: {$validated['email']}");
+            } catch (\Exception $e) {
+                \Log::error("Failed to create admin sekolah account: " . $e->getMessage());
+                return redirect()->back()
+                    ->with('warning', 'Sekolah berhasil dibuat, tetapi gagal membuat akun admin sekolah. Silakan buat manual di User Management.')
+                    ->withInput();
+            }
+        }
 
         return redirect()->route('dinas.schools.index')->with('success', 'Data sekolah berhasil ditambahkan.');
     }
@@ -125,7 +151,7 @@ class SchoolController extends Controller
     public function update(Request $request, School $school)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|min:3|max:255',
             'npsn' => ['required', 'string', 'max:20', Rule::unique('schools')->ignore($school->id)],
             'education_level' => ['required', 'string', Rule::in(array_keys(config('school.education_levels')))],
             'status' => ['required', 'string', Rule::in(array_keys(config('school.status')))],
@@ -145,7 +171,9 @@ class SchoolController extends Controller
             }],
             'website' => 'nullable|url|max:255',
             'headmaster' => 'nullable|string|max:255',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'admin_password' => 'nullable|string|min:8|confirmed',
+            'admin_password_confirmation' => 'nullable|string|min:8'
         ]);
 
         if ($request->hasFile('logo')) {
@@ -156,7 +184,36 @@ class SchoolController extends Controller
             $validated['logo'] = $request->file('logo')->store('school-logos', 'public');
         }
 
+        // Remove password fields from school data
+        $adminPassword = $validated['admin_password'] ?? null;
+        unset($validated['admin_password'], $validated['admin_password_confirmation']);
+
         $school->update($validated);
+
+        // Create or update admin sekolah account if password provided
+        if ($adminPassword) {
+            try {
+                $user = \App\Models\User::updateOrCreate(
+                    ['email' => $validated['email']],
+                    [
+                        'name' => $validated['headmaster'] ?? 'Admin Sekolah',
+                        'password' => \Hash::make($adminPassword),
+                        'school_id' => $school->id,
+                    ]
+                );
+
+                if (!$user->hasRole('admin_sekolah')) {
+                    $user->assignRole('admin_sekolah');
+                }
+
+                \Log::info("Admin sekolah account updated for school: {$school->name} with email: {$validated['email']}");
+            } catch (\Exception $e) {
+                \Log::error("Failed to update admin sekolah account: " . $e->getMessage());
+                return redirect()->back()
+                    ->with('warning', 'Sekolah berhasil diperbarui, tetapi gagal membuat/update akun admin sekolah. Silakan buat manual di User Management.')
+                    ->withInput();
+            }
+        }
 
         return redirect()->route('dinas.schools.index')->with('success', 'Data sekolah berhasil diperbarui.');
     }
@@ -187,29 +244,120 @@ class SchoolController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $importService = new SchoolImportService();
-        $results = $importService->processExcel($request->file('file'));
+        // Store import progress in database
+        $importId = 'import_' . time() . '_' . auth()->id();
+        $progress = \App\Models\ImportProgress::create([
+            'import_id' => $importId,
+            'user_id' => auth()->id(),
+            'status' => 'starting',
+            'total' => 0,
+            'processed' => 0,
+            'success' => 0,
+            'failed' => 0,
+            'errors' => [],
+            'warnings' => [],
+            'started_at' => now(),
+        ]);
 
-        $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+        try {
+            $importService = new SchoolImportService();
+            $results = $importService->processExcel($request->file('file'), $importId);
 
-        if (!empty($results['errors'])) {
-            $message .= "\n\nError: " . implode("\n", array_slice($results['errors'], 0, 5));
-            if (count($results['errors']) > 5) {
-                $message .= "\n... dan " . (count($results['errors']) - 5) . " error lainnya.";
+            // Update final progress
+            $progress->update([
+                'status' => 'completed',
+                'total' => $results['total'] ?? 0,
+                'processed' => $results['processed'] ?? 0,
+                'success' => $results['success'] ?? 0,
+                'failed' => $results['failed'] ?? 0,
+                'errors' => $results['errors'] ?? [],
+                'warnings' => $results['warnings'] ?? [],
+                'completed_at' => now(),
+            ]);
+
+            $message = "Import selesai: {$results['success']} berhasil, {$results['failed']} gagal.";
+
+            if (!empty($results['errors'])) {
+                $message .= "\n\nError: " . implode("\n", array_slice($results['errors'], 0, 5));
+                if (count($results['errors']) > 5) {
+                    $message .= "\n... dan " . (count($results['errors']) - 5) . " error lainnya.";
+                }
             }
+
+            if (!empty($results['warnings'])) {
+                $message .= "\n\nWarning: " . implode("\n", array_slice($results['warnings'], 0, 5));
+                if (count($results['warnings']) > 5) {
+                    $message .= "\n... dan " . (count($results['warnings']) - 5) . " warning lainnya.";
+                }
+            }
+
+            return redirect()->route('dinas.schools.index')
+                ->with('success', $message)
+                ->with('import_errors', $results['errors'])
+                ->with('import_warnings', $results['warnings']);
+        } catch (\Exception $e) {
+            // Update progress with error
+            $progress->update([
+                'status' => 'error',
+                'errors' => [$e->getMessage()],
+                'completed_at' => now(),
+            ]);
+
+            return redirect()->route('dinas.schools.index')
+                ->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get import progress
+     */
+    public function importProgress(Request $request)
+    {
+        // Get latest progress from database
+        $progress = \App\Models\ImportProgress::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Debug logging
+        \Log::info('[PROGRESS] Fetching progress data', [
+            'user_id' => auth()->id(),
+            'has_progress_data' => !is_null($progress),
+            'progress_id' => $progress->id ?? null,
+        ]);
+
+        if (!$progress) {
+            return response()->json([
+                'status' => 'not_started',
+                'total' => 0,
+                'processed' => 0,
+                'success' => 0,
+                'failed' => 0,
+                'errors' => [],
+                'warnings' => [],
+                'progress_percentage' => 0,
+                'elapsed_time' => 0,
+            ]);
         }
 
-        if (!empty($results['warnings'])) {
-            $message .= "\n\nWarning: " . implode("\n", array_slice($results['warnings'], 0, 5));
-            if (count($results['warnings']) > 5) {
-                $message .= "\n... dan " . (count($results['warnings']) - 5) . " warning lainnya.";
-            }
-        }
+        $response = [
+            'status' => $progress->status,
+            'total' => $progress->total,
+            'processed' => $progress->processed,
+            'success' => $progress->success,
+            'failed' => $progress->failed,
+            'errors' => $progress->errors ?? [],
+            'warnings' => $progress->warnings ?? [],
+            'progress_percentage' => $progress->progress_percentage,
+            'elapsed_time' => $progress->elapsed_time,
+        ];
 
-        return redirect()->route('dinas.schools.index')
-            ->with('success', $message)
-            ->with('import_errors', $results['errors'])
-            ->with('import_warnings', $results['warnings']);
+        \Log::info('[PROGRESS] Returning progress response', [
+            'status' => $response['status'],
+            'total' => $response['total'],
+            'processed' => $response['processed']
+        ]);
+
+        return response()->json($response);
     }
 
     /**

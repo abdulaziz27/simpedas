@@ -216,7 +216,7 @@
 
             <div class="inline-block align-top bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-top sm:max-w-lg sm:w-full sm:p-6">
                 {{-- Hapus pesan error/success di dalam modal, hanya tampilkan di atas manajemen data sekolah --}}
-                <form action="{{ route('dinas.schools.import') }}" method="POST" enctype="multipart/form-data">
+                <form id="import-form" action="{{ route('dinas.schools.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="sm:flex sm:items-start">
                         <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -240,8 +240,15 @@
                         </div>
                     </div>
                     <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Import
+                        <button type="submit" id="import-submit-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            <span id="import-btn-text">Import</span>
+                            <span id="import-btn-loading" class="hidden">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processing...
+                            </span>
                         </button>
                         <button type="button" onclick="document.getElementById('import-modal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
                             Batal
@@ -252,6 +259,51 @@
         </div>
         </div>
     </div>
+
+    {{-- Loading Overlay --}}
+    <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-gray-900 bg-opacity-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg shadow-xl p-8 max-w-md mx-4">
+                <div class="text-center">
+                    {{-- Animated Spinner --}}
+                    <div class="inline-flex items-center justify-center w-16 h-16 mb-4">
+                        <svg class="animate-spin h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+
+                    {{-- Loading Message --}}
+                    <h3 id="loading-title" class="text-xl font-semibold text-gray-900 mb-2">Memproses Import Data</h3>
+                    <p id="loading-message" class="text-gray-600 mb-4">Mohon tunggu, sedang memproses file Excel Anda...</p>
+
+                    {{-- Progress Indicator --}}
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                        <div class="bg-blue-600 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                    </div>
+
+                    {{-- Estimated Time --}}
+                    <p class="text-sm text-gray-500 mb-4">
+                        <span id="estimated-time">Estimasi waktu: 1-3 menit untuk 300+ data</span>
+                    </p>
+
+                    {{-- Warning Message --}}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="text-sm">
+                                <p class="text-yellow-800 font-medium">Jangan tutup halaman ini!</p>
+                                <p class="text-yellow-700">Proses import sedang berjalan dan akan selesai dalam beberapa menit.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function(){
             const form = document.getElementById('filtersForm');
@@ -266,5 +318,107 @@
             selects.forEach(el => el.addEventListener('change', () => form.submit()));
             inputs.forEach(el => el.addEventListener('input', () => debounce(() => form.submit(), 400)));
         })();
+
+        // Import Progress Tracking
+        let progressInterval;
+        let startTime;
+
+        document.getElementById('import-form').addEventListener('submit', function(e) {
+            // Show loading state in button
+            document.getElementById('import-btn-text').classList.add('hidden');
+            document.getElementById('import-btn-loading').classList.remove('hidden');
+            document.getElementById('import-submit-btn').disabled = true;
+
+            // Close import modal
+            document.getElementById('import-modal').classList.add('hidden');
+
+            // Show loading overlay on the page
+            showLoadingOverlay();
+
+            // Show success message after form submission
+            setTimeout(() => {
+                showLoadingMessage('Import sedang diproses...', 'Mohon tunggu, jangan tutup halaman ini.');
+            }, 500);
+        });
+
+        function showLoadingOverlay() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        function hideLoadingOverlay() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        function showLoadingMessage(title, message, timeText = null) {
+            document.getElementById('loading-title').textContent = title;
+            document.getElementById('loading-message').textContent = message;
+            if (timeText) {
+                document.getElementById('estimated-time').textContent = timeText;
+            }
+        }
+
+        // Auto-hide loading overlay after page reload (in case of success/error)
+        window.addEventListener('load', function() {
+            // Check if there are success/error messages from redirect
+            const hasMessages = document.querySelector('.bg-green-100, .bg-red-100');
+            if (hasMessages) {
+                hideLoadingOverlay();
+                // Reset import button state
+                const importBtn = document.getElementById('import-submit-btn');
+                const importBtnText = document.getElementById('import-btn-text');
+                const importBtnLoading = document.getElementById('import-btn-loading');
+
+                if (importBtn && importBtnText && importBtnLoading) {
+                    importBtn.disabled = false;
+                    importBtnText.classList.remove('hidden');
+                    importBtnLoading.classList.add('hidden');
+                }
+            }
+        });
+
+        // Show different loading messages over time to keep user engaged
+        let loadingMessageIndex = 0;
+        const loadingMessages = [
+            { title: 'Memproses Import Data', message: 'Mohon tunggu, sedang memproses file Excel Anda...', time: 'Estimasi waktu: 1-3 menit untuk 300+ data' },
+            { title: 'Memvalidasi Data', message: 'Sedang memeriksa format dan validitas data sekolah...', time: 'Fase 1: Validasi data' },
+            { title: 'Menyimpan ke Database', message: 'Sedang menyimpan data sekolah ke database...', time: 'Fase 2: Penyimpanan data' },
+            { title: 'Membuat Akun Admin', message: 'Sedang membuat akun admin sekolah otomatis...', time: 'Hampir selesai...' },
+            { title: 'Finalisasi Import', message: 'Menyelesaikan proses import dan membuat laporan...', time: 'Proses hampir selesai' },
+            { title: 'Import Berlangsung', message: 'Sistem sedang memproses data Anda dengan aman...', time: 'Mohon bersabar sebentar lagi' }
+        ];
+
+        function rotateLoadingMessages() {
+            setInterval(() => {
+                if (document.getElementById('loading-overlay').classList.contains('hidden')) {
+                    return; // Stop if overlay is hidden
+                }
+
+                loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
+                const currentMessage = loadingMessages[loadingMessageIndex];
+                showLoadingMessage(currentMessage.title, currentMessage.message, currentMessage.time);
+            }, 15000); // Change message every 15 seconds
+        }
+
+        // Start rotating messages when loading starts
+        document.getElementById('import-form').addEventListener('submit', function() {
+            setTimeout(rotateLoadingMessages, 15000); // Start after 15 seconds
+
+            // Fallback: Hide loading after 10 minutes (in case something goes wrong)
+            setTimeout(() => {
+                if (!document.getElementById('loading-overlay').classList.contains('hidden')) {
+                    hideLoadingOverlay();
+                    alert('Import membutuhkan waktu lebih lama dari biasanya. Silakan refresh halaman untuk melihat hasilnya.');
+                }
+            }, 600000); // 10 minutes
+        });
+
+        // Also hide loading overlay when user navigates back
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                hideLoadingOverlay();
+            }
+        });
     </script>
 @endsection

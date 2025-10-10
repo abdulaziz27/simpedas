@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\NonTeachingStaffController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Admin\SchoolController;
+use App\Http\Controllers\Admin\OptimizedSchoolController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,13 @@ Route::middleware('auth')->group(function () {
         Route::post('students/import', [App\Http\Controllers\Admin\StudentController::class, 'import'])->name('students.import');
         // Import and template routes for schools
         Route::post('schools/import', [SchoolController::class, 'import'])->name('schools.import');
+
+        // Optimized import routes
+        Route::get('schools/optimized-import', [OptimizedSchoolController::class, 'showImportOptions'])->name('schools.optimized-import');
+        Route::post('schools/optimized-import', [OptimizedSchoolController::class, 'import'])->name('admin.schools.optimized-import');
+
+        // Import progress tracking
+        Route::get('schools/import-progress', [SchoolController::class, 'importProgress'])->name('schools.import-progress');
         Route::get('students/template-excel', [StudentController::class, 'downloadTemplateSiswa'])->name('students.template');
         Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
         Route::get('teachers/template-excel', [TeacherController::class, 'downloadTemplateGuru'])->name('teachers.template');
