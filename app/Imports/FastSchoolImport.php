@@ -7,12 +7,11 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
+class FastSchoolImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected $results = [
         'success' => 0,
@@ -34,34 +33,31 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         set_time_limit(300); // 5 minutes
         ini_set('memory_limit', '512M');
 
-        // FASE 1: VALIDASI SEMUA DATA TERLEBIH DAHULU (tanpa menyimpan ke database)
+        // Minimal logging for performance
+        Log::info('[FAST_IMPORT] Starting import', ['total_rows' => $rows->count()]);
+
+        // FASE 1: VALIDASI SEMUA DATA TERLEBIH DAHULU
         $validatedRows = [];
         $hasErrors = false;
 
         // Update progress - starting validation
         $this->updateProgress('validating', 0, $rows->count());
 
-        // Count total rows for progress tracking
-        $totalRows = $rows->count();
-
-        \Log::info('[IMPORT] Fase 1: Validasi semua data...');
-
         // Pre-load all existing schools to avoid N+1 queries
-        $existingSchools = \App\Models\School::withTrashed()->pluck('npsn', 'npsn')->toArray();
-        $activeSchools = \App\Models\School::pluck('npsn', 'npsn')->toArray();
+        $existingSchools = School::withTrashed()->pluck('npsn', 'npsn')->toArray();
+        $activeSchools = School::pluck('npsn', 'npsn')->toArray();
 
         foreach ($rows as $index => $row) {
-            // Skip baris yang semua kolomnya kosong
             if (collect($row)->filter()->isEmpty()) {
                 continue;
             }
-            // Skip baris petunjuk/template (bukan data sekolah)
+
             $action = strtoupper($row['aksi'] ?? '');
             $validActions = ['CREATE', 'UPDATE', 'DELETE'];
             if (empty($row['npsn']) && !in_array($action, $validActions)) {
-                // Baris ini kemungkinan besar baris petunjuk, skip
                 continue;
             }
+
             // CASTING: pastikan npsn dan telepon selalu string
             if (isset($row['npsn'])) {
                 $row['npsn'] = (string) $row['npsn'];
@@ -84,7 +80,6 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 }
             } catch (\Exception $e) {
                 $this->addError($index, $e->getMessage());
-                \Log::error('[IMPORT] Exception pada baris ' . ($index + 2) . ': ' . $e->getMessage());
                 $hasErrors = true;
             }
         }
@@ -92,19 +87,16 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         // Jika ada error, jangan lanjutkan ke database
         if ($hasErrors) {
             $this->results['failed'] = count($this->results['errors']);
-            \Log::error('[IMPORT] Import dibatalkan karena ada error. Total error: ' . count($this->results['errors']));
-            \Log::error('[IMPORT] Silakan perbaiki semua error di file Excel dan upload ulang.');
+            Log::error('[FAST_IMPORT] Import dibatalkan karena ada error', ['error_count' => count($this->results['errors'])]);
             return;
         }
 
-        // FASE 2: SIMPAN KE DATABASE (hanya jika semua data valid)
-        \Log::info('[IMPORT] Fase 2: Semua data valid. Mulai menyimpan ke database...');
-        \Log::info('[IMPORT] Total data yang akan diproses: ' . count($validatedRows));
-
-        // Update progress - starting import
+        // FASE 2: SIMPAN KE DATABASE
+        Log::info('[FAST_IMPORT] Starting database operations', ['validated_rows' => count($validatedRows)]);
         $this->updateProgress('importing', 0, count($validatedRows));
 
         $processedCount = 0;
+        $userCreationCount = 0;
 
         foreach ($validatedRows as $validatedData) {
             $row = $validatedData['row'];
@@ -131,48 +123,40 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                     $this->results['failed']++;
                 }
 
-                // Update progress for every record
                 $processedCount++;
 
-                // Update progress less frequently for better performance
-                if ($processedCount % 25 == 0 || $processedCount == count($validatedRows)) {
+                // Update progress every 20 records (reduced frequency)
+                if ($processedCount % 20 == 0 || $processedCount == count($validatedRows)) {
                     $this->updateProgress('importing', $processedCount, count($validatedRows));
                 }
 
-                // Progress logging every 100 records (reduced frequency)
+                // Minimal progress logging every 100 records
                 if ($processedCount % 100 == 0) {
                     $percentage = round(($processedCount / count($validatedRows)) * 100, 1);
-                    \Log::info("[IMPORT] Progress: {$processedCount}/" . count($validatedRows) . " ({$percentage}%) - Success: {$this->results['success']}, Failed: {$this->results['failed']}");
+                    Log::info("[FAST_IMPORT] Progress: {$processedCount}/" . count($validatedRows) . " ({$percentage}%)");
                 }
             } catch (\Exception $e) {
                 $this->results['failed']++;
                 $this->addError($index, $e->getMessage());
-                \Log::error('[IMPORT] Exception saat menyimpan baris ' . ($index + 2) . ': ' . $e->getMessage());
             }
         }
 
         // Update final progress
         $this->updateProgress('completed', count($validatedRows), count($validatedRows));
 
-        // Log hasil akhir error dan warning (optimized)
-        \Log::info('[IMPORT] Selesai. Jumlah error: ' . count($this->results['errors']) . ', warning: ' . count($this->results['warnings']));
-
-        // Only log errors/warnings if there are any (avoid empty JSON)
-        if (!empty($this->results['errors'])) {
-            \Log::info('[IMPORT] Errors: ' . implode('; ', array_slice($this->results['errors'], 0, 10)) .
-                (count($this->results['errors']) > 10 ? '... dan ' . (count($this->results['errors']) - 10) . ' error lainnya' : ''));
-        }
-        if (!empty($this->results['warnings'])) {
-            \Log::info('[IMPORT] Warnings: ' . implode('; ', array_slice($this->results['warnings'], 0, 10)) .
-                (count($this->results['warnings']) > 10 ? '... dan ' . (count($this->results['warnings']) - 10) . ' warning lainnya' : ''));
-        }
+        // Minimal final logging
+        Log::info('[FAST_IMPORT] Completed', [
+            'success' => $this->results['success'],
+            'failed' => $this->results['failed'],
+            'errors_count' => count($this->results['errors']),
+            'warnings_count' => count($this->results['warnings'])
+        ]);
     }
 
     protected function updateProgress($status, $processed, $total)
     {
         if (!$this->importId) return;
 
-        // Update progress in database
         $progress = \App\Models\ImportProgress::where('import_id', $this->importId)->first();
 
         if ($progress) {
@@ -185,25 +169,11 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 'errors' => $this->results['errors'],
                 'warnings' => $this->results['warnings'],
             ]);
-
-            // Reduced logging frequency for better performance
-            if ($processed % 50 == 0 || $status === 'completed' || $status === 'error') {
-                \Log::info('[IMPORT] Progress updated', [
-                    'status' => $status,
-                    'processed' => $processed,
-                    'total' => $total,
-                    'success' => $this->results['success'],
-                    'failed' => $this->results['failed']
-                ]);
-            }
-        } else {
-            \Log::error('[IMPORT] Progress record not found for import_id: ' . $this->importId);
         }
     }
 
     protected function validateRowData($row, $index, $action, $existingSchools, $activeSchools)
     {
-        // Validasi berdasarkan aksi
         switch ($action) {
             case 'CREATE':
                 return $this->validateCreateData($row, $index, $existingSchools, $activeSchools);
@@ -219,28 +189,21 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateCreateData($row, $index, $existingSchools, $activeSchools)
     {
-        // Validasi field yang diperlukan untuk CREATE
         if (!$this->validateRequired($row, $index)) {
             return false;
         }
 
-        // Cek NPSN sudah ada atau belum (menggunakan pre-loaded data)
-        if (!empty($row['npsn'])) {
-            if (isset($activeSchools[$row['npsn']])) {
-                $this->addError($index, "NPSN sudah terdaftar.", $row);
-                return false;
-            }
+        if (!empty($row['npsn']) && isset($activeSchools[$row['npsn']])) {
+            $this->addError($index, "NPSN sudah terdaftar.");
+            return false;
         }
 
-        // Validasi panjang nama sekolah saja (tidak perlu warning spam)
         $this->validateSchoolName($row, $index);
-
         return true;
     }
 
     protected function validateUpdateData($row, $index, $existingSchools)
     {
-        // Cari sekolah berdasarkan NPSN (menggunakan pre-loaded data)
         if (empty($row['npsn'])) {
             $this->addError($index, "ERROR KRITIS: NPSN wajib diisi untuk UPDATE");
             return false;
@@ -251,33 +214,27 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             return false;
         }
 
-        // Validasi field yang diperlukan untuk update
         if (empty($row['nama_sekolah']) || empty($row['jenjang_pendidikan']) || empty($row['status']) || empty($row['alamat'])) {
             $this->addError($index, "ERROR KRITIS: Field wajib tidak lengkap untuk update");
             return false;
         }
 
-        // Validasi education level
         if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'KB', 'PKBM'])) {
             $this->addError($index, "ERROR KRITIS: Jenjang pendidikan tidak valid");
             return false;
         }
 
-        // Validasi status
         if (!in_array($row['status'], ['Negeri', 'Swasta'])) {
             $this->addError($index, "ERROR KRITIS: Status tidak valid");
             return false;
         }
 
-        // Validasi panjang nama sekolah saja (tidak perlu warning spam)
         $this->validateSchoolName($row, $index);
-
         return true;
     }
 
     protected function validateDeleteData($row, $index, $existingSchools)
     {
-        // Cari sekolah berdasarkan NPSN (menggunakan pre-loaded data)
         if (empty($row['npsn'])) {
             $this->addError($index, "ERROR KRITIS: NPSN wajib diisi untuk DELETE");
             return false;
@@ -293,76 +250,31 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function createSchool($row, $index)
     {
-        // Validasi sudah dilakukan di fase 1, langsung proses data
-
-        // Cek NPSN, restore jika soft deleted, error jika aktif, create jika tidak ada
         $existing = School::withTrashed()->where('npsn', $row['npsn'])->first();
         if ($existing) {
             if ($existing->trashed()) {
-                // Restore dan update data
                 $existing->restore();
-                $existing->update([
-                    'name' => $row['nama_sekolah'],
-                    'education_level' => $row['jenjang_pendidikan'],
-                    'status' => $row['status'],
-                    'address' => $row['alamat'],
-                    'desa' => $row['desa'] ?? null,
-                    'kecamatan' => $row['kecamatan'] ?? null,
-                    'kabupaten_kota' => $row['kabupaten_kota'] ?? null,
-                    'provinsi' => $row['provinsi'] ?? null,
-                    'google_maps_link' => $row['google_maps_link'] ?? null,
-                    'latitude' => $row['latitude'] ?? null,
-                    'longitude' => $row['longitude'] ?? null,
-                    'phone' => $row['telepon'] ?? null,
-                    'email' => $row['email'] ?? null,
-                    'website' => $row['website'] ?? null,
-                    'headmaster' => $row['kepala_sekolah'] ?? null,
-                ]);
+                $existing->update($this->prepareSchoolData($row));
+                $school = $existing;
             } else {
-                // Seharusnya tidak sampai ke sini karena sudah divalidasi di fase 1
-                \Log::error('[IMPORT] NPSN sudah terdaftar, tapi lolos validasi fase 1: ' . $row['npsn']);
                 return false;
             }
         } else {
-            // Buat sekolah baru
-            $school = School::create([
-                'npsn' => $row['npsn'],
-                'name' => $row['nama_sekolah'],
-                'education_level' => $row['jenjang_pendidikan'],
-                'status' => $row['status'],
-                'address' => $row['alamat'],
-                'desa' => $row['desa'] ?? null,
-                'kecamatan' => $row['kecamatan'] ?? null,
-                'kabupaten_kota' => $row['kabupaten_kota'] ?? null,
-                'provinsi' => $row['provinsi'] ?? null,
-                'google_maps_link' => $row['google_maps_link'] ?? null,
-                'latitude' => $row['latitude'] ?? null,
-                'longitude' => $row['longitude'] ?? null,
-                'phone' => $row['telepon'] ?? null,
-                'email' => $row['email'] ?? null,
-                'website' => $row['website'] ?? null,
-                'headmaster' => $row['kepala_sekolah'] ?? null,
-            ]);
+            $school = School::create($this->prepareSchoolData($row));
         }
 
-        // Create admin sekolah account if password provided (optimized)
+        // Create admin sekolah account if password provided (minimal logging)
         if (!empty($row['password_admin'])) {
             try {
-                $user = \App\Models\User::create([
+                $user = User::create([
                     'name' => $row['kepala_sekolah'] ?? 'Admin Sekolah',
                     'email' => $row['email'],
-                    'password' => \Hash::make($row['password_admin']),
+                    'password' => Hash::make($row['password_admin']),
                     'school_id' => $school->id,
                 ]);
                 $user->assignRole('admin_sekolah');
-
-                // Reduced logging for performance - only log every 50th record
-                if ($index % 50 == 0) {
-                    \Log::info("Admin sekolah accounts created via import. Progress: " . ($index + 1) . " records processed.");
-                }
             } catch (\Exception $e) {
-                \Log::error("Failed to create admin sekolah account via import: " . $e->getMessage());
-                $this->addWarning($index, "Sekolah berhasil dibuat, tetapi gagal membuat akun admin sekolah. Silakan buat manual di User Management.");
+                $this->addWarning($index, "Sekolah berhasil dibuat, tetapi gagal membuat akun admin sekolah.");
             }
         }
 
@@ -371,41 +283,21 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function updateSchool($row, $index)
     {
-        // Validasi sudah dilakukan di fase 1, langsung proses data
         $school = School::where('npsn', $row['npsn'])->first();
         if (!$school) {
-            // Seharusnya tidak sampai ke sini karena sudah divalidasi di fase 1
-            \Log::error('[IMPORT] Sekolah tidak ditemukan untuk update, tapi lolos validasi fase 1: ' . $row['npsn']);
             return false;
         }
 
-        // Update sekolah
-        $school->update([
-            'name' => $row['nama_sekolah'],
-            'education_level' => $row['jenjang_pendidikan'],
-            'status' => $row['status'],
-            'address' => $row['alamat'],
-            'desa' => $row['desa'] ?? $school->desa,
-            'kecamatan' => $row['kecamatan'] ?? $school->kecamatan,
-            'kabupaten_kota' => $row['kabupaten_kota'] ?? $school->kabupaten_kota,
-            'provinsi' => $row['provinsi'] ?? $school->provinsi,
-            'google_maps_link' => $row['google_maps_link'] ?? $school->google_maps_link,
-            'latitude' => $row['latitude'] ?? $school->latitude,
-            'longitude' => $row['longitude'] ?? $school->longitude,
-            'phone' => $row['telepon'] ?? $school->phone,
-            'email' => $row['email'] ?? $school->email,
-            'website' => $row['website'] ?? $school->website,
-            'headmaster' => $row['kepala_sekolah'] ?? $school->headmaster,
-        ]);
+        $school->update($this->prepareSchoolData($row));
 
-        // Create or update admin sekolah account if password provided
+        // Create or update admin sekolah account if password provided (minimal logging)
         if (!empty($row['password_admin'])) {
             try {
-                $user = \App\Models\User::updateOrCreate(
+                $user = User::updateOrCreate(
                     ['email' => $row['email']],
                     [
                         'name' => $row['kepala_sekolah'] ?? 'Admin Sekolah',
-                        'password' => \Hash::make($row['password_admin']),
+                        'password' => Hash::make($row['password_admin']),
                         'school_id' => $school->id,
                     ]
                 );
@@ -413,14 +305,8 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 if (!$user->hasRole('admin_sekolah')) {
                     $user->assignRole('admin_sekolah');
                 }
-
-                // Reduced logging for performance - only log every 50th record
-                if ($index % 50 == 0) {
-                    \Log::info("Admin sekolah accounts updated via import. Progress: " . ($index + 1) . " records processed.");
-                }
             } catch (\Exception $e) {
-                \Log::error("Failed to update admin sekolah account via import: " . $e->getMessage());
-                $this->addWarning($index, "Sekolah berhasil diperbarui, tetapi gagal membuat/update akun admin sekolah. Silakan buat manual di User Management.");
+                $this->addWarning($index, "Sekolah berhasil diperbarui, tetapi gagal membuat/update akun admin sekolah.");
             }
         }
 
@@ -429,20 +315,35 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function deleteSchool($row, $index)
     {
-        // Validasi sudah dilakukan di fase 1, langsung proses data
         $school = School::where('npsn', $row['npsn'])->first();
         if (!$school) {
-            // Seharusnya tidak sampai ke sini karena sudah divalidasi di fase 1
-            \Log::error('[IMPORT] Sekolah tidak ditemukan untuk delete, tapi lolos validasi fase 1: ' . $row['npsn']);
             return false;
         }
 
-        // Detach users
-        $school->users()->update(['school_id' => null]);
-
-        // Soft delete
         $school->delete();
         return true;
+    }
+
+    protected function prepareSchoolData($row)
+    {
+        return [
+            'npsn' => $row['npsn'],
+            'name' => $row['nama_sekolah'],
+            'education_level' => $row['jenjang_pendidikan'],
+            'status' => $row['status'],
+            'address' => $row['alamat'],
+            'desa' => $row['desa'] ?? null,
+            'kecamatan' => $row['kecamatan'] ?? null,
+            'kabupaten_kota' => $row['kabupaten_kota'] ?? null,
+            'provinsi' => $row['provinsi'] ?? null,
+            'google_maps_link' => $row['google_maps_link'] ?? null,
+            'latitude' => $row['latitude'] ?? null,
+            'longitude' => $row['longitude'] ?? null,
+            'phone' => $row['telepon'] ?? null,
+            'email' => $row['email'] ?? null,
+            'website' => $row['website'] ?? null,
+            'headmaster' => $row['kepala_sekolah'] ?? null,
+        ];
     }
 
     protected function validateRequired($row, $index)
@@ -451,28 +352,31 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         $hasError = false;
         foreach ($required as $field) {
             if (empty($row[$field])) {
-                $this->addError($index, "Kolom '{$field}' wajib diisi.", $row);
+                $this->addError($index, "Kolom '{$field}' wajib diisi.");
                 $hasError = true;
             }
         }
-        // Validasi panjang minimum untuk name (warning saja)
+
         if (!empty($row['nama_sekolah']) && strlen($row['nama_sekolah']) < 3) {
             $this->addWarning($index, "Nama sekolah sebaiknya minimal 3 karakter.");
         }
-        // Validasi panjang maksimum
+
         if (!empty($row['npsn']) && strlen($row['npsn']) > 20) {
-            $this->addError($index, "NPSN maksimal 20 karakter.", $row);
+            $this->addError($index, "NPSN maksimal 20 karakter.");
             $hasError = true;
         }
+
         if (!empty($row['nama_sekolah']) && strlen($row['nama_sekolah']) > 255) {
             $this->addWarning($index, "Nama sekolah sebaiknya maksimal 255 karakter.");
         }
+
         if (!empty($row['telepon']) && strlen($row['telepon']) > 20) {
-            $this->addWarning($index, "Nomor telepon dipotong maksimal 20 karakter.", $row);
+            $this->addWarning($index, "Nomor telepon dipotong maksimal 20 karakter.");
             $row['telepon'] = substr($row['telepon'], 0, 20);
         }
+
         if (!empty($row['kepala_sekolah']) && strlen($row['kepala_sekolah']) > 255) {
-            $this->addWarning($index, "Nama kepala sekolah dipotong maksimal 255 karakter.", $row);
+            $this->addWarning($index, "Nama kepala sekolah dipotong maksimal 255 karakter.");
             $row['kepala_sekolah'] = substr($row['kepala_sekolah'], 0, 255);
         }
 
@@ -482,7 +386,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 $this->addWarning($index, "Format website tidak valid: " . $row['website']);
             }
             if (strlen($row['website']) > 255) {
-                $this->addWarning($index, "Website URL dipotong maksimal 255 karakter.", $row);
+                $this->addWarning($index, "Website URL dipotong maksimal 255 karakter.");
                 $row['website'] = substr($row['website'], 0, 255);
             }
         }
@@ -507,8 +411,6 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function validateSchoolName($row, $index)
     {
-        // Tidak perlu warning spam - petunjuk sudah ada di Excel template
-        // Hanya validasi panjang nama jika diperlukan
         $name = $row['nama_sekolah'];
 
         if (!empty($name) && strlen($name) < 3) {
@@ -520,23 +422,14 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         }
     }
 
-    protected function addError($index, $message, $row = null)
+    protected function addError($index, $message)
     {
-        $info = '';
-        if ($row) {
-            $infoParts = [];
-            if (!empty($row['npsn'])) $infoParts[] = 'NPSN: ' . $row['npsn'];
-            if (!empty($row['nama_sekolah'])) $infoParts[] = 'Nama: ' . $row['nama_sekolah'];
-            if ($infoParts) $info = ' (' . implode(', ', $infoParts) . ')';
-        }
-        $errorMsg = "Baris " . ($index + 2) . "{$info}: {$message}";
-        $this->results['errors'][] = $errorMsg;
-        \Log::error('[IMPORT] Error pada baris ' . ($index + 2) . ': ' . $errorMsg);
+        $this->results['errors'][] = "Row " . ($index + 2) . ": " . $message;
     }
 
     protected function addWarning($index, $message)
     {
-        $this->results['warnings'][] = "Row " . ($index + 2) . ": {$message}";
+        $this->results['warnings'][] = "Row " . ($index + 2) . ": " . $message;
     }
 
     public function getResults()
