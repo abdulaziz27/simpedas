@@ -16,11 +16,17 @@ class School extends Model
         'education_level',
         'status',
         'address',
+        'desa',
+        'kecamatan',
+        'kabupaten_kota',
+        'provinsi',
+        'google_maps_link',
+        'latitude',
+        'longitude',
         'phone',
         'email',
         'website',
         'headmaster',
-        'region',
         'logo'
     ];
 

@@ -12,7 +12,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between bg-[#136e67] rounded-2xl shadow-lg px-8 py-5">
         <h2 class="text-2xl font-semibold text-white mb-4 md:mb-0">Hasil Pencarian Sekolah/Lembaga</h2>
         <div class="w-full md:w-1/2 lg:w-1/3">
-            <x-public.search-form :action="route('public.search-sekolah')" placeholder="Cari nama / NPSN / kepala sekolah / wilayah" />
+            <x-public.search-form :action="route('public.search-sekolah')" placeholder="Cari nama / NPSN / kepala sekolah / kecamatan" />
         </div>
     </div>
     <div class="mt-10">
@@ -35,13 +35,13 @@
                         $s->npsn,
                         $s->education_level,
                         $s->status,
-                        $s->region,
+                        $s->kecamatan ?? '-',
                         '<a href="'.route('public.detail-sekolah',$s->id).'" class="text-green-300 hover:underline">Lihat detail</a>'
                     ];
                 });
             @endphp
             <div class="bg-[#09443c] rounded-2xl shadow-lg px-0 py-8">
-                <x-public.data-table :headers="['Nama Sekolah','NPSN','Jenjang','Status','Wilayah','Aksi']" :rows="$rows" />
+                <x-public.data-table :headers="['Nama Sekolah','NPSN','Jenjang','Status','Kecamatan','Aksi']" :rows="$rows" />
                 @if($schools->hasPages())
                 <div class="px-8 pt-4">
                     {{ $schools->links() }}

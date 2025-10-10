@@ -25,8 +25,8 @@ class SchoolController extends Controller
             $query->where('education_level', $request->education_level);
         }
 
-        if ($request->filled('region')) {
-            $query->where('region', $request->region);
+        if ($request->filled('kecamatan')) {
+            $query->where('kecamatan', 'like', '%' . $request->kecamatan . '%');
         }
 
         if ($request->filled('status')) {
@@ -45,9 +45,8 @@ class SchoolController extends Controller
         return view('admin.schools.index', [
             'schools' => $schools,
             'education_levels' => config('school.education_levels'),
-            'regions' => config('school.regions'),
             'statuses' => config('school.status'),
-            'filters' => $request->only(['education_level', 'region', 'status', 'search'])
+            'filters' => $request->only(['education_level', 'kecamatan', 'status', 'search'])
         ]);
     }
 
@@ -58,7 +57,6 @@ class SchoolController extends Controller
     {
         return view('admin.schools.create', [
             'education_levels' => config('school.education_levels'),
-            'regions' => config('school.regions'),
             'statuses' => config('school.status')
         ]);
     }
@@ -74,6 +72,13 @@ class SchoolController extends Controller
             'education_level' => ['required', 'string', Rule::in(array_keys(config('school.education_levels')))],
             'status' => ['required', 'string', Rule::in(array_keys(config('school.status')))],
             'address' => 'nullable|string',
+            'desa' => 'nullable|string|max:100',
+            'kecamatan' => 'nullable|string|max:100',
+            'kabupaten_kota' => 'nullable|string|max:100',
+            'provinsi' => 'nullable|string|max:100',
+            'google_maps_link' => 'nullable|string|max:2000',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'phone' => 'nullable|string|max:20',
             'email' => ['required', 'max:255', 'unique:schools,email', function ($attribute, $value, $fail) {
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -82,7 +87,6 @@ class SchoolController extends Controller
             }],
             'website' => 'nullable|url|max:255',
             'headmaster' => 'nullable|string|max:255',
-            'region' => ['required', 'string', Rule::in(array_keys(config('school.regions')))],
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
@@ -111,7 +115,6 @@ class SchoolController extends Controller
         return view('admin.schools.edit', [
             'school' => $school,
             'education_levels' => config('school.education_levels'),
-            'regions' => config('school.regions'),
             'statuses' => config('school.status')
         ]);
     }
@@ -127,6 +130,13 @@ class SchoolController extends Controller
             'education_level' => ['required', 'string', Rule::in(array_keys(config('school.education_levels')))],
             'status' => ['required', 'string', Rule::in(array_keys(config('school.status')))],
             'address' => 'nullable|string',
+            'desa' => 'nullable|string|max:100',
+            'kecamatan' => 'nullable|string|max:100',
+            'kabupaten_kota' => 'nullable|string|max:100',
+            'provinsi' => 'nullable|string|max:100',
+            'google_maps_link' => 'nullable|string|max:2000',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'phone' => 'nullable|string|max:20',
             'email' => ['required', 'max:255', Rule::unique('schools', 'email')->ignore($school->id), function ($attribute, $value, $fail) {
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -135,7 +145,6 @@ class SchoolController extends Controller
             }],
             'website' => 'nullable|url|max:255',
             'headmaster' => 'nullable|string|max:255',
-            'region' => ['required', 'string', Rule::in(array_keys(config('school.regions')))],
             'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 

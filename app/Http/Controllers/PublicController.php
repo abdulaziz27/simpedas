@@ -84,7 +84,10 @@ class PublicController extends Controller
             $query->where('name', 'like', '%' . $q . '%')
                 ->orWhere('npsn', 'like', '%' . $q . '%')
                 ->orWhere('headmaster', 'like', '%' . $q . '%')
-                ->orWhere('region', 'like', '%' . $q . '%');
+                ->orWhere('kecamatan', 'like', '%' . $q . '%')
+                ->orWhere('desa', 'like', '%' . $q . '%')
+                ->orWhere('kabupaten_kota', 'like', '%' . $q . '%')
+                ->orWhere('provinsi', 'like', '%' . $q . '%');
         })
             ->latest()
             ->paginate(9)
@@ -159,7 +162,7 @@ class PublicController extends Controller
 
         $data = $query->groupBy('label')->get();
 
-        $allLabels = ['TK', 'SD', 'SMP', 'Non Formal'];
+        $allLabels = ['TK', 'SD', 'SMP', 'KB', 'PKBM'];
         $dataMap = $data->pluck('value', 'label')->all();
 
         $values = [];

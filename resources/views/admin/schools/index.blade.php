@@ -84,14 +84,8 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Kecamatan</label>
                         <div class="relative">
-                             <select name="region" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
-                                <option value="">Semua kecamatan</option>
-                                @foreach($regions as $value => $label)
-                                    <option value="{{ $value }}" {{ ($filters['region'] ?? '') == $value ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <input type="text" name="kecamatan" value="{{ $filters['kecamatan'] ?? '' }}" placeholder="Cari kecamatan..."
+                                class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
                         </div>
                     </div>
                     <div>

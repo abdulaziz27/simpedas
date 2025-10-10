@@ -94,6 +94,77 @@
                         @error('address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- Desa --}}
+                    <div>
+                        <label for="desa" class="block text-sm font-medium text-gray-700">Desa</label>
+                        <input type="text" name="desa" id="desa" value="{{ old('desa', $school->desa) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Nama Desa">
+                        @error('desa') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Kecamatan --}}
+                    <div>
+                        <label for="kecamatan" class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                        <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan', $school->kecamatan) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Nama Kecamatan">
+                        @error('kecamatan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Kabupaten/Kota --}}
+                    <div>
+                        <label for="kabupaten_kota" class="block text-sm font-medium text-gray-700">Kabupaten/Kota</label>
+                        <input type="text" name="kabupaten_kota" id="kabupaten_kota" value="{{ old('kabupaten_kota', $school->kabupaten_kota) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Nama Kabupaten/Kota">
+                        @error('kabupaten_kota') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Provinsi --}}
+                    <div>
+                        <label for="provinsi" class="block text-sm font-medium text-gray-700">Provinsi</label>
+                        <input type="text" name="provinsi" id="provinsi" value="{{ old('provinsi', $school->provinsi) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Nama Provinsi">
+                        @error('provinsi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Google Maps Link (Recommended) --}}
+                    <div class="md:col-span-2">
+                        <label for="google_maps_link" class="block text-sm font-medium text-gray-700">
+                            Link Google Maps <span class="text-green-600">(Direkomendasikan)</span>
+                        </label>
+                        <textarea name="google_maps_link" id="google_maps_link" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Paste iframe code dari Google Maps di sini...">{{ old('google_maps_link', $school->google_maps_link) }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">
+                            💡 <strong>Cara mudah:</strong> Buka Google Maps → Cari sekolah → Klik "Share" → Pilih "Embed a map" → Copy iframe code<br>
+                            📝 <strong>Contoh iframe:</strong> &lt;iframe src="https://www.google.com/maps/embed?pb=..."&gt;&lt;/iframe&gt;
+                        </p>
+                        @error('google_maps_link') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Latitude (Optional) --}}
+                    <div>
+                        <label for="latitude" class="block text-sm font-medium text-gray-700">Latitude (Opsional)</label>
+                        <input type="text" name="latitude" id="latitude" value="{{ old('latitude', $school->latitude) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Contoh: 2.9876543">
+                        <p class="mt-1 text-sm text-gray-500">Hanya jika tidak ada link Google Maps</p>
+                        @error('latitude') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Longitude (Optional) --}}
+                    <div>
+                        <label for="longitude" class="block text-sm font-medium text-gray-700">Longitude (Opsional)</label>
+                        <input type="text" name="longitude" id="longitude" value="{{ old('longitude', $school->longitude) }}"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            placeholder="Contoh: 99.0123456">
+                        <p class="mt-1 text-sm text-gray-500">Hanya jika tidak ada link Google Maps</p>
+                        @error('longitude') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
                     {{-- Nomor HP --}}
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700">Nomor HP</label>
@@ -126,18 +197,6 @@
                         @error('headmaster') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Wilayah (Kecamatan) --}}
-                    <div class="md:col-span-2">
-                        <label for="region" class="block text-sm font-medium text-gray-700">Wilayah (Kecamatan)</label>
-                         <select name="region" id="region" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="">Pilih Kecamatan</option>
-                            @foreach($regions as $value => $label)
-                                <option value="{{ $value }}" {{ old('region', $school->region) == $value ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('region') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
 
                 </div>
 

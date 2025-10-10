@@ -59,7 +59,8 @@ class ReportController extends Controller
         $tkSchools = School::where('education_level', 'TK')->count();
         $sdSchools = School::where('education_level', 'SD')->count();
         $smpSchools = School::where('education_level', 'SMP')->count();
-        $nonFormalSchools = School::where('education_level', 'Non Formal')->count();
+        $kbSchools = School::where('education_level', 'KB')->count();
+        $pkbmSchools = School::where('education_level', 'PKBM')->count();
 
         return view('admin.reports.schools', compact(
             'schools',
@@ -69,7 +70,8 @@ class ReportController extends Controller
             'tkSchools',
             'sdSchools',
             'smpSchools',
-            'nonFormalSchools'
+            'kbSchools',
+            'pkbmSchools'
         ));
     }
 

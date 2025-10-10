@@ -186,9 +186,29 @@
                 <div class="detail-label">Alamat Lengkap</div>
                 <div class="detail-value">{{ $school->address ?? '-' }}</div>
             </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Desa</div>
+                <div class="detail-value">{{ $school->desa ?? '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Kecamatan</div>
+                <div class="detail-value">{{ $school->kecamatan ?? '-' }}</div>
+            </div>
         </div>
 
         <div class="column-right">
+            <div class="detail-item">
+                <div class="detail-label">Kabupaten/Kota</div>
+                <div class="detail-value">{{ $school->kabupaten_kota ?? '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Provinsi</div>
+                <div class="detail-value">{{ $school->provinsi ?? '-' }}</div>
+            </div>
+
             <div class="detail-item">
                 <div class="detail-label">No HP</div>
                 <div class="detail-value">{{ $school->phone ?? '-' }}</div>
@@ -205,10 +225,6 @@
                 </div>
             </div>
 
-            <div class="detail-item">
-                <div class="detail-label">Wilayah</div>
-                <div class="detail-value">{{ $school->region ?? '-' }}</div>
-            </div>
 
             <div class="detail-item">
                 <div class="detail-label">Email</div>

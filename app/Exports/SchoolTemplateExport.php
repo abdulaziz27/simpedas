@@ -37,11 +37,17 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
             'JENJANG_PENDIDIKAN',
             'STATUS',
             'ALAMAT',
+            'DESA',
+            'KECAMATAN',
+            'KABUPATEN_KOTA',
+            'PROVINSI',
+            'GOOGLE_MAPS_LINK',
+            'LATITUDE',
+            'LONGITUDE',
             'TELEPON',
             'EMAIL',
             'WEBSITE',
-            'KEPALA_SEKOLAH',
-            'KECAMATAN'
+            'KEPALA_SEKOLAH'
         ];
     }
 
@@ -57,14 +63,20 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
             'D' => 20, // JENJANG_PENDIDIKAN
             'E' => 15, // STATUS
             'F' => 40, // ALAMAT
-            'G' => 20, // TELEPON
-            'H' => 30, // EMAIL
-            'I' => 30, // WEBSITE
-            'J' => 30, // KEPALA_SEKOLAH
-            'K' => 20, // KECAMATAN
-            'M' => 60, // PETUNJUK (kolom utama)
-            'N' => 60, // PETUNJUK (merge, biar wrap text optimal)
-            'O' => 60, // PETUNJUK (merge, biar wrap text optimal)
+            'G' => 20, // DESA
+            'H' => 20, // KECAMATAN
+            'I' => 20, // KABUPATEN_KOTA
+            'J' => 20, // PROVINSI
+            'K' => 50, // GOOGLE_MAPS_LINK
+            'L' => 15, // LATITUDE
+            'M' => 15, // LONGITUDE
+            'N' => 20, // TELEPON
+            'O' => 30, // EMAIL
+            'P' => 30, // WEBSITE
+            'Q' => 30, // KEPALA_SEKOLAH
+            'S' => 60, // PETUNJUK (kolom utama)
+            'T' => 60, // PETUNJUK (merge, biar wrap text optimal)
+            'U' => 60, // PETUNJUK (merge, biar wrap text optimal)
         ];
     }
 
@@ -122,7 +134,7 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                     $validation->setFormula1('"CREATE,UPDATE,DELETE"');
                 }
 
-                // 2. JENJANG_PENDIDIKAN (Column D) - TK, SD, SMP, Non Formal
+                // 2. JENJANG_PENDIDIKAN (Column D) - TK, SD, SMP, KB, PKBM
                 for ($row = 2; $row <= $lastRow; $row++) {
                     $validation = $sheet->getCell('D' . $row)->getDataValidation();
                     $validation->setType(DataValidation::TYPE_LIST);
@@ -134,8 +146,8 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                     $validation->setErrorTitle('Input error');
                     $validation->setError('Nilai tidak valid. Pilih jenjang pendidikan.');
                     $validation->setPromptTitle('Pilih Jenjang Pendidikan');
-                    $validation->setPrompt('Pilih TK, SD, SMP, atau Non Formal');
-                    $validation->setFormula1('"TK,SD,SMP,Non Formal"');
+                    $validation->setPrompt('Pilih TK, SD, SMP, KB, atau PKBM');
+                    $validation->setFormula1('"TK,SD,SMP,KB,PKBM"');
                 }
 
                 // 3. STATUS (Column E) - Negeri, Swasta
@@ -154,52 +166,40 @@ class SchoolTemplateExport implements FromArray, WithHeadings, WithStyles, WithC
                     $validation->setFormula1('"Negeri,Swasta"');
                 }
 
-                // 4. KECAMATAN (Column K) - Daftar kecamatan
-                for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('K' . $row)->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST);
-                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                    $validation->setAllowBlank(false);
-                    $validation->setShowInputMessage(true);
-                    $validation->setShowErrorMessage(true);
-                    $validation->setShowDropDown(true);
-                    $validation->setErrorTitle('Input error');
-                    $validation->setError('Nilai tidak valid. Pilih kecamatan.');
-                    $validation->setPromptTitle('Pilih Kecamatan');
-                    $validation->setPrompt('Pilih kecamatan yang sesuai');
-                    $validation->setFormula1('"Siantar Utara,Siantar Selatan,Siantar Barat,Siantar Timur,Siantar Marihat,Siantar Martoba,Siantar Sitalasari,Siantar Marimbun"');
-                }
-
-                // Pindahkan petunjuk ke sisi kanan, dua kolom setelah kolom paling kanan (kolom N)
-                $startCol = 'M'; // Dua kolom setelah K
+                // Pindahkan petunjuk ke sisi kanan, dua kolom setelah kolom paling kanan (kolom S)
+                $startCol = 'S'; // Dua kolom setelah Q
                 $row = 2; // Mulai di bawah header
                 $petunjuk = [
                     'PETUNJUK PENGGUNAAN:',
                     '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
                     '2. Kolom NPSN: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NPSN',
                     '3. Kolom NAMA_SEKOLAH: Wajib diisi, minimal 3 karakter',
-                    '4. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, atau Non Formal (dropdown)',
+                    '4. Kolom JENJANG_PENDIDIKAN: Wajib diisi dengan nilai TK, SD, SMP, KB, atau PKBM (dropdown)',
                     '5. Kolom STATUS: Wajib diisi dengan nilai Negeri atau Swasta (dropdown)',
                     '6. Kolom ALAMAT: Wajib diisi',
-                    '7. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
-                    '8. Kolom KEPALA_SEKOLAH: Wajib diisi',
-                    '9. Kolom KECAMATAN: Wajib diisi dengan kecamatan yang valid (dropdown)',
+                    '7. Kolom DESA, KECAMATAN, KABUPATEN_KOTA, PROVINSI: Opsional',
+                    '8. Kolom GOOGLE_MAPS_LINK: Opsional (iframe code dari Google Maps - akan tampil embedded)',
+                    '9. Kolom LATITUDE, LONGITUDE: Opsional (untuk lokasi di peta)',
+                    '10. Kolom TELEPON, EMAIL, WEBSITE: Opsional',
+                    '11. Kolom KEPALA_SEKOLAH: Wajib diisi',
                     '',
                     'CATATAN:',
                     '• Dropdown tersedia di semua baris (2-1000)',
                     '• NPSN harus unik, tidak boleh duplikat',
                     '• Format email: user@domain.com',
                     '• Format website: https://www.example.com',
+                    '• Format koordinat: Latitude (-90 hingga 90), Longitude (-180 hingga 180)',
+                    '• Format Google Maps: Copy iframe code dari "Embed a map" di Google Maps',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
-                    // Merge cell petunjuk saja (N sampai P)
-                    $sheet->mergeCells($startCol . $row . ':P' . $row);
+                    // Merge cell petunjuk saja (S sampai V)
+                    $sheet->mergeCells($startCol . $row . ':V' . $row);
                     $sheet->getStyle($startCol . $row)->getFont()->setBold($row === 2);
                     $row++;
                 }
                 // Format wrap text untuk petunjuk
-                $sheet->getStyle('N2:P' . ($row - 1))->getAlignment()->setWrapText(true);
+                $sheet->getStyle('S2:V' . ($row - 1))->getAlignment()->setWrapText(true);
             },
         ];
     }

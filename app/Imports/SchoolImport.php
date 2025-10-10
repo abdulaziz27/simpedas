@@ -96,10 +96,16 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                     'education_level' => $row['jenjang_pendidikan'],
                     'status' => $row['status'],
                     'address' => $row['alamat'],
+                    'desa' => $row['desa'] ?? null,
+                    'kecamatan' => $row['kecamatan'] ?? null,
+                    'kabupaten_kota' => $row['kabupaten_kota'] ?? null,
+                    'provinsi' => $row['provinsi'] ?? null,
+                    'google_maps_link' => $row['google_maps_link'] ?? null,
+                    'latitude' => $row['latitude'] ?? null,
+                    'longitude' => $row['longitude'] ?? null,
                     'phone' => $row['telepon'] ?? null,
                     'email' => $row['email'] ?? null,
                     'headmaster' => $row['kepala_sekolah'] ?? null,
-                    'region' => $row['kecamatan'] ?? 'Siantar Utara',
                 ]);
             } else {
                 $this->addError($index, "NPSN sudah terdaftar.", $row);
@@ -113,10 +119,16 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
                 'education_level' => $row['jenjang_pendidikan'],
                 'status' => $row['status'],
                 'address' => $row['alamat'],
+                'desa' => $row['desa'] ?? null,
+                'kecamatan' => $row['kecamatan'] ?? null,
+                'kabupaten_kota' => $row['kabupaten_kota'] ?? null,
+                'provinsi' => $row['provinsi'] ?? null,
+                'google_maps_link' => $row['google_maps_link'] ?? null,
+                'latitude' => $row['latitude'] ?? null,
+                'longitude' => $row['longitude'] ?? null,
                 'phone' => $row['telepon'] ?? null,
                 'email' => $row['email'] ?? null,
                 'headmaster' => $row['kepala_sekolah'] ?? null,
-                'region' => $row['kecamatan'] ?? 'Siantar Utara',
             ]);
         }
 
@@ -171,7 +183,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         // Validasi education level
-        if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'Non Formal'])) {
+        if (!in_array($row['jenjang_pendidikan'], ['TK', 'SD', 'SMP', 'KB', 'PKBM'])) {
             $this->addError($index, "ERROR KRITIS: Jenjang pendidikan tidak valid");
             return false;
         }
@@ -191,10 +203,15 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             'education_level' => $row['jenjang_pendidikan'],
             'status' => $row['status'],
             'address' => $row['alamat'],
+            'desa' => $row['desa'] ?? $school->desa,
+            'kecamatan' => $row['kecamatan'] ?? $school->kecamatan,
+            'kabupaten_kota' => $row['kabupaten_kota'] ?? $school->kabupaten_kota,
+            'provinsi' => $row['provinsi'] ?? $school->provinsi,
+            'latitude' => $row['latitude'] ?? $school->latitude,
+            'longitude' => $row['longitude'] ?? $school->longitude,
             'phone' => $row['telepon'] ?? $school->phone,
             'email' => $row['email'] ?? $school->email,
             'headmaster' => $row['kepala_sekolah'] ?? $school->headmaster,
-            'region' => $row['kecamatan'] ?? $school->region,
         ]);
         return true;
     }
@@ -265,7 +282,8 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
             'TK' => ['TK', 'Taman Kanak'],
             'SD' => ['SD', 'Sekolah Dasar'],
             'SMP' => ['SMP'],
-            'Non Formal' => ['Non Formal', 'Nonformal', 'PKBM', 'SKB']
+            'KB' => ['KB', 'Kelompok Bermain'],
+            'PKBM' => ['PKBM', 'Non Formal', 'Nonformal', 'SKB']
         ];
 
         $matchFound = false;
@@ -318,7 +336,7 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         return [
             '*.npsn' => ['nullable', 'max:20'],
             '*.nama_sekolah' => ['nullable', 'string', 'max:255'],
-            '*.jenjang_pendidikan' => ['nullable', 'string', 'in:TK,SD,SMP,Non Formal'],
+            '*.jenjang_pendidikan' => ['nullable', 'string', 'in:TK,SD,SMP,KB,PKBM'],
             '*.status' => ['nullable', 'string', 'in:Negeri,Swasta'],
             '*.alamat' => ['nullable', 'string'],
             '*.telepon' => ['nullable', 'max:20'],

@@ -43,13 +43,23 @@
                 <p class="text-sm text-gray-400 print:text-gray-600">Kepala Sekolah</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->headmaster }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Wilayah</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->region }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">Alamat</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->address }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Desa</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->desa ?: '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Kecamatan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->kecamatan ?: '-' }}</p>
             </div>
             <div>
+                <p class="text-sm text-gray-400 print:text-gray-600">Kabupaten/Kota</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->kabupaten_kota ?: '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Provinsi</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->provinsi ?: '-' }}</p>
+
                 <p class="text-sm text-gray-400 print:text-gray-600">Telepon</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $school->phone ?? '-' }}</p>
 
@@ -67,5 +77,98 @@
             </div>
         </div>
     </div>
+
+    {{-- Map Section --}}
+    @if($school->google_maps_link || ($school->latitude && $school->longitude))
+    <div class="bg-[#09443c] p-6 md:p-10 rounded-2xl shadow-lg mt-8 print:hidden">
+        <h3 class="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Lokasi Sekolah</h3>
+        <div class="map-container">
+            @if($school->google_maps_link)
+                {{-- Google Maps Embed --}}
+                @php
+                    // Extract src from iframe if it's a full iframe code
+                    $iframeSrc = $school->google_maps_link;
+                    if (strpos($iframeSrc, '<iframe') !== false) {
+                        preg_match('/src="([^"]+)"/', $iframeSrc, $matches);
+                        $iframeSrc = $matches[1] ?? $iframeSrc;
+                    }
+                @endphp
+                <iframe
+                    width="100%"
+                    height="400"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="{{ $iframeSrc }}"
+                    style="border-radius: 0.75rem; border: 2px solid #d1d5db; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+                <br/>
+                <small class="text-gray-300">
+                    <a href="{{ $iframeSrc }}"
+                       target="_blank"
+                       class="text-blue-300 hover:text-blue-200">
+                        Lihat Peta Lebih Besar di Google Maps
+                    </a>
+                </small>
+            @elseif($school->latitude && $school->longitude)
+                {{-- OpenStreetMap dengan Koordinat --}}
+                <iframe
+                    width="100%"
+                    height="400"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ $school->longitude - 0.01 }}%2C{{ $school->latitude - 0.01 }}%2C{{ $school->longitude + 0.01 }}%2C{{ $school->latitude + 0.01 }}&amp;layer=mapnik&amp;marker={{ $school->latitude }}%2C{{ $school->longitude }}"
+                    style="border-radius: 0.75rem;">
+                </iframe>
+                <br/>
+                <small class="text-gray-300">
+                    <a href="https://www.openstreetmap.org/?mlat={{ $school->latitude }}&amp;mlon={{ $school->longitude }}#map=15/{{ $school->latitude }}/{{ $school->longitude }}"
+                       target="_blank"
+                       class="text-blue-300 hover:text-blue-200">
+                        Lihat Peta Lebih Besar
+                    </a>
+                </small>
+            @endif
+        </div>
+    </div>
+    @endif
 </section>
+
+@push('styles')
+<style>
+    /* Simple iframe map container */
+    .map-container {
+        width: 100%;
+        position: relative;
+    }
+
+    .map-container iframe {
+        width: 100%;
+        height: 400px;
+        border-radius: 0.75rem;
+        border: 2px solid #d1d5db;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .map-container iframe {
+            height: 300px;
+        }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    // No JavaScript needed - iframe handles everything!
+    console.log('✅ Map loaded via iframe - no complex JavaScript required');
+</script>
+@endpush
 @endsection

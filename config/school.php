@@ -5,7 +5,8 @@ return [
         'TK' => 'TK',
         'SD' => 'SD',
         'SMP' => 'SMP',
-        'Non Formal' => 'Non Formal'
+        'KB' => 'KB',
+        'PKBM' => 'PKBM'
     ],
 
     'regions' => [
