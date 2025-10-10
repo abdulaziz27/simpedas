@@ -227,7 +227,7 @@ class TurboSchoolImport implements ToCollection, WithHeadingRow
         if ($row instanceof \Illuminate\Support\Collection) {
             $row = $row->toArray();
         }
-        
+
         // Minimal casting for speed
         if (isset($row['npsn'])) {
             $row['npsn'] = (string) $row['npsn'];

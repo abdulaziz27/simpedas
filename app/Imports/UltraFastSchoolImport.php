@@ -374,7 +374,7 @@ class UltraFastSchoolImport implements ToCollection, WithHeadingRow, WithChunkRe
         if ($row instanceof \Illuminate\Support\Collection) {
             $row = $row->toArray();
         }
-        
+
         // Cast important fields to proper types
         if (isset($row['npsn'])) {
             $row['npsn'] = (string) $row['npsn'];

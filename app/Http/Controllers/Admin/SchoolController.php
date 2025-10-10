@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Services\SchoolImportService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SchoolTemplateExport;
 

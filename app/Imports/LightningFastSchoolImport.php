@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Models\School;
 use App\Models\User;
-use App\Services\FastHashService;
+use App\Services\UltraFastHashService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -50,7 +50,7 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
         $roleId = $this->getAdminSekolahRoleId();
 
         // Pre-generate common password hashes for speed
-        FastHashService::preGenerateCommonHashes();
+        UltraFastHashService::preGenerateCommonHashes();
 
         // Prepare bulk data arrays
         $schoolInserts = [];
@@ -123,7 +123,7 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
         // Batch hash all passwords at once (MUCH faster than individual hashing)
         $hashedPasswords = [];
         if (!empty($passwordsToHash)) {
-            $hashedPasswords = FastHashService::batchHashPasswords($passwordsToHash);
+            $hashedPasswords = UltraFastHashService::batchProcessPasswords($passwordsToHash);
 
             // Fill in the hashed passwords
             foreach ($hashedPasswords as $key => $hashedPassword) {
@@ -218,7 +218,7 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
         ]);
 
         // Clean up memory
-        FastHashService::clearCache();
+        UltraFastHashService::clearCache();
 
         $this->results['failed'] = count($this->results['errors']);
     }
@@ -256,7 +256,7 @@ class LightningFastSchoolImport implements ToCollection, WithHeadingRow
         if ($row instanceof \Illuminate\Support\Collection) {
             $row = $row->toArray();
         }
-        
+
         // Fast casting - only essential fields
         if (isset($row['npsn'])) {
             $row['npsn'] = (string) $row['npsn'];

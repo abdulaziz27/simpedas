@@ -284,7 +284,7 @@
 
                     {{-- Estimated Time --}}
                     <p class="text-sm text-gray-500 mb-4">
-                        <span id="estimated-time">Estimasi waktu: 1-3 menit untuk 300+ data</span>
+                        <span id="estimated-time">Estimasi waktu: 10-30 detik untuk 300+ data</span>
                     </p>
 
                     {{-- Warning Message --}}
@@ -381,7 +381,7 @@
         // Show different loading messages over time to keep user engaged
         let loadingMessageIndex = 0;
         const loadingMessages = [
-            { title: 'Memproses Import Data', message: 'Mohon tunggu, sedang memproses file Excel Anda...', time: 'Estimasi waktu: 1-3 menit untuk 300+ data' },
+            { title: 'Memproses Import Data', message: 'Mohon tunggu, sedang memproses file Excel Anda...', time: 'Estimasi waktu: 10-30 detik untuk 300+ data' },
             { title: 'Memvalidasi Data', message: 'Sedang memeriksa format dan validitas data sekolah...', time: 'Fase 1: Validasi data' },
             { title: 'Menyimpan ke Database', message: 'Sedang menyimpan data sekolah ke database...', time: 'Fase 2: Penyimpanan data' },
             { title: 'Membuat Akun Admin', message: 'Sedang membuat akun admin sekolah otomatis...', time: 'Hampir selesai...' },

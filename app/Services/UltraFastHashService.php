@@ -98,6 +98,27 @@ class UltraFastHashService
     }
 
     /**
+     * Pre-generate common passwords for faster import
+     */
+    public static function preGenerateCommonHashes(): void
+    {
+        $commonPasswords = [
+            'password123',
+            'admin123',
+            'sekolah123',
+            '12345678',
+            'password',
+            'admin',
+        ];
+
+        Log::info('[ULTRA_HASH] Pre-generating common password hashes');
+
+        foreach ($commonPasswords as $password) {
+            self::ultraFastHash($password);
+        }
+    }
+
+    /**
      * Get performance statistics
      */
     public static function getPerformanceStats(): array
