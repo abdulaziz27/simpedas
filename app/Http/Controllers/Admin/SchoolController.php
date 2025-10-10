@@ -260,8 +260,9 @@ class SchoolController extends Controller
         ]);
 
         try {
-            $importService = new SchoolImportService();
-            $results = $importService->processExcel($request->file('file'), $importId);
+            // Use optimized import service with auto strategy selection
+            $importService = new \App\Services\OptimizedSchoolImportService();
+            $results = $importService->processExcel($request->file('file'), $importId, 'auto');
 
             // Update final progress
             $progress->update([
