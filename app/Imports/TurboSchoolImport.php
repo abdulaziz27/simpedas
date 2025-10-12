@@ -99,9 +99,7 @@ class TurboSchoolImport implements ToCollection, WithHeadingRow
                 $userInserts[] = [
                     'name' => $row['kepala_sekolah'] ?? 'Admin Sekolah',
                     'email' => $row['email'],
-                    'password' => $this->skipPasswordHashing
-                        ? UltraFastHashService::skipHashingForSpeed()
-                        : UltraFastHashService::ultraFastHash($row['password_admin']),
+                    'password' => UltraFastHashService::ultraFastHash($row['password_admin']),
                     'school_npsn' => $row['npsn'],
                     'created_at' => now(),
                     'updated_at' => now(),

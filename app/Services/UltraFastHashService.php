@@ -88,12 +88,15 @@ class UltraFastHashService
     }
 
     /**
-     * Skip password hashing entirely for ultra-fast import (passwords can be reset later)
+     * DEPRECATED: Skip password hashing entirely for ultra-fast import (passwords can be reset later)
+     * WARNING: This function creates invalid password hashes that cannot be used for authentication!
+     * Use ultraFastHash() instead for proper password hashing.
      */
     public static function skipHashingForSpeed(): string
     {
-        // Return a placeholder hash that can be reset later
-        // This is acceptable for bulk imports where passwords will be reset anyway
+        // DEPRECATED: This function creates invalid password hashes
+        // Use ultraFastHash() instead for proper password hashing
+        Log::warning('[ULTRA_HASH] skipHashingForSpeed() is deprecated and creates invalid password hashes!');
         return '$2y$04$' . str_repeat('a', 53); // Valid bcrypt format, minimal cost
     }
 
