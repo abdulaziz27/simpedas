@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
-class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, WithColumnWidths
+class TeacherTemplateExportV2 implements WithHeadings, WithEvents, WithStyles, WithColumnWidths
 {
     public function headings(): array
     {

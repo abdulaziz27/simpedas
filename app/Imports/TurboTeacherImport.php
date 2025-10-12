@@ -77,11 +77,11 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
                     $teacherInserts[] = $this->prepareTeacherData($row, $schoolId);
 
                     // Prepare user data if password provided
-                    if (!empty($row['email']) && !empty($row['password_admin'])) {
+                    if (!empty($row['email']) && !empty($row['password_guru'])) {
                         $userInserts[] = [
                             'name' => $row['nama_lengkap'],
                             'email' => $row['email'],
-                            'password' => \Hash::make($row['password_admin']),
+                            'password' => \Hash::make($row['password_guru']),
                             'school_id' => $schoolId,
                             'teacher_nuptk' => $row['nuptk'], // Link to teacher
                             'created_at' => now(),

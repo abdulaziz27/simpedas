@@ -64,8 +64,10 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
             'R' => 15, // TMT
             'S' => 15, // STATUS
             'T' => 30, // EMAIL
-            'U' => 25, // PASSWORD_GURU
-            'V' => 80, // PETUNJUK - Lebar untuk petunjuk
+            'U' => 20, // PASSWORD_GURU
+            'V' => 60, // PETUNJUK
+            'W' => 60, // PETUNJUK (lanjutan)
+            'X' => 60, // PETUNJUK (lanjutan)
         ];
     }
 
@@ -180,7 +182,7 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"Aktif,Tidak Aktif"');
                 }
 
-                // Petunjuk penggunaan di kolom V (setelah PASSWORD_GURU di kolom U)
+                // Petunjuk penggunaan di kanan (dimulai dari kolom V agar tidak tertimbun dengan PASSWORD_GURU)
                 $startCol = 'V';
                 $row = 2;
                 $petunjuk = [
@@ -205,16 +207,13 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     '• Admin sekolah tidak perlu isi NPSN_SEKOLAH',
                     '• Jika EMAIL dan PASSWORD_GURU diisi, akan otomatis buat akun login',
                 ];
-                
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
+                    $sheet->mergeCells($startCol . $row . ':X' . $row);
                     $sheet->getStyle($startCol . $row)->getFont()->setBold($row === 2);
                     $row++;
                 }
-                
-                // Set wrap text untuk kolom petunjuk
-                $sheet->getStyle('V2:V' . ($row - 1))->getAlignment()->setWrapText(true);
-                $sheet->getStyle('V2:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                $sheet->getStyle('V2:X' . ($row - 1))->getAlignment()->setWrapText(true);
             }
         ];
     }

@@ -214,13 +214,13 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
         $teacher = Teacher::create($data);
 
         // Create user account if password provided (manual password)
-        if (!empty($row['email']) && !empty($row['password_admin'])) {
+        if (!empty($row['email']) && !empty($row['password_guru'])) {
             try {
                 $user = \App\Models\User::firstOrCreate(
                     ['email' => $row['email']],
                     [
                         'name' => $row['nama_lengkap'] ?? $teacher->full_name,
-                        'password' => \Illuminate\Support\Facades\Hash::make($row['password_admin']),
+                        'password' => \Illuminate\Support\Facades\Hash::make($row['password_guru']),
                         'school_id' => $teacher->school_id,
                         'teacher_id' => $teacher->id,
                     ]
