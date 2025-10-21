@@ -52,24 +52,24 @@
                 <p class="text-sm text-gray-400 print:text-gray-600">Jenis Kelamin</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gender }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Agama</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->religion ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Jenis PTK</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jenis_ptk ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Alamat</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->address }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Status Kepegawaian</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->employment_status ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">No. Telepon</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->phone ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">TMT Kerja</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->tmt ? $teacher->tmt->format('d F Y') : '-' }}</p>
             </div>
             <div>
-                <p class="text-sm text-gray-400 print:text-gray-600">Pendidikan</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->education_level ?? '-' }} {{ $teacher->education_major ? '- '.$teacher->education_major : '' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Jenjang Pendidikan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jenjang ?? '-' }} {{ $teacher->education_major ? '- '.$teacher->education_major : '' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Golongan</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->rank ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Gelar</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gelar_depan ?? '' }} {{ $teacher->gelar_belakang ?? '' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Jabatan</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->position ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Mengajar</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->mengajar ?? $teacher->subjects ?? '-' }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">TMT Mengajar</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->tmt ? $teacher->tmt->translatedFormat('d - F - Y') : '-' }}</p>

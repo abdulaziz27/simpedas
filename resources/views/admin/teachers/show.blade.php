@@ -37,47 +37,90 @@
 
         {{-- Details Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div>
+            {{-- Kolom Kiri --}}
+            <div>
+                <h4 class="text-xl font-bold text-green-300 mb-4 print:text-green-800">IDENTITAS DASAR</h4>
+                
                 <p class="text-sm text-gray-400 print:text-gray-600">NUPTK</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->nuptk ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Jenis Kelamin</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gender == 'L' ? 'Laki-laki' : ($teacher->gender == 'P' ? 'Perempuan' : '-') }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Tempat, Tanggal Lahir</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->birth_place ?? '-' }}{{ $teacher->birth_date ? ', ' . $teacher->birth_date->translatedFormat('d F Y') : '' }}</p>
 
                 <p class="text-sm text-gray-400 print:text-gray-600">NIP</p>
                 <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->nip ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Tempat, Tanggal Lahir</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ strtoupper($teacher->birth_place) }}, {{ $teacher->birth_date->translatedFormat('d - F - Y') }}</p>
+                <h4 class="text-xl font-bold text-green-300 mb-4 mt-8 print:text-green-800">KEPEGAWAIAN</h4>
+                
+                <p class="text-sm text-gray-400 print:text-gray-600">Status Kepegawaian</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->employment_status ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Jenis Kelamin</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gender }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Jenis PTK</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jenis_ptk ?? '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Agama</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->religion ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">TMT Kerja</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->tmt ? $teacher->tmt->translatedFormat('d F Y') : '-' }}</p>
 
-                <p class="text-sm text-gray-400 print:text-gray-600">Alamat</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->address }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Tenaga Pendidikan Satuan Kerja</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->school->name ?? '-' }}</p>
-                        </div>
-                         <div>
-                <p class="text-sm text-gray-400 print:text-gray-600">Status Guru</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->status }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Golongan</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->rank ?? '-' }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Jabatan</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->position ?? '-' }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">TMT Mengajar</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->tmt ? $teacher->tmt->translatedFormat('d - F - Y') : '-' }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Mata Pelajaran Yang Di Ajar</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->subjects }}</p>
-
-                <p class="text-sm text-gray-400 print:text-gray-600">Pendidikan Terakhir</p>
-                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->education_level ?? '-' }}</p>
+                <p class="text-sm text-gray-400 print:text-gray-600">Keterangan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->keterangan ?? '-' }}</p>
             </div>
+
+            {{-- Kolom Kanan --}}
+            <div>
+                <h4 class="text-xl font-bold text-green-300 mb-4 print:text-green-800">PENDIDIKAN & GELAR</h4>
+                
+                <p class="text-sm text-gray-400 print:text-gray-600">Gelar Depan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gelar_depan ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Gelar Belakang</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->gelar_belakang ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Jenjang Pendidikan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jenjang ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Jurusan/Prodi</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->education_major ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Sertifikasi</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->sertifikasi ?? '-' }}</p>
+
+                <h4 class="text-xl font-bold text-green-300 mb-4 mt-8 print:text-green-800">TUGAS MENGAJAR</h4>
+                
+                <p class="text-sm text-gray-400 print:text-gray-600">Tugas Tambahan</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->tugas_tambahan ?? '-' }}</p>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Mengajar</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->mengajar ?? $teacher->subjects ?? '-' }}</p>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-400 print:text-gray-600">Jam Tugas Tambahan</p>
+                        <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jam_tugas_tambahan ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 print:text-gray-600">JJM</p>
+                        <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->jjm ?? '-' }}</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-400 print:text-gray-600">Total JJM</p>
+                        <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->total_jjm ?? '-' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400 print:text-gray-600">Jumlah Siswa</p>
+                        <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->siswa ?? '-' }}</p>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-400 print:text-gray-600">Kompetensi</p>
+                <p class="font-bold text-white text-lg mb-4 print:text-black">{{ $teacher->kompetensi ?? '-' }}</p>
+            </div>
+        </div>
         </div>
 
         {{-- Action Buttons --}}

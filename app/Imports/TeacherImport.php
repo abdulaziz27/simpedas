@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use App\Helpers\ReligionHelper;
+use App\Helpers\NormalizationHelper;
 
 class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
 {
@@ -23,14 +25,18 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
         $user = Auth::user();
         \Log::info('TeacherImport: Starting collection processing', [
             'total_rows' => $rows->count(),
-            'user_id' => $user->id
+            'user_id' => $user ? $user->id : 'unknown'
         ]);
+
+        // Increase execution time for large imports
+        set_time_limit(300); // 5 minutes
+        ini_set('memory_limit', '512M');
 
         // Validasi template di baris pertama
         if ($rows->count() > 0) {
             $firstRow = $rows->first();
-            $availableColumns = array_keys($firstRow->toArray());
-            $expectedColumns = ['aksi', 'npsn_sekolah', 'nama_lengkap', 'nuptk', 'nip', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'telepon', 'tingkat_pendidikan', 'jurusan_pendidikan', 'mata_pelajaran', 'status_ke_pegawaian', 'pangkat', 'jabatan', 'tmt', 'status', 'email'];
+            $availableColumns = array_keys(is_array($firstRow) ? $firstRow : $firstRow->toArray());
+            $expectedColumns = ['aksi', 'npsn_sekolah', 'nama', 'nuptk', 'jk', 'tempat_lahir', 'tanggal_lahir', 'nip', 'status_kepegawaian', 'jenis_ptk', 'gelar_depan', 'gelar_belakang', 'jenjang', 'jurusan_prodi', 'sertifikasi', 'tmt_kerja', 'tugas_tambahan', 'mengajar', 'jam_tugas_tambahan', 'jjm', 'total_jjm', 'siswa', 'kompetensi'];
 
             $missingColumns = array_diff($expectedColumns, $availableColumns);
             if (!empty($missingColumns)) {
@@ -45,25 +51,24 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
             ]);
         }
 
-        foreach ($rows as $index => $row) {
-            \Log::info('TeacherImport: Processing row ' . ($index + 1), [
-                'row_data' => $row->toArray(),
-                'has_data' => !collect($row)->filter(function ($value) {
-                    return !empty(trim($value));
-                })->isEmpty()
-            ]);
+        // FASE 1: VALIDASI SEMUA DATA TERLEBIH DAHULU (tanpa menyimpan ke database)
+        $validatedRows = [];
+        $hasErrors = false;
 
-            // Skip baris kosong atau baris yang hanya berisi whitespace
-            if (collect($row)->filter(function ($value) {
-                return !empty(trim($value));
-            })->isEmpty()) {
-                \Log::info('TeacherImport: Skipping empty row ' . ($index + 1));
+        \Log::info('[TEACHER_IMPORT] Fase 1: Validasi semua data...');
+
+        // Pre-load existing teachers to avoid N+1 queries
+        $existingTeachers = \App\Models\Teacher::pluck('nuptk', 'nuptk')->toArray();
+        $activeTeachers = \App\Models\Teacher::pluck('nuptk', 'nuptk')->toArray();
+
+        foreach ($rows as $index => $row) {
+            // Skip baris kosong
+            if (collect($row)->filter()->isEmpty()) {
                 continue;
             }
 
             // Skip baris yang tidak memiliki data penting (nuptk atau nama_lengkap)
             if (empty($row['nuptk']) && empty($row['nama_lengkap'])) {
-                \Log::info('TeacherImport: Skipping row without essential data ' . ($index + 1));
                 continue;
             }
 
@@ -71,175 +76,270 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
             if (isset($row['nuptk'])) $row['nuptk'] = (string) $row['nuptk'];
             if (isset($row['nip'])) $row['nip'] = (string) $row['nip'];
             if (isset($row['npsn_sekolah'])) $row['npsn_sekolah'] = (string) $row['npsn_sekolah'];
-            // Validasi kolom yang diperlukan
-            $requiredColumns = ['nuptk', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_ke_pegawaian'];
-            $missingColumns = [];
-            foreach ($requiredColumns as $col) {
-                if (!isset($row[$col]) || empty($row[$col])) {
-                    $missingColumns[] = $col;
+
+            // NORMALIZATION - Tolerate common typos/variants
+            $row['jk'] = NormalizationHelper::normalizeGender($row['jk'] ?? null);
+            $row['status_kepegawaian'] = NormalizationHelper::normalizeEmploymentStatus($row['status_kepegawaian'] ?? null);
+            $row['aksi'] = NormalizationHelper::normalizeAction($row['aksi'] ?? null);
+
+            try {
+                $action = strtoupper($row['aksi'] ?? 'CREATE');
+                
+                // Validasi data tanpa menyimpan ke database
+                $isValid = $this->validateRowData($row, $index, $action, $user, $existingTeachers, $activeTeachers);
+                if (!$isValid) {
+                    $hasErrors = true;
+                } else {
+                    $validatedRows[] = ['row' => $row, 'index' => $index, 'action' => $action];
                 }
+            } catch (\Exception $e) {
+                $this->addError($index, $e->getMessage());
+                \Log::error('[TEACHER_IMPORT] Exception pada baris ' . ($index + 2) . ': ' . $e->getMessage());
+                $hasErrors = true;
             }
+        }
 
-            if (!empty($missingColumns)) {
-                $this->addError($index, "Kolom yang diperlukan tidak ditemukan atau kosong: " . implode(', ', $missingColumns) . ". Pastikan menggunakan template yang benar.", $row);
-                $this->results['failed']++;
-                continue;
-            }
+        // Jika ada error, jangan lanjutkan ke database
+        if ($hasErrors) {
+            $this->results['failed'] = count($this->results['errors']);
+            \Log::error('[TEACHER_IMPORT] Import dibatalkan karena ada error. Total error: ' . count($this->results['errors']));
+            \Log::error('[TEACHER_IMPORT] Silakan perbaiki semua error di file Excel dan upload ulang.');
+            return;
+        }
 
-            if ($user->hasRole('admin_sekolah')) {
+        // FASE 2: SIMPAN KE DATABASE (hanya jika semua data valid)
+        \Log::info('[TEACHER_IMPORT] Fase 2: Simpan ke database...');
+
+        foreach ($validatedRows as $validatedRow) {
+            $row = $validatedRow['row'];
+            $index = $validatedRow['index'];
+            $action = $validatedRow['action'];
+
+            // Set school_id (sudah divalidasi di fase 1)
+            if ($user && $user->hasRole('admin_sekolah')) {
                 $row['school_id'] = $user->school_id;
             } else {
-                // admin dinas: cari school_id dari NPSN_SEKOLAH
-                if (!empty($row['npsn_sekolah'])) {
-                    $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
-                    if ($school) {
-                        $row['school_id'] = $school->id;
-                    } else {
-                        $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
-                        $this->results['failed']++;
-                        continue;
-                    }
-                } else {
-                    $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
-                    $this->results['failed']++;
-                    continue;
-                }
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                $row['school_id'] = $school->id;
             }
-            // Validasi format tanggal
+
+            // Parse dates (sudah divalidasi di fase 1)
             if (isset($row['tanggal_lahir'])) {
-                \Log::info('TeacherImport: Parsing tanggal_lahir', [
-                    'original' => $row['tanggal_lahir'],
-                    'type' => gettype($row['tanggal_lahir']),
-                    'is_numeric' => is_numeric($row['tanggal_lahir']),
-                    'row_index' => $index + 1
-                ]);
-
-                $tanggalLahir = $this->parseDate($row['tanggal_lahir']);
-                if (!$tanggalLahir) {
-                    $this->addError($index, "Format tanggal lahir tidak valid: '{$row['tanggal_lahir']}'. Gunakan format YYYY-MM-DD (contoh: 1985-07-10) atau DD/MM/YY (contoh: 10/07/85).", $row);
-                    $this->results['failed']++;
-                    continue;
-                }
-                $row['tanggal_lahir'] = $tanggalLahir;
-
-                \Log::info('TeacherImport: Tanggal lahir parsed successfully', [
-                    'original' => $row['tanggal_lahir'],
-                    'parsed' => $tanggalLahir
-                ]);
+                $row['tanggal_lahir'] = $this->parseDate($row['tanggal_lahir']);
             }
-
             if (isset($row['tmt'])) {
-                \Log::info('TeacherImport: Parsing TMT', [
-                    'original' => $row['tmt'],
-                    'type' => gettype($row['tmt']),
-                    'is_numeric' => is_numeric($row['tmt']),
-                    'row_index' => $index + 1
-                ]);
-
-                $tmt = $this->parseDate($row['tmt']);
-                if (!$tmt) {
-                    $this->addError($index, "Format TMT tidak valid: '{$row['tmt']}'. Gunakan format YYYY-MM-DD (contoh: 2010-01-01) atau DD/MM/YY (contoh: 01/01/10).", $row);
-                    $this->results['failed']++;
-                    continue;
-                }
-                $row['tmt'] = $tmt;
-
-                \Log::info('TeacherImport: TMT parsed successfully', [
-                    'original' => $row['tmt'],
-                    'parsed' => $tmt
-                ]);
+                $row['tmt'] = $this->parseDate($row['tmt']);
             }
 
-            $action = strtoupper($row['aksi'] ?? 'CREATE');
-            $result = false;
+            // Execute database operation
             try {
                 switch ($action) {
                     case 'CREATE':
-                        $result = $this->createTeacher($row, $index);
+                        $this->createTeacher($row, $index);
                         break;
                     case 'UPDATE':
-                        $result = $this->updateTeacher($row, $index);
+                        $this->updateTeacher($row, $index);
                         break;
                     case 'DELETE':
-                        $result = $this->deleteTeacher($row, $index);
+                        $this->deleteTeacher($row, $index);
                         break;
-                    default:
-                        $this->addError($index, "Aksi tidak valid: {$action}");
-                        $this->results['failed']++;
-                        continue 2;
                 }
-                if ($result === true) {
-                    $this->results['success']++;
-                } else {
-                    $this->results['failed']++;
-                }
+                $this->results['success']++;
             } catch (\Exception $e) {
                 $this->results['failed']++;
                 $this->addError($index, $e->getMessage());
+                \Log::error('[TEACHER_IMPORT] Database error pada baris ' . ($index + 2) . ': ' . $e->getMessage());
             }
         }
+
+        \Log::info('[TEACHER_IMPORT] Import selesai', [
+            'success' => $this->results['success'],
+            'failed' => $this->results['failed'],
+            'errors_count' => count($this->results['errors']),
+            'warnings_count' => count($this->results['warnings'])
+        ]);
+    }
+
+    protected function validateRowData($row, $index, $action, $user, $existingTeachers, $activeTeachers)
+    {
+        // Validasi berdasarkan aksi
+        switch ($action) {
+            case 'CREATE':
+                return $this->validateCreateData($row, $index, $user, $activeTeachers);
+            case 'UPDATE':
+                return $this->validateUpdateData($row, $index, $user, $existingTeachers);
+            case 'DELETE':
+                return $this->validateDeleteData($row, $index, $user, $existingTeachers);
+            default:
+                $this->addError($index, "Aksi tidak valid: {$action}");
+                return false;
+        }
+    }
+
+    protected function validateCreateData($row, $index, $user, $activeTeachers)
+    {
+        // Validasi field yang diperlukan untuk CREATE
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Cek NUPTK sudah ada atau belum
+        if (!empty($row['nuptk'])) {
+            if (isset($activeTeachers[$row['nuptk']])) {
+                $this->addError($index, "NUPTK sudah terdaftar.", $row);
+                return false;
+            }
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateUpdateData($row, $index, $user, $existingTeachers)
+    {
+        // Cari guru berdasarkan NUPTK (diperlukan sebagai identifier untuk UPDATE)
+        if (empty($row['nuptk'])) {
+            $this->addError($index, "NUPTK wajib diisi untuk UPDATE (sebagai identifier)");
+            return false;
+        }
+
+        if (!isset($existingTeachers[$row['nuptk']])) {
+            $this->addError($index, "Guru tidak ditemukan untuk update");
+            return false;
+        }
+
+        // Validasi field yang diperlukan untuk update
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateDeleteData($row, $index, $user, $existingTeachers)
+    {
+        // Cari guru berdasarkan NUPTK (diperlukan sebagai identifier untuk DELETE)
+        if (empty($row['nuptk'])) {
+            $this->addError($index, "NUPTK wajib diisi untuk DELETE (sebagai identifier)");
+            return false;
+        }
+
+        if (!isset($existingTeachers[$row['nuptk']])) {
+            $this->addError($index, "Guru tidak ditemukan untuk delete");
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function validateRequired($row, $index, $user)
+    {
+        $requiredColumns = ['nama']; // Only required fields - NUPTK is optional
+        
+        if ($user && $user->hasRole('admin_dinas')) {
+            $requiredColumns[] = 'npsn_sekolah';
+        }
+
+        $missingColumns = [];
+        foreach ($requiredColumns as $col) {
+            if (!isset($row[$col]) || empty($row[$col])) {
+                $missingColumns[] = $col;
+            }
+        }
+
+        if (!empty($missingColumns)) {
+            $this->addError($index, "Kolom yang diperlukan tidak ditemukan atau kosong: " . implode(', ', $missingColumns) . ". Pastikan menggunakan template yang benar.", $row);
+            return false;
+        }
+
+        // Validasi NPSN sekolah untuk admin dinas
+        if ($user && $user->hasRole('admin_dinas')) {
+            if (!empty($row['npsn_sekolah'])) {
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                if (!$school) {
+                    $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
+                    return false;
+                }
+            } else {
+                $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function validateDataFormats($row, $index)
+    {
+        $hasError = false;
+
+        // Validasi jenis kelamin (optional, flexible)
+        if (!empty($row['jk']) && !in_array($row['jk'], ['L', 'P'])) {
+            $this->addError($index, "Jenis kelamin harus 'L' atau 'P'.", $row);
+            $hasError = true;
+        }
+
+        // No strict validation for other fields - allow free input as per Dapodik
+
+        // Validasi format tanggal
+        if (!empty($row['tanggal_lahir'])) {
+            $tanggalLahir = $this->parseDate($row['tanggal_lahir']);
+            if (!$tanggalLahir) {
+                $this->addError($index, "Format tanggal lahir tidak valid: '{$row['tanggal_lahir']}'. Gunakan format YYYY-MM-DD (contoh: 1985-07-10) atau DD/MM/YY (contoh: 10/07/85).", $row);
+                $hasError = true;
+            }
+        }
+
+        if (!empty($row['tmt_kerja'])) {
+            $tmt = $this->parseDate($row['tmt_kerja']);
+            if (!$tmt) {
+                $this->addError($index, "Format TMT Kerja tidak valid: '{$row['tmt_kerja']}'. Gunakan format YYYY-MM-DD (contoh: 2010-01-01) atau DD/MM/YY (contoh: 01/01/10).", $row);
+                $hasError = true;
+            }
+        }
+
+        return !$hasError;
     }
 
     protected function createTeacher($row, $index)
     {
-        if (!$this->validateRequired($row, $index)) return false;
+        $user = Auth::user();
+        if (!$this->validateRequired($row, $index, $user)) return false;
         $existing = Teacher::where('nuptk', $row['nuptk'])->first();
         if ($existing) {
             $this->addError($index, "NUPTK sudah terdaftar.", $row);
             return false;
         }
-        // Mapping field dari header bahasa Indonesia ke field database
+        // Mapping field dari header Dapodik ke field database
         $data = [
             'school_id' => $row['school_id'] ?? null,
-            'full_name' => $row['nama_lengkap'] ?? null,
+            'full_name' => $row['nama'] ?? null,
             'nuptk' => $row['nuptk'] ?? null,
-            'nip' => $row['nip'] ?? null,
+            'gender' => $row['jk'] ?? null,
             'birth_place' => $row['tempat_lahir'] ?? null,
             'birth_date' => $row['tanggal_lahir'] ?? null,
-            'gender' => $row['jenis_kelamin'] ?? null,
-            'religion' => $row['agama'] ?? null,
-            'address' => $row['alamat'] ?? null,
-            'phone' => $row['telepon'] ?? null,
-            'education_level' => $row['tingkat_pendidikan'] ?? null,
-            'education_major' => $row['jurusan_pendidikan'] ?? null,
-            'subjects' => $row['mata_pelajaran'] ?? null,
-            'employment_status' => $row['status_ke_pegawaian'] ?? null,
-            'rank' => $row['pangkat'] ?? null,
-            'position' => $row['jabatan'] ?? null,
-            'tmt' => $row['tmt'] ?? null,
-            'status' => $row['status'] ?? 'Aktif',
-            'academic_year' => $row['tahun_akademik'] ?? null,
+            'nip' => $row['nip'] ?? null,
+            'employment_status' => $row['status_kepegawaian'] ?? null,
+            'jenis_ptk' => $row['jenis_ptk'] ?? null,
+            'gelar_depan' => $row['gelar_depan'] ?? null,
+            'gelar_belakang' => $row['gelar_belakang'] ?? null,
+            'jenjang' => $row['jenjang'] ?? null,
+            'education_major' => $row['jurusan_prodi'] ?? null,
+            'sertifikasi' => $row['sertifikasi'] ?? null,
+            'tmt' => $row['tmt_kerja'] ?? null,
+            'tugas_tambahan' => $row['tugas_tambahan'] ?? null,
+            'mengajar' => $row['mengajar'] ?? null,
+            'jam_tugas_tambahan' => $row['jam_tugas_tambahan'] ?? null,
+            'jjm' => $row['jjm'] ?? null,
+            'total_jjm' => $row['total_jjm'] ?? null,
+            'siswa' => $row['siswa'] ?? null,
+            'kompetensi' => $row['kompetensi'] ?? null,
         ];
 
         $teacher = Teacher::create($data);
 
-        // Create user account if password provided (manual password)
-        if (!empty($row['email']) && !empty($row['password_guru'])) {
-            try {
-                $user = \App\Models\User::firstOrCreate(
-                    ['email' => $row['email']],
-                    [
-                        'name' => $row['nama_lengkap'] ?? $teacher->full_name,
-                        'password' => \Illuminate\Support\Facades\Hash::make($row['password_guru']),
-                        'school_id' => $teacher->school_id,
-                        'teacher_id' => $teacher->id,
-                    ]
-                );
-
-                if (!$user->hasRole('guru')) {
-                    $user->assignRole('guru');
-                }
-
-                // Ensure linkage
-                $user->school_id = $teacher->school_id;
-                $user->teacher_id = $teacher->id;
-                $user->save();
-
-                $this->addWarning($index, "User guru berhasil dibuat dengan password manual.");
-            } catch (\Exception $e) {
-                $this->addWarning($index, "Gagal membuat user guru: {$e->getMessage()}");
-            }
-        }
+        // User creation removed - focus on Dapodik data only
         return true;
     }
 
@@ -254,25 +354,28 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
             $this->addError($index, "Guru tidak ditemukan untuk update", $row);
             return false;
         }
-        // Mapping field dari header bahasa Indonesia ke field database
+        // Mapping field dari header Dapodik ke field database
         $data = [
-            'full_name' => $row['nama_lengkap'] ?? $teacher->full_name,
-            'nip' => $row['nip'] ?? $teacher->nip,
+            'full_name' => $row['nama'] ?? $teacher->full_name,
+            'gender' => $row['jk'] ?? $teacher->gender,
             'birth_place' => $row['tempat_lahir'] ?? $teacher->birth_place,
             'birth_date' => $row['tanggal_lahir'] ?? $teacher->birth_date,
-            'gender' => $row['jenis_kelamin'] ?? $teacher->gender,
-            'religion' => $row['agama'] ?? $teacher->religion,
-            'address' => $row['alamat'] ?? $teacher->address,
-            'phone' => $row['telepon'] ?? $teacher->phone,
-            'education_level' => $row['tingkat_pendidikan'] ?? $teacher->education_level,
-            'education_major' => $row['jurusan_pendidikan'] ?? $teacher->education_major,
-            'subjects' => $row['mata_pelajaran'] ?? $teacher->subjects,
-            'employment_status' => $row['status_ke_pegawaian'] ?? $teacher->employment_status,
-            'rank' => $row['pangkat'] ?? $teacher->rank,
-            'position' => $row['jabatan'] ?? $teacher->position,
-            'tmt' => $row['tmt'] ?? $teacher->tmt,
-            'status' => $row['status'] ?? $teacher->status,
-            'academic_year' => $row['tahun_akademik'] ?? $teacher->academic_year,
+            'nip' => $row['nip'] ?? $teacher->nip,
+            'employment_status' => $row['status_kepegawaian'] ?? $teacher->employment_status,
+            'jenis_ptk' => $row['jenis_ptk'] ?? $teacher->jenis_ptk,
+            'gelar_depan' => $row['gelar_depan'] ?? $teacher->gelar_depan,
+            'gelar_belakang' => $row['gelar_belakang'] ?? $teacher->gelar_belakang,
+            'jenjang' => $row['jenjang'] ?? $teacher->jenjang,
+            'education_major' => $row['jurusan_prodi'] ?? $teacher->education_major,
+            'sertifikasi' => $row['sertifikasi'] ?? $teacher->sertifikasi,
+            'tmt' => $row['tmt_kerja'] ?? $teacher->tmt,
+            'tugas_tambahan' => $row['tugas_tambahan'] ?? $teacher->tugas_tambahan,
+            'mengajar' => $row['mengajar'] ?? $teacher->mengajar,
+            'jam_tugas_tambahan' => $row['jam_tugas_tambahan'] ?? $teacher->jam_tugas_tambahan,
+            'jjm' => $row['jjm'] ?? $teacher->jjm,
+            'total_jjm' => $row['total_jjm'] ?? $teacher->total_jjm,
+            'siswa' => $row['siswa'] ?? $teacher->siswa,
+            'kompetensi' => $row['kompetensi'] ?? $teacher->kompetensi,
         ];
 
         $teacher->update($data);
@@ -294,21 +397,6 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
         return true;
     }
 
-    protected function validateRequired($row, $index)
-    {
-        $required = ['nuptk', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_ke_pegawaian'];
-        if (Auth::user()->hasRole('admin_dinas')) {
-            $required[] = 'npsn_sekolah';
-        }
-        $hasError = false;
-        foreach ($required as $field) {
-            if (empty($row[$field])) {
-                $this->addError($index, "Kolom '{$field}' wajib diisi.", $row);
-                $hasError = true;
-            }
-        }
-        return !$hasError;
-    }
 
     protected function isValidDate($dateValue)
     {
@@ -415,7 +503,7 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
         if ($row) {
             $infoParts = [];
             if (!empty($row['nuptk'])) $infoParts[] = 'NUPTK: ' . $row['nuptk'];
-            if (!empty($row['nama_lengkap'])) $infoParts[] = 'Nama: ' . $row['nama_lengkap'];
+            if (!empty($row['nama'])) $infoParts[] = 'Nama: ' . $row['nama'];
             if ($infoParts) $info = ' (' . implode(', ', $infoParts) . ')';
         }
         $this->results['errors'][] = "Baris " . ($index + 2) . "{$info}: {$message}";
@@ -434,36 +522,26 @@ class TeacherImport implements ToCollection, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
+            // Basic validation - most fields are optional and flexible
             '*.nuptk' => ['nullable', 'max:20'],
-            '*.nip' => ['nullable', 'max:20'],
-            '*.nama_lengkap' => ['nullable', 'max:255'],
-            '*.jenis_kelamin' => ['nullable', 'in:Laki-laki,Perempuan'],
+            '*.nama' => ['nullable', 'max:255'],
+            '*.jk' => ['nullable', 'in:L,P'],
             '*.tempat_lahir' => ['nullable', 'max:100'],
             '*.tanggal_lahir' => ['nullable', function ($attribute, $value, $fail) {
                 if (!empty($value) && !$this->isValidDate($value)) {
                     $fail('Format tanggal tidak valid: ' . $value . '. Gunakan format DD/MM/YY atau YYYY-MM-DD.');
                 }
             }],
-            '*.agama' => ['nullable', 'max:50'],
-            '*.alamat' => ['nullable'],
-            '*.telepon' => ['nullable', 'max:20'],
-            '*.tingkat_pendidikan' => ['nullable', 'max:100'],
-            '*.jurusan_pendidikan' => ['nullable', 'max:100'],
-            '*.mata_pelajaran' => ['nullable'],
-            '*.status_ke_pegawaian' => ['nullable', 'in:PNS,PPPK,GTY,PTY'],
-            '*.pangkat' => ['nullable', 'max:50'],
-            '*.jabatan' => ['nullable', 'max:100'],
-            '*.tmt' => ['nullable', function ($attribute, $value, $fail) {
+            '*.nip' => ['nullable', 'max:20'],
+            '*.tmt_kerja' => ['nullable', function ($attribute, $value, $fail) {
                 if (!empty($value) && !$this->isValidDate($value)) {
-                    $fail('Format TMT tidak valid: ' . $value . '. Gunakan format DD/MM/YY atau YYYY-MM-DD.');
+                    $fail('Format TMT Kerja tidak valid: ' . $value . '. Gunakan format DD/MM/YY atau YYYY-MM-DD.');
                 }
             }],
-            '*.status' => ['nullable', 'in:Aktif,Tidak Aktif'],
-            '*.email' => ['nullable', 'max:255', function ($attribute, $value, $fail) {
-                if (!empty($value) && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $fail('Format email tidak valid: ' . $value);
-                }
-            }],
+            '*.jam_tugas_tambahan' => ['nullable', 'integer', 'min:0'],
+            '*.jjm' => ['nullable', 'integer', 'min:0'],
+            '*.total_jjm' => ['nullable', 'integer', 'min:0'],
+            '*.siswa' => ['nullable', 'integer', 'min:0'],
             '*.npsn_sekolah' => ['nullable', 'max:20'],
         ];
     }

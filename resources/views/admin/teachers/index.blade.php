@@ -36,15 +36,13 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Mata Pelajaran</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Jenis PTK</label>
                         <div class="relative">
-                            <select name="subjects" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
-                                <option value="">Semua Mapel</option>
-                                <option value="Matematika" {{ request('subjects') == 'Matematika' ? 'selected' : '' }}>Matematika</option>
-                                <option value="Bahasa Indonesia" {{ request('subjects') == 'Bahasa Indonesia' ? 'selected' : '' }}>Bahasa Indonesia</option>
-                                <option value="Bahasa Inggris" {{ request('subjects') == 'Bahasa Inggris' ? 'selected' : '' }}>Bahasa Inggris</option>
-                                <option value="IPA" {{ request('subjects') == 'IPA' ? 'selected' : '' }}>IPA</option>
-                                <option value="IPS" {{ request('subjects') == 'IPS' ? 'selected' : '' }}>IPS</option>
+                            <select name="jenis_ptk" class="block w-full bg-white rounded-lg border-0 py-2.5 pl-4 pr-10 focus:ring-2 focus:ring-green-400">
+                                <option value="">Semua Jenis PTK</option>
+                                <option value="Guru" {{ request('jenis_ptk') == 'Guru' ? 'selected' : '' }}>Guru</option>
+                                <option value="Kepala Sekolah" {{ request('jenis_ptk') == 'Kepala Sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
+                                <option value="Wakil Kepala Sekolah" {{ request('jenis_ptk') == 'Wakil Kepala Sekolah' ? 'selected' : '' }}>Wakil Kepala Sekolah</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,14 +158,17 @@
                             return [
                                 $teacher->full_name,
                                 $teacher->nuptk ?? '-',
+                                ($teacher->gender == 'L' ? 'Laki-laki' : ($teacher->gender == 'P' ? 'Perempuan' : '-')),
+                                $teacher->jenis_ptk ?? '-',
+                                $teacher->employment_status ?? '-',
                                 $teacher->school->name ?? '-',
-                                $teacher->subjects ?? '-',
-                                '<a href="'.(auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.show', $teacher->id) : route('dinas.teachers.show', $teacher->id)).'" class="text-green-300 hover:underline">Lihat detail</a>'
+                                $teacher->mengajar ?? $teacher->subjects ?? '-',
+                                '<a href="'.(auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.show', $teacher->id) : route('dinas.teachers.show', $teacher->id)).'" class="text-green-300 hover:underline">Detail</a>'
                             ];
                         });
                     @endphp
                     <div class="bg-[#09443c] rounded-xl shadow-lg px-0 py-8">
-                        <x-public.data-table :headers="['Nama','NUPTK','Asal Sekolah','Mata Pelajaran','Aksi']" :rows="$rows" />
+                        <x-public.data-table :headers="['Nama','NUPTK','JK','Jenis PTK','Status Kepegawaian','Sekolah','Mengajar','Aksi']" :rows="$rows" />
                     </div>
                 @endif
 

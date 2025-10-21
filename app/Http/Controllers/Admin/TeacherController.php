@@ -34,14 +34,22 @@ class TeacherController extends Controller
             $query->where('school_id', $request->school_id);
         }
 
-        // Filter by subjects
-        if ($request->filled('subjects')) {
-            $query->where('subjects', 'like', '%' . $request->subjects . '%');
+        // Filter by jenis_ptk
+        if ($request->filled('jenis_ptk')) {
+            $query->where('jenis_ptk', 'like', '%' . $request->jenis_ptk . '%');
         }
 
         // Filter by employment status
         if ($request->filled('employment_status')) {
-            $query->where('employment_status', $request->employment_status);
+            $query->where('employment_status', 'like', '%' . $request->employment_status . '%');
+        }
+
+        // Filter by mengajar (subjects)
+        if ($request->filled('mengajar')) {
+            $query->where(function($q) use ($request) {
+                $q->where('mengajar', 'like', '%' . $request->mengajar . '%')
+                  ->orWhere('subjects', 'like', '%' . $request->mengajar . '%');
+            });
         }
 
         // Search
@@ -72,25 +80,41 @@ class TeacherController extends Controller
     {
         $user = Auth::user();
 
-        // Adjust validation rules to match database schema
+        // Validation rules for Dapodik format
         $data = $request->validate([
+            // Required fields
             'full_name' => 'required|string|max:255',
             'nuptk' => 'nullable|string|max:20|unique:teachers,nuptk',
-            'nip' => 'nullable|string|max:20',
+            
+            // Basic info
+            'gender' => 'required|in:L,P',
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
-            'gender' => 'required|in:Laki-laki,Perempuan',
-            'religion' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'education_level' => 'nullable|string|max:100',
+            'nip' => 'nullable|string|max:20',
+            
+            // Employment info
+            'employment_status' => 'nullable|string|max:100',
+            'jenis_ptk' => 'nullable|string|max:100',
+            
+            // Academic credentials
+            'gelar_depan' => 'nullable|string|max:50',
+            'gelar_belakang' => 'nullable|string|max:50',
+            'jenjang' => 'nullable|string|max:50',
             'education_major' => 'nullable|string|max:100',
-            'subjects' => 'nullable|string',
-            'employment_status' => 'nullable|in:PNS,PPPK,GTY,PTY',
-            'rank' => 'nullable|string|max:50',
-            'position' => 'nullable|string|max:100',
+            'sertifikasi' => 'nullable|string|max:100',
+            
+            // Work details
             'tmt' => 'nullable|date',
-            'status' => 'required|in:Aktif,Tidak Aktif,Pensiun',
+            'tugas_tambahan' => 'nullable|string',
+            'mengajar' => 'nullable|string',
+            'jam_tugas_tambahan' => 'nullable|integer|min:0',
+            'jjm' => 'nullable|integer|min:0',
+            'total_jjm' => 'nullable|integer|min:0',
+            'siswa' => 'nullable|integer|min:0',
+            'kompetensi' => 'nullable|string',
+            
+            // Additional fields
+            'subjects' => 'nullable|string',
             'photo' => 'nullable|file|image|max:2048',
             'school_id' => $user->hasRole('admin_dinas')
                 ? 'required|exists:schools,id'
@@ -99,8 +123,9 @@ class TeacherController extends Controller
             // Custom error messages
             'school_id.required' => 'Pilih sekolah terlebih dahulu.',
             'full_name.required' => 'Nama lengkap harus diisi.',
+            'nuptk.unique' => 'NUPTK sudah terdaftar.',
             'gender.required' => 'Jenis kelamin harus dipilih.',
-            'status.required' => 'Status guru harus dipilih.',
+            'gender.in' => 'Jenis kelamin harus L atau P.',
         ]);
 
         // Set school_id for admin_sekolah
@@ -118,7 +143,7 @@ class TeacherController extends Controller
 
             // Redirect with success message
             return redirect()->route(
-                $user->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'admin.teachers.index'
+                $user->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'dinas.teachers.index'
             )->with('success', 'Data guru berhasil ditambahkan.');
         } catch (\Exception $e) {
             // Log the error for debugging
@@ -147,31 +172,48 @@ class TeacherController extends Controller
         $this->authorizeAccess($teacher);
 
         $data = $request->validate([
+            // Required fields
             'full_name' => 'required|string|max:255',
             'nuptk' => 'nullable|string|max:20|unique:teachers,nuptk,' . $teacher->id,
-            'nip' => 'nullable|string|max:20',
+            
+            // Basic info
+            'gender' => 'required|in:L,P',
             'birth_place' => 'nullable|string|max:100',
             'birth_date' => 'nullable|date',
-            'gender' => 'required|in:Laki-laki,Perempuan',
-            'religion' => 'nullable|in:Islam,Kristen,Katolik,Hindu,Buddha,Konghucu',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'education_level' => 'nullable|string|max:100',
+            'nip' => 'nullable|string|max:20',
+            
+            // Employment info
+            'employment_status' => 'nullable|string|max:100',
+            'jenis_ptk' => 'nullable|string|max:100',
+            
+            // Academic credentials
+            'gelar_depan' => 'nullable|string|max:50',
+            'gelar_belakang' => 'nullable|string|max:50',
+            'jenjang' => 'nullable|string|max:50',
             'education_major' => 'nullable|string|max:100',
-            'subjects' => 'nullable|string',
-            'employment_status' => 'nullable|in:PNS,PPPK,GTY,PTY',
-            'rank' => 'nullable|string|max:50',
-            'position' => 'nullable|string|max:100',
+            'sertifikasi' => 'nullable|string|max:100',
+            
+            // Work details
             'tmt' => 'nullable|date',
-            'status' => 'required|in:Aktif,Tidak Aktif,Pensiun',
+            'tugas_tambahan' => 'nullable|string',
+            'mengajar' => 'nullable|string',
+            'jam_tugas_tambahan' => 'nullable|integer|min:0',
+            'jjm' => 'nullable|integer|min:0',
+            'total_jjm' => 'nullable|integer|min:0',
+            'siswa' => 'nullable|integer|min:0',
+            'kompetensi' => 'nullable|string',
+            
+            // Additional fields
+            'subjects' => 'nullable|string',
             'photo' => 'nullable|file|image|max:2048',
             'school_id' => Auth::user()->hasRole('admin_dinas')
                 ? 'required|exists:schools,id'
                 : 'sometimes',
         ], [
             'full_name.required' => 'Nama lengkap harus diisi.',
+            'nuptk.unique' => 'NUPTK sudah terdaftar.',
             'gender.required' => 'Jenis kelamin harus dipilih.',
-            'status.required' => 'Status guru harus dipilih.',
+            'gender.in' => 'Jenis kelamin harus L atau P.',
         ]);
 
         try {
@@ -188,7 +230,7 @@ class TeacherController extends Controller
             $teacher->update($data);
 
             return redirect()->route(
-                Auth::user()->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'admin.teachers.index'
+                Auth::user()->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'dinas.teachers.index'
             )->with('success', "Data guru {$teacher->full_name} berhasil diperbarui.");
         } catch (\Exception $e) {
             \Log::error('Teacher update failed: ' . $e->getMessage());
@@ -210,7 +252,7 @@ class TeacherController extends Controller
             $teacher->delete();
 
             return redirect()->route(
-                Auth::user()->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'admin.teachers.index'
+                Auth::user()->hasRole('admin_sekolah') ? 'sekolah.teachers.index' : 'dinas.teachers.index'
             )->with('success', "Guru {$teacherName} berhasil dihapus.");
         } catch (\Exception $e) {
             \Log::error('Teacher deletion failed: ' . $e->getMessage());

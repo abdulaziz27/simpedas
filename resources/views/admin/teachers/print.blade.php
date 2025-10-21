@@ -185,13 +185,13 @@
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Agama</div>
-                <div class="detail-value">{{ $teacher->religion ?? '-' }}</div>
+                <div class="detail-label">Jenis PTK</div>
+                <div class="detail-value">{{ $teacher->jenis_ptk ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Alamat</div>
-                <div class="detail-value">{{ $teacher->address }}</div>
+                <div class="detail-label">Status Kepegawaian</div>
+                <div class="detail-value">{{ $teacher->employment_status ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
@@ -207,13 +207,13 @@
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Golongan</div>
-                <div class="detail-value">{{ $teacher->rank ?? '-' }}</div>
+                <div class="detail-label">Gelar Depan</div>
+                <div class="detail-value">{{ $teacher->gelar_depan ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Jabatan</div>
-                <div class="detail-value">{{ $teacher->position ?? '-' }}</div>
+                <div class="detail-label">Gelar Belakang</div>
+                <div class="detail-value">{{ $teacher->gelar_belakang ?? '-' }}</div>
             </div>
 
             <div class="detail-item">
@@ -227,8 +227,18 @@
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Pendidikan Terakhir</div>
-                <div class="detail-value">{{ $teacher->education_level ?? '-' }}</div>
+                <div class="detail-label">Jenjang Pendidikan</div>
+                <div class="detail-value">{{ $teacher->jenjang ?? '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Jurusan/Prodi</div>
+                <div class="detail-value">{{ $teacher->education_major ?? '-' }}</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Mengajar</div>
+                <div class="detail-value">{{ $teacher->mengajar ?? $teacher->subjects ?? '-' }}</div>
             </div>
         </div>
     </div>

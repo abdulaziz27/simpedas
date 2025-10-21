@@ -14,30 +14,37 @@ return new class extends Migration
         Schema::create('teachers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('school_id');
-            $table->string('full_name');
-            $table->string('nuptk', 20)->unique()->nullable();
-            $table->string('nip', 20)->nullable();
-            $table->string('birth_place', 100)->nullable();
-            $table->date('birth_date')->nullable();
-            $table->enum('gender', ['Laki-laki', 'Perempuan']);
-            $table->enum('religion', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
-            $table->text('address')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone', 20)->nullable();
-            $table->string('education_level', 100)->nullable();
-            $table->string('education_major', 100)->nullable();
-            $table->text('subjects')->nullable(); // JSON atau comma separated
-            $table->enum('employment_status', ['PNS', 'PPPK', 'GTY', 'PTY'])->nullable();
-            $table->string('rank', 50)->nullable();
-            $table->string('position', 100)->nullable();
-            $table->date('tmt')->nullable(); // Tanggal Mulai Tugas
-            $table->enum('status', ['Aktif', 'Tidak Aktif', 'Pensiun']);
-            $table->string('academic_year', 20)->nullable();
-            $table->string('photo')->nullable();
+            
+            // === DAPODIK FIELDS ===
+            $table->string('full_name'); // Nama
+            $table->string('nuptk', 20)->unique()->nullable(); // NUPTK
+            $table->string('gender', 1); // JK (L/P)
+            $table->string('birth_place', 100)->nullable(); // Tempat Lahir
+            $table->date('birth_date')->nullable(); // Tanggal Lahir
+            $table->string('nip', 20)->nullable(); // NIP
+            $table->string('employment_status')->nullable(); // Status Kepegawaian
+            $table->string('jenis_ptk')->nullable(); // Jenis PTK
+            $table->string('gelar_depan')->nullable(); // Gelar Depan
+            $table->string('gelar_belakang')->nullable(); // Gelar Belakang
+            $table->string('jenjang')->nullable(); // Jenjang (S1, S2, S3, etc)
+            $table->string('education_major')->nullable(); // Jurusan/Prodi
+            $table->string('sertifikasi')->nullable(); // Sertifikasi
+            $table->date('tmt')->nullable(); // TMT Kerja
+            $table->text('tugas_tambahan')->nullable(); // Tugas Tambahan
+            $table->text('mengajar')->nullable(); // Mengajar
+            $table->integer('jam_tugas_tambahan')->nullable(); // Jam Tugas Tambahan
+            $table->integer('jjm')->nullable(); // JJM
+            $table->integer('total_jjm')->nullable(); // Total JJM
+            $table->integer('siswa')->nullable(); // Siswa
+            $table->text('kompetensi')->nullable(); // Kompetensi
+            
+            // === ADDITIONAL FIELDS (not in Dapodik but useful) ===
+            $table->text('subjects')->nullable(); // Keep for backward compatibility
+            $table->string('photo')->nullable(); // For manual photo upload
             $table->timestamps();
 
             $table->foreign('school_id')->references('id')->on('schools')->onDelete('cascade');
-            $table->index(['school_id', 'status']);
+            $table->index(['school_id']);
             $table->index('full_name');
             $table->index('nuptk');
         });

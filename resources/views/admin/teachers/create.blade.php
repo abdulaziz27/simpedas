@@ -39,9 +39,10 @@
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
+                    {{-- === IDENTITAS DASAR === --}}
                     {{-- Nama Lengkap --}}
                     <div>
-                        <label for="full_name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <label for="full_name" class="block text-sm font-medium text-gray-700">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" name="full_name" id="full_name" value="{{ old('full_name') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                         @error('full_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
@@ -53,115 +54,146 @@
                         @error('nuptk') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- NIP --}}
-                    <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP (kalau PNS)</label>
-                        <input type="text" name="nip" id="nip" value="{{ old('nip') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('nip') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    {{-- Tempat, Tanggal Lahir --}}
-                    <div>
-                        <label for="birth_place_date" class="block text-sm font-medium text-gray-700">Tempat, Tanggal Lahir</label>
-                        <div class="flex space-x-2">
-                            <input type="text" name="birth_place" value="{{ old('birth_place') }}" placeholder="Tempat Lahir" required class="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <input type="date" name="birth_date" value="{{ old('birth_date') }}" required class="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        </div>
-                        @error('birth_place') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        @error('birth_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
                     {{-- Jenis Kelamin --}}
                     <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin <span class="text-red-500">*</span></label>
                         <select name="gender" id="gender" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                             <option value="">Pilih</option>
-                            <option value="Laki-laki" {{ old('gender') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="Perempuan" {{ old('gender') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                            <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
                         </select>
                         @error('gender') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Agama --}}
+                    {{-- Tempat Lahir --}}
                     <div>
-                        <label for="religion" class="block text-sm font-medium text-gray-700">Agama</label>
-                        <select name="religion" id="religion" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="">Pilih</option>
-                            <option value="Islam" {{ old('religion') == 'Islam' ? 'selected' : '' }}>Islam</option>
-                            <option value="Kristen" {{ old('religion') == 'Kristen' ? 'selected' : '' }}>Kristen</option>
-                            <option value="Katolik" {{ old('religion') == 'Katolik' ? 'selected' : '' }}>Katolik</option>
-                            <option value="Hindu" {{ old('religion') == 'Hindu' ? 'selected' : '' }}>Hindu</option>
-                            <option value="Buddha" {{ old('religion') == 'Buddha' ? 'selected' : '' }}>Buddha</option>
-                            <option value="Konghucu" {{ old('religion') == 'Konghucu' ? 'selected' : '' }}>Konghucu</option>
-                        </select>
-                        @error('religion') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="birth_place" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
+                        <input type="text" name="birth_place" id="birth_place" value="{{ old('birth_place') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('birth_place') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Alamat --}}
-                    <div class="md:col-span-2">
-                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea name="address" id="address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>{{ old('address') }}</textarea>
-                        @error('address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    {{-- Tanggal Lahir --}}
+                    <div>
+                        <label for="birth_date" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+                        <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('birth_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- NIP --}}
+                    <div>
+                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                        <input type="text" name="nip" id="nip" value="{{ old('nip') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('nip') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Status Kepegawaian --}}
                     <div>
                         <label for="employment_status" class="block text-sm font-medium text-gray-700">Status Kepegawaian</label>
-                        <select name="employment_status" id="employment_status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="">Pilih</option>
-                            <option value="PNS" {{ old('employment_status') == 'PNS' ? 'selected' : '' }}>PNS</option>
-                            <option value="PPPK" {{ old('employment_status') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
-                            <option value="GTT" {{ old('employment_status') == 'GTT' ? 'selected' : '' }}>GTT</option>
-                            <option value="GTY" {{ old('employment_status') == 'GTY' ? 'selected' : '' }}>GTY</option>
-                        </select>
+                        <input type="text" name="employment_status" id="employment_status" value="{{ old('employment_status') }}" placeholder="PNS, PPPK, GTY, PTY" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                         @error('employment_status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Golongan --}}
+                    {{-- Jenis PTK --}}
                     <div>
-                        <label for="rank" class="block text-sm font-medium text-gray-700">Golongan (jika PNS)</label>
-                        <input type="text" name="rank" id="rank" value="{{ old('rank') }}" placeholder="Contoh: III/c" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('rank') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="jenis_ptk" class="block text-sm font-medium text-gray-700">Jenis PTK</label>
+                        <input type="text" name="jenis_ptk" id="jenis_ptk" value="{{ old('jenis_ptk') }}" placeholder="Guru, Kepala Sekolah, Wakil Kepala Sekolah" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('jenis_ptk') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Jabatan --}}
+
+
+                    {{-- === GELAR & PENDIDIKAN === --}}
+                    {{-- Gelar Depan --}}
                     <div>
-                        <label for="position" class="block text-sm font-medium text-gray-700">Jabatan</label>
-                        <input type="text" name="position" id="position" value="{{ old('position') }}" placeholder="Contoh: Guru Kelas, Wakepsek" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('position') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="gelar_depan" class="block text-sm font-medium text-gray-700">Gelar Depan</label>
+                        <input type="text" name="gelar_depan" id="gelar_depan" value="{{ old('gelar_depan') }}" placeholder="Drs., Dr., Prof." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('gelar_depan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- TMT Mengajar --}}
+                    {{-- Gelar Belakang --}}
                     <div>
-                        <label for="tmt" class="block text-sm font-medium text-gray-700">TMT Mengajar</label>
+                        <label for="gelar_belakang" class="block text-sm font-medium text-gray-700">Gelar Belakang</label>
+                        <input type="text" name="gelar_belakang" id="gelar_belakang" value="{{ old('gelar_belakang') }}" placeholder="S.Pd., M.Pd., S.Mers" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('gelar_belakang') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Jenjang --}}
+                    <div>
+                        <label for="jenjang" class="block text-sm font-medium text-gray-700">Jenjang</label>
+                        <input type="text" name="jenjang" id="jenjang" value="{{ old('jenjang') }}" placeholder="S1, S2, S3, D3, D4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('jenjang') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Jurusan/Prodi --}}
+                    <div>
+                        <label for="education_major" class="block text-sm font-medium text-gray-700">Jurusan/Prodi</label>
+                        <input type="text" name="education_major" id="education_major" value="{{ old('education_major') }}" placeholder="Pendidikan Matematika" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('education_major') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Sertifikasi --}}
+                    <div>
+                        <label for="sertifikasi" class="block text-sm font-medium text-gray-700">Sertifikasi</label>
+                        <input type="text" name="sertifikasi" id="sertifikasi" value="{{ old('sertifikasi') }}" placeholder="Mata pelajaran yang disertifikasi" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('sertifikasi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- TMT Kerja --}}
+                    <div>
+                        <label for="tmt" class="block text-sm font-medium text-gray-700">TMT Kerja</label>
                         <input type="date" name="tmt" id="tmt" value="{{ old('tmt') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
                         @error('tmt') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Mata Pelajaran Yang Di Ajar --}}
-                    <div>
-                        <label for="subjects" class="block text-sm font-medium text-gray-700">Mata Pelajaran Yang Di Ajar</label>
-                        <input type="text" name="subjects" id="subjects" value="{{ old('subjects') }}" placeholder="Contoh: Matematika, Fisika" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('subjects') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    {{-- === TUGAS & MENGAJAR === --}}
+                    {{-- Tugas Tambahan --}}
+                    <div class="md:col-span-2">
+                        <label for="tugas_tambahan" class="block text-sm font-medium text-gray-700">Tugas Tambahan</label>
+                        <textarea name="tugas_tambahan" id="tugas_tambahan" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('tugas_tambahan') }}</textarea>
+                        @error('tugas_tambahan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Pendidikan Terakhir --}}
-                    <div>
-                        <label for="education_level" class="block text-sm font-medium text-gray-700">Pendidikan Terakhir</label>
-                        <input type="text" name="education_level" id="education_level" value="{{ old('education_level') }}" placeholder="Contoh: S1 Pendidikan Matematika" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                        @error('education_level') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    {{-- Mengajar --}}
+                    <div class="md:col-span-2">
+                        <label for="mengajar" class="block text-sm font-medium text-gray-700">Mengajar</label>
+                        <textarea name="mengajar" id="mengajar" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('mengajar') }}</textarea>
+                        @error('mengajar') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Status Guru --}}
+                    {{-- === JAM MENGAJAR === --}}
+                    {{-- Jam Tugas Tambahan --}}
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700">Status Guru</label>
-                        <select name="status" id="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                            <option value="">Pilih Status</option>
-                            <option value="Aktif" {{ old('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="Tidak Aktif" {{ old('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                            <option value="Pensiun" {{ old('status') == 'Pensiun' ? 'selected' : '' }}>Pensiun</option>
-                        </select>
-                        @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="jam_tugas_tambahan" class="block text-sm font-medium text-gray-700">Jam Tugas Tambahan</label>
+                        <input type="number" name="jam_tugas_tambahan" id="jam_tugas_tambahan" value="{{ old('jam_tugas_tambahan') }}" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('jam_tugas_tambahan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- JJM --}}
+                    <div>
+                        <label for="jjm" class="block text-sm font-medium text-gray-700">JJM</label>
+                        <input type="number" name="jjm" id="jjm" value="{{ old('jjm') }}" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('jjm') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Total JJM --}}
+                    <div>
+                        <label for="total_jjm" class="block text-sm font-medium text-gray-700">Total JJM</label>
+                        <input type="number" name="total_jjm" id="total_jjm" value="{{ old('total_jjm') }}" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('total_jjm') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Siswa --}}
+                    <div>
+                        <label for="siswa" class="block text-sm font-medium text-gray-700">Jumlah Siswa</label>
+                        <input type="number" name="siswa" id="siswa" value="{{ old('siswa') }}" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        @error('siswa') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Kompetensi --}}
+                    <div class="md:col-span-2">
+                        <label for="kompetensi" class="block text-sm font-medium text-gray-700">Kompetensi</label>
+                        <textarea name="kompetensi" id="kompetensi" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('kompetensi') }}</textarea>
+                        @error('kompetensi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Sekolah (hanya untuk admin_dinas) --}}

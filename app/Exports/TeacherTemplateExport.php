@@ -19,25 +19,27 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
         return [
             'AKSI',
             'NPSN_SEKOLAH',
-            'NAMA_LENGKAP',
+            'NAMA',
             'NUPTK',
-            'NIP',
-            'JENIS_KELAMIN',
+            'JK',
             'TEMPAT_LAHIR',
             'TANGGAL_LAHIR',
-            'AGAMA',
-            'ALAMAT',
-            'TELEPON',
-            'TINGKAT_PENDIDIKAN',
-            'JURUSAN_PENDIDIKAN',
-            'MATA_PELAJARAN',
-            'STATUS_KE_PEGAWAIAN',
-            'PANGKAT',
-            'JABATAN',
-            'TMT',
-            'STATUS',
-            'EMAIL',
-            'PASSWORD_GURU',
+            'NIP',
+            'STATUS_KEPEGAWAIAN',
+            'JENIS_PTK',
+            'GELAR_DEPAN',
+            'GELAR_BELAKANG',
+            'JENJANG',
+            'JURUSAN_PRODI',
+            'SERTIFIKASI',
+            'TMT_KERJA',
+            'TUGAS_TAMBAHAN',
+            'MENGAJAR',
+            'JAM_TUGAS_TAMBAHAN',
+            'JJM',
+            'TOTAL_JJM',
+            'SISWA',
+            'KOMPETENSI',
         ];
     }
 
@@ -46,26 +48,28 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
         return [
             'A' => 15, // AKSI
             'B' => 15, // NPSN_SEKOLAH
-            'C' => 30, // NAMA_LENGKAP
-            'D' => 15, // NUPTK
-            'E' => 15, // NIP
-            'F' => 15, // JENIS_KELAMIN
-            'G' => 20, // TEMPAT_LAHIR
-            'H' => 15, // TANGGAL_LAHIR
-            'I' => 20, // AGAMA
-            'J' => 40, // ALAMAT
-            'K' => 20, // TELEPON
-            'L' => 25, // TINGKAT_PENDIDIKAN
-            'M' => 25, // JURUSAN_PENDIDIKAN
-            'N' => 30, // MATA_PELAJARAN
-            'O' => 20, // STATUS_KE_PEGAWAIAN
-            'P' => 20, // PANGKAT
-            'Q' => 25, // JABATAN
-            'R' => 15, // TMT
-            'S' => 15, // STATUS
-            'T' => 30, // EMAIL
-            'U' => 25, // PASSWORD_GURU
-            'V' => 80, // PETUNJUK - Lebar untuk petunjuk
+            'C' => 30, // NAMA
+            'D' => 20, // NUPTK
+            'E' => 5,  // JK
+            'F' => 20, // TEMPAT_LAHIR
+            'G' => 15, // TANGGAL_LAHIR
+            'H' => 20, // NIP
+            'I' => 15, // STATUS_KEPEGAWAIAN
+            'J' => 15, // JENIS_PTK
+            'L' => 10, // GELAR_DEPAN
+            'M' => 10, // GELAR_BELAKANG
+            'N' => 10, // JENJANG
+            'O' => 25, // JURUSAN_PRODI
+            'P' => 25, // SERTIFIKASI
+            'Q' => 15, // TMT_KERJA
+            'R' => 30, // TUGAS_TAMBAHAN
+            'S' => 25, // MENGAJAR
+            'T' => 10, // JAM_TUGAS_TAMBAHAN
+            'U' => 10, // JJM
+            'V' => 10, // TOTAL_JJM
+            'W' => 10, // SISWA
+            'X' => 30, // KOMPETENSI
+            'Y' => 80, // PETUNJUK
         ];
     }
 
@@ -116,9 +120,9 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setFormula1('"CREATE,UPDATE,DELETE"');
                 }
 
-                // 2. JENIS_KELAMIN (Column F) - Laki-laki, Perempuan
+                // 2. JK (Column E) - L, P
                 for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('F' . $row)->getDataValidation();
+                    $validation = $sheet->getCell('E' . $row)->getDataValidation();
                     $validation->setType(DataValidation::TYPE_LIST);
                     $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
                     $validation->setAllowBlank(false);
@@ -126,84 +130,50 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     $validation->setShowErrorMessage(true);
                     $validation->setShowDropDown(true);
                     $validation->setErrorTitle('Input error');
-                    $validation->setError('Nilai tidak valid. Pilih Laki-laki atau Perempuan.');
+                    $validation->setError('Nilai tidak valid. Pilih L atau P.');
                     $validation->setPromptTitle('Pilih Jenis Kelamin');
-                    $validation->setPrompt('Pilih Laki-laki atau Perempuan');
-                    $validation->setFormula1('"Laki-laki,Perempuan"');
+                    $validation->setPrompt('Pilih L untuk Laki-laki atau P untuk Perempuan');
+                    $validation->setFormula1('"L,P"');
                 }
 
-                // 3. AGAMA (Column I) - Islam, Kristen, Katolik, Hindu, Buddha, Konghucu
-                for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('I' . $row)->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST);
-                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                    $validation->setAllowBlank(false);
-                    $validation->setShowInputMessage(true);
-                    $validation->setShowErrorMessage(true);
-                    $validation->setShowDropDown(true);
-                    $validation->setErrorTitle('Input error');
-                    $validation->setError('Nilai tidak valid. Pilih dari daftar agama.');
-                    $validation->setPromptTitle('Pilih Agama');
-                    $validation->setPrompt('Pilih agama yang sesuai');
-                    $validation->setFormula1('"Islam,Kristen,Katolik,Hindu,Buddha,Konghucu"');
-                }
+                // Remove strict validations - let users input freely
+                // Only keep basic validations for critical fields if needed
 
-                // 4. STATUS_KE_PEGAWAIAN (Column O) - PNS, PPPK, GTY, PTY
-                for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('O' . $row)->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST);
-                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                    $validation->setAllowBlank(false);
-                    $validation->setShowInputMessage(true);
-                    $validation->setShowErrorMessage(true);
-                    $validation->setShowDropDown(true);
-                    $validation->setErrorTitle('Input error');
-                    $validation->setError('Nilai tidak valid. Pilih status kepegawaian.');
-                    $validation->setPromptTitle('Pilih Status Kepegawaian');
-                    $validation->setPrompt('Pilih PNS, PPPK, GTY, atau PTY');
-                    $validation->setFormula1('"PNS,PPPK,GTY,PTY"');
-                }
-
-                // 5. STATUS (Column S) - Aktif, Tidak Aktif
-                for ($row = 2; $row <= $lastRow; $row++) {
-                    $validation = $sheet->getCell('S' . $row)->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST);
-                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-                    $validation->setAllowBlank(false);
-                    $validation->setShowInputMessage(true);
-                    $validation->setShowErrorMessage(true);
-                    $validation->setShowDropDown(true);
-                    $validation->setErrorTitle('Input error');
-                    $validation->setError('Nilai tidak valid. Pilih status aktif.');
-                    $validation->setPromptTitle('Pilih Status');
-                    $validation->setPrompt('Pilih Aktif atau Tidak Aktif');
-                    $validation->setFormula1('"Aktif,Tidak Aktif"');
-                }
-
-                // Petunjuk penggunaan di kolom V (setelah PASSWORD_GURU di kolom U)
-                $startCol = 'V';
+                // Petunjuk penggunaan di kolom Y
+                $startCol = 'Y';
                 $row = 2;
                 $petunjuk = [
-                    'PETUNJUK PENGGUNAAN:',
-                    '1. Kolom AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
-                    '2. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah',
-                    '3. Kolom NAMA_LENGKAP: Wajib diisi',
-                    '4. Kolom NUPTK: Wajib diisi (unik) untuk identifikasi',
-                    '5. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan (dropdown)',
-                    '6. Kolom TEMPAT_LAHIR: Wajib diisi',
-                    '7. Kolom TANGGAL_LAHIR: Wajib diisi (format: YYYY-MM-DD)',
-                    '8. Kolom AGAMA: Wajib diisi dengan agama yang valid (dropdown)',
-                    '9. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian (dropdown)',
-                    '10. Kolom STATUS: Wajib diisi dengan Aktif atau Tidak Aktif (dropdown)',
-                    '11. Kolom EMAIL: Opsional, untuk akun login guru',
-                    '12. Kolom PASSWORD_GURU: Opsional, untuk akun login guru',
+                    'PETUNJUK PENGGUNAAN TEMPLATE DAPODIK:',
+                    '1. AKSI: Wajib diisi dengan CREATE, UPDATE, atau DELETE (dropdown)',
+                    '2. NPSN_SEKOLAH: Wajib untuk admin dinas, otomatis untuk admin sekolah',
+                    '3. NAMA: Wajib diisi - nama lengkap guru',
+                    '4. NUPTK: Opsional untuk CREATE (wajib untuk UPDATE/DELETE sebagai identifier)',
+                    '5. JK: Wajib diisi dengan L atau P (dropdown)',
+                    '6. TEMPAT_LAHIR: Wajib diisi',
+                    '7. TANGGAL_LAHIR: Format YYYY-MM-DD (contoh: 1985-07-20)',
+                    '8. NIP: Opsional - Nomor Induk Pegawai',
+                    '9. STATUS_KEPEGAWAIAN: Contoh: PNS, PPPK, GTY, PTY',
+                    '10. JENIS_PTK: Contoh: Guru, Kepala Sekolah, Wakil Kepala Sekolah',
+                    '12. GELAR_DEPAN: Contoh: Drs., Dr., Prof.',
+                    '13. GELAR_BELAKANG: Contoh: S.Pd., M.Pd., S.Mers',
+                    '14. JENJANG: Contoh: S1, S2, S3, D3, D4',
+                    '15. JURUSAN_PRODI: Jurusan/Program Studi pendidikan',
+                    '16. SERTIFIKASI: Mata pelajaran yang disertifikasi',
+                    '17. TMT_KERJA: Tanggal Mulai Tugas (YYYY-MM-DD)',
+                    '18. TUGAS_TAMBAHAN: Text bebas tugas tambahan',
+                    '19. MENGAJAR: Mata pelajaran yang diajar',
+                    '20. JAM_TUGAS_TAMBAHAN: Angka jam tugas tambahan',
+                    '21. JJM: Jam Jaminan Mengajar (angka)',
+                    '22. TOTAL_JJM: Total Jam Jaminan Mengajar (angka)',
+                    '23. SISWA: Jumlah siswa yang diajar (angka)',
+                    '24. KOMPETENSI: Text bebas kompetensi guru',
                     '',
-                    'CATATAN:',
-                    '• Dropdown tersedia di semua baris (2-1000)',
-                    '• Format tanggal: YYYY-MM-DD (contoh: 1990-05-15)',
-                    '• NUPTK harus unik, tidak boleh duplikat',
-                    '• Admin sekolah tidak perlu isi NPSN_SEKOLAH',
-                    '• Jika EMAIL dan PASSWORD_GURU diisi, akan otomatis buat akun login',
+                    'CATATAN PENTING:',
+                    '• Field wajib: NAMA saja (NUPTK opsional untuk CREATE, wajib untuk UPDATE/DELETE)',
+                    '• Semua field lain opsional dan bisa diisi bebas',
+                    '• Tidak ada batasan enum - input sesuai data Dapodik',
+                    '• Format tanggal: YYYY-MM-DD',
+                    '• NUPTK harus unik per guru',
                 ];
                 
                 foreach ($petunjuk as $text) {
@@ -213,8 +183,8 @@ class TeacherTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                 }
                 
                 // Set wrap text untuk kolom petunjuk
-                $sheet->getStyle('V2:V' . ($row - 1))->getAlignment()->setWrapText(true);
-                $sheet->getStyle('V2:V' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                $sheet->getStyle('Y2:Y' . ($row - 1))->getAlignment()->setWrapText(true);
+                $sheet->getStyle('Y2:Y' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
             }
         ];
     }
