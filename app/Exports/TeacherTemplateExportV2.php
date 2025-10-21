@@ -192,7 +192,7 @@ class TeacherTemplateExportV2 implements WithHeadings, WithEvents, WithStyles, W
                     '5. Kolom JENIS_KELAMIN: Wajib diisi dengan Laki-laki atau Perempuan (dropdown)',
                     '6. Kolom TEMPAT_LAHIR: Wajib diisi',
                     '7. Kolom TANGGAL_LAHIR: Wajib diisi (format: YYYY-MM-DD)',
-                    '8. Kolom AGAMA: Wajib diisi dengan agama yang valid (dropdown)',
+                    '8. Kolom AGAMA: Wajib diisi (dropdown: Islam, Kristen, Katolik/Katholik, Hindu, Buddha, Konghucu)',
                     '9. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi dengan status kepegawaian (dropdown)',
                     '10. Kolom STATUS: Wajib diisi dengan Aktif atau Tidak Aktif (dropdown)',
                     '11. Kolom EMAIL: Opsional, untuk akun login guru',
@@ -204,6 +204,7 @@ class TeacherTemplateExportV2 implements WithHeadings, WithEvents, WithStyles, W
                     '• NUPTK harus unik, tidak boleh duplikat',
                     '• Admin sekolah tidak perlu isi NPSN_SEKOLAH',
                     '• Jika EMAIL dan PASSWORD_GURU diisi, akan otomatis buat akun login',
+                    '• Agama: Bisa tulis "Katolik" atau "Katholik", sistem akan otomatis normalisasi',
                 ];
                 
                 foreach ($petunjuk as $text) {

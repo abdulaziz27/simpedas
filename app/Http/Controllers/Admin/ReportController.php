@@ -143,12 +143,15 @@ class ReportController extends Controller
 
             \Log::info('Exporting teachers report to Excel');
 
-            // Get teachers data
+            // Get teachers data with Dapodik fields
             $teachers = Teacher::with('school')
-                ->select('school_id', 'employment_status', 'education_level', 'full_name', 'nip', 'phone')
+                ->select('school_id', 'full_name', 'nuptk', 'gender', 'birth_place', 'birth_date', 'nip', 
+                        'employment_status', 'jenis_ptk', 'gelar_depan', 'gelar_belakang', 'jenjang', 
+                        'education_major', 'sertifikasi', 'tmt', 'tugas_tambahan', 'mengajar', 
+                        'jam_tugas_tambahan', 'jjm', 'total_jjm', 'siswa', 'kompetensi')
                 ->orderBy('school_id')
+                ->orderBy('jenis_ptk')
                 ->orderBy('employment_status')
-                ->orderBy('education_level')
                 ->orderBy('full_name')
                 ->get();
 
@@ -166,9 +169,14 @@ class ReportController extends Controller
                 ->setSubject('Data Guru')
                 ->setDescription('Dibuat oleh Sistem Informasi Manajemen Pendidikan Dasar');
 
-            // Headers
-            $headers = ['NO', 'NAMA SEKOLAH', 'NPSN', 'NAMA LENGKAP GURU', 'NIP', 'STATUS KEPEGAWAIAN', 'TINGKAT PENDIDIKAN', 'NO. TELEPON'];
-            $lastCol = 'H';
+            // Headers with Dapodik fields
+            $headers = [
+                'NO', 'NAMA SEKOLAH', 'NPSN', 'NAMA', 'NUPTK', 'JK', 'TEMPAT LAHIR', 'TANGGAL LAHIR', 
+                'NIP', 'STATUS KEPEGAWAIAN', 'JENIS PTK', 'GELAR DEPAN', 'GELAR BELAKANG', 'JENJANG', 
+                'JURUSAN/PRODI', 'SERTIFIKASI', 'TMT KERJA', 'TUGAS TAMBAHAN', 'MENGAJAR', 
+                'JAM TUGAS TAMBAHAN', 'JJM', 'TOTAL JJM', 'SISWA', 'KOMPETENSI'
+            ];
+            $lastCol = chr(65 + count($headers) - 1); // Dynamic last column
 
             // Set headers
             foreach ($headers as $index => $header) {
@@ -198,16 +206,32 @@ class ReportController extends Controller
             $sheet->getStyle('A1:' . $lastCol . '1')->applyFromArray($headerStyle);
             $sheet->getRowDimension(1)->setRowHeight(30);
 
-            // Set column widths
+            // Set column widths for Dapodik fields
             $columnWidths = [
                 'A' => 5,   // NO
                 'B' => 35,  // NAMA SEKOLAH
                 'C' => 15,  // NPSN
-                'D' => 30,  // NAMA LENGKAP GURU
-                'E' => 20,  // NIP
-                'F' => 20,  // STATUS KEPEGAWAIAN
-                'G' => 20,  // TINGKAT PENDIDIKAN
-                'H' => 15   // NO. TELEPON
+                'D' => 30,  // NAMA
+                'E' => 20,  // NUPTK
+                'F' => 5,   // JK
+                'G' => 20,  // TEMPAT LAHIR
+                'H' => 15,  // TANGGAL LAHIR
+                'I' => 20,  // NIP
+                'J' => 15,  // STATUS KEPEGAWAIAN
+                'K' => 15,  // JENIS PTK
+                'L' => 10,  // GELAR DEPAN
+                'M' => 10,  // GELAR BELAKANG
+                'N' => 10,  // JENJANG
+                'O' => 25,  // JURUSAN/PRODI
+                'P' => 20,  // SERTIFIKASI
+                'Q' => 15,  // TMT KERJA
+                'R' => 25,  // TUGAS TAMBAHAN
+                'S' => 25,  // MENGAJAR
+                'T' => 10,  // JAM TUGAS TAMBAHAN
+                'U' => 10,  // JJM
+                'V' => 10,  // TOTAL JJM
+                'W' => 10,  // SISWA
+                'X' => 30   // KOMPETENSI
             ];
             foreach ($columnWidths as $col => $width) {
                 $sheet->getColumnDimension($col)->setWidth($width);
@@ -222,17 +246,34 @@ class ReportController extends Controller
                 $sheet->setCellValue('B' . $row, $teacher->school->name ?? 'Tidak Diketahui');
                 $sheet->setCellValue('C' . $row, $teacher->school->npsn ?? '');
                 $sheet->setCellValue('D' . $row, $teacher->full_name ?? '');
-
-                // Set format NIP sebagai text terlebih dahulu, lalu isi data
-                $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-                $sheet->setCellValue('E' . $row, $teacher->nip ?? '');
-
-                $sheet->setCellValue('F' . $row, $teacher->employment_status ?? '');
-                $sheet->setCellValue('G' . $row, $teacher->education_level ?? '');
-
-                // Set format Phone sebagai text terlebih dahulu, lalu isi data
-                $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
-                $sheet->setCellValue('H' . $row, $teacher->phone ?? '');
+                
+                // Set format NUPTK sebagai text
+                $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                $sheet->setCellValue('E' . $row, $teacher->nuptk ?? '');
+                
+                $sheet->setCellValue('F' . $row, $teacher->gender == 'L' ? 'Laki-laki' : ($teacher->gender == 'P' ? 'Perempuan' : ''));
+                $sheet->setCellValue('G' . $row, $teacher->birth_place ?? '');
+                $sheet->setCellValue('H' . $row, $teacher->birth_date ? $teacher->birth_date->format('d/m/Y') : '');
+                
+                // Set format NIP sebagai text
+                $sheet->getStyle('I' . $row)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                $sheet->setCellValue('I' . $row, $teacher->nip ?? '');
+                
+                $sheet->setCellValue('J' . $row, $teacher->employment_status ?? '');
+                $sheet->setCellValue('K' . $row, $teacher->jenis_ptk ?? '');
+                $sheet->setCellValue('L' . $row, $teacher->gelar_depan ?? '');
+                $sheet->setCellValue('M' . $row, $teacher->gelar_belakang ?? '');
+                $sheet->setCellValue('N' . $row, $teacher->jenjang ?? '');
+                $sheet->setCellValue('O' . $row, $teacher->education_major ?? '');
+                $sheet->setCellValue('P' . $row, $teacher->sertifikasi ?? '');
+                $sheet->setCellValue('Q' . $row, $teacher->tmt ? $teacher->tmt->format('d/m/Y') : '');
+                $sheet->setCellValue('R' . $row, $teacher->tugas_tambahan ?? '');
+                $sheet->setCellValue('S' . $row, $teacher->mengajar ?? '');
+                $sheet->setCellValue('T' . $row, $teacher->jam_tugas_tambahan ?? '');
+                $sheet->setCellValue('U' . $row, $teacher->jjm ?? '');
+                $sheet->setCellValue('V' . $row, $teacher->total_jjm ?? '');
+                $sheet->setCellValue('W' . $row, $teacher->siswa ?? '');
+                $sheet->setCellValue('X' . $row, $teacher->kompetensi ?? '');
 
                 // Warna baris selang-seling
                 if ($row % 2 == 0) {

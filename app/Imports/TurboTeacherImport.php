@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use App\Helpers\NormalizationHelper;
 
 class TurboTeacherImport implements ToCollection, WithHeadingRow
 {
@@ -50,6 +51,10 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
             if ($this->isEmptyRow($row)) continue;
 
             $row = $this->castRowData($row);
+            // NORMALIZATION
+            $row['jenis_kelamin'] = NormalizationHelper::normalizeGender($row['jenis_kelamin'] ?? null);
+            $row['status_kepegawaian'] = NormalizationHelper::normalizeEmploymentStatus($row['status_kepegawaian'] ?? null);
+            $row['aksi'] = NormalizationHelper::normalizeAction($row['aksi'] ?? null);
 
             // Fast validation (minimal checks)
             if (empty($row['nama_lengkap'])) {
@@ -123,6 +128,15 @@ class TurboTeacherImport implements ToCollection, WithHeadingRow
             'deletes' => count($deleteNuptks),
             'prep_time' => number_format($prepTime * 1000, 2) . 'ms'
         ]);
+
+        // All-or-nothing: abort if any validation errors were collected
+        if (!empty($this->results['errors'])) {
+            $this->results['failed'] = count($this->results['errors']);
+            Log::error('[TURBO_TEACHER] Import aborted due to validation errors', [
+                'errors_count' => $this->results['failed']
+            ]);
+            return;
+        }
 
         // Execute all operations in single transaction (SUPER FAST!)
         DB::transaction(function () use ($teacherInserts, $teacherUpdates, $deleteNuptks, $userInserts) {

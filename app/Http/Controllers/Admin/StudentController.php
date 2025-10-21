@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\StudentImportService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\StudentTemplateExport;
+use App\Helpers\ReligionHelper;
 
 class StudentController extends Controller
 {
@@ -79,7 +80,7 @@ class StudentController extends Controller
             'jenis_kelamin' => 'required|in:L,P',
             'tempat_lahir' => 'required|string|max:100',
             'tanggal_lahir' => 'required|date',
-            'agama' => 'required|string|max:50',
+            'agama' => ReligionHelper::getValidationRule(true),
             'rombel' => 'required|string|max:50',
             'sekolah_id' => 'required|exists:schools,id',
 
@@ -108,6 +109,9 @@ class StudentController extends Controller
         if ($user->hasRole('admin_sekolah')) {
             $data['sekolah_id'] = $user->school_id;
         }
+
+        // Normalize religion input
+        $data['agama'] = ReligionHelper::normalizeReligion($data['agama']);
 
         $student = Student::create($data);
 
@@ -139,7 +143,7 @@ class StudentController extends Controller
             'jenis_kelamin' => 'required|in:L,P',
             'tempat_lahir' => 'required|string|max:100',
             'tanggal_lahir' => 'required|date',
-            'agama' => 'required|string|max:50',
+            'agama' => ReligionHelper::getValidationRule(true),
             'rombel' => 'required|string|max:50',
             'sekolah_id' => 'required|exists:schools,id',
 
@@ -168,6 +172,9 @@ class StudentController extends Controller
         if (Auth::user()->hasRole('admin_sekolah')) {
             $data['sekolah_id'] = Auth::user()->school_id;
         }
+
+        // Normalize religion input
+        $data['agama'] = ReligionHelper::normalizeReligion($data['agama']);
 
         $student->update($data);
 

@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use App\Helpers\ReligionHelper;
+use App\Helpers\NormalizationHelper;
 
 class StudentImport implements ToCollection, WithHeadingRow, WithValidation
 {
@@ -27,95 +29,210 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             'rows_count' => $rows->count(),
         ]);
 
-        foreach ($rows as $index => $row) {
-            \Log::info('[STUDENT_IMPORT] Processing row ' . ($index + 2), [
-                'row_data' => $row->toArray(),
-                'row_keys' => array_keys($row->toArray()),
-                'is_empty' => $this->isEmptyRow($row),
-            ]);
+        // Increase execution time for large imports
+        set_time_limit(300); // 5 minutes
+        ini_set('memory_limit', '512M');
 
+        // FASE 1: VALIDASI SEMUA DATA TERLEBIH DAHULU (tanpa menyimpan ke database)
+        $validatedRows = [];
+        $hasErrors = false;
+
+        \Log::info('[STUDENT_IMPORT] Fase 1: Validasi semua data...');
+
+        // Pre-load existing students to avoid N+1 queries
+        $existingStudents = \App\Models\Student::pluck('nisn', 'nisn')->toArray();
+        $activeStudents = \App\Models\Student::pluck('nisn', 'nisn')->toArray();
+
+        foreach ($rows as $index => $row) {
+            // Convert Collection to array for easier manipulation
+            $row = $row->toArray();
+            
             if ($this->isEmptyRow($row)) {
-                \Log::info('[STUDENT_IMPORT] Skipping empty row ' . ($index + 2));
                 continue;
             }
+
             // CASTING - Convert all data to proper types
             $row = $this->castRowData($row);
+            // NORMALIZATION - Tolerate common typos/variants
+            $row['jenis_kelamin'] = NormalizationHelper::normalizeGender($row['jenis_kelamin'] ?? null);
+            $row['status_siswa'] = NormalizationHelper::normalizeStatus($row['status_siswa'] ?? null);
+            $row['aksi'] = NormalizationHelper::normalizeAction($row['aksi'] ?? null);
+            $row['rombel'] = NormalizationHelper::normalizeRombel($row['rombel'] ?? null);
+            if (array_key_exists('kip', $row)) {
+                $row['kip'] = NormalizationHelper::normalizeYesNo($row['kip']);
+            }
+
+            try {
+                $action = strtoupper($row['aksi'] ?? 'CREATE');
+                
+                // Validasi data tanpa menyimpan ke database
+                $isValid = $this->validateRowData($row, $index, $action, $user, $existingStudents, $activeStudents);
+                if (!$isValid) {
+                    $hasErrors = true;
+                } else {
+                    $validatedRows[] = ['row' => $row, 'index' => $index, 'action' => $action];
+                }
+            } catch (\Exception $e) {
+                $this->addError($index, $e->getMessage());
+                \Log::error('[STUDENT_IMPORT] Exception pada baris ' . ($index + 2) . ': ' . $e->getMessage());
+                $hasErrors = true;
+            }
+        }
+
+        // Jika ada error, jangan lanjutkan ke database
+        if ($hasErrors) {
+            $this->results['failed'] = count($this->results['errors']);
+            \Log::error('[STUDENT_IMPORT] Import dibatalkan karena ada error. Total error: ' . count($this->results['errors']));
+            \Log::error('[STUDENT_IMPORT] Silakan perbaiki semua error di file Excel dan upload ulang.');
+            return;
+        }
+
+        // FASE 2: SIMPAN KE DATABASE (hanya jika semua data valid)
+        \Log::info('[STUDENT_IMPORT] Fase 2: Simpan ke database...');
+
+        foreach ($validatedRows as $validatedRow) {
+            $row = $validatedRow['row'];
+            $index = $validatedRow['index'];
+            $action = $validatedRow['action'];
+
+            // Set sekolah_id (sudah divalidasi di fase 1)
             if ($user->hasRole('admin_sekolah')) {
                 $row['sekolah_id'] = $user->school_id;
             } else {
-                // admin dinas: cari sekolah_id dari NPSN_SEKOLAH
-                if (!empty($row['npsn_sekolah'])) {
-                    $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
-                    if ($school) {
-                        $row['sekolah_id'] = $school->id;
-                    } else {
-                        $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
-                        $this->results['failed']++;
-                        continue;
-                    }
-                } else {
-                    $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
-                    $this->results['failed']++;
-                    continue;
-                }
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                $row['sekolah_id'] = $school->id;
             }
-            $action = strtoupper($row['aksi'] ?? 'CREATE');
-            \Log::info('[STUDENT_IMPORT] Row ' . ($index + 2) . ' action: ' . $action);
 
-            $result = false;
+            // Execute database operation
             try {
                 switch ($action) {
                     case 'CREATE':
-                        $result = $this->createStudent($row, $index);
+                        $this->createStudent($row, $index);
                         break;
                     case 'UPDATE':
-                        $result = $this->updateStudent($row, $index);
+                        $this->updateStudent($row, $index);
                         break;
                     case 'DELETE':
-                        $result = $this->deleteStudent($row, $index);
+                        $this->deleteStudent($row, $index);
                         break;
-                    default:
-                        \Log::error('[STUDENT_IMPORT] Row ' . ($index + 2) . ' invalid action: ' . $action);
-                        $this->addError($index, "Aksi tidak valid: {$action}");
-                        $this->results['failed']++;
-                        continue 2;
                 }
-                if ($result === true) {
-                    \Log::info('[STUDENT_IMPORT] Row ' . ($index + 2) . ' ' . $action . ' success');
-                    $this->results['success']++;
-                } else {
-                    \Log::warning('[STUDENT_IMPORT] Row ' . ($index + 2) . ' ' . $action . ' failed');
-                    $this->results['failed']++;
-                }
+                $this->results['success']++;
             } catch (\Exception $e) {
                 $this->results['failed']++;
                 $this->addError($index, $e->getMessage());
-                \Log::error('[STUDENT_IMPORT] Exception baris ' . ($index + 2) . ': ' . $e->getMessage(), [
-                    'trace' => $e->getTraceAsString(),
-                    'row_hint' => [
-                        'nisn' => $row['nisn'] ?? null,
-                        'nama_lengkap' => $row['nama_lengkap'] ?? null,
-                        'school_id' => $row['school_id'] ?? null,
-                    ],
-                ]);
+                \Log::error('[STUDENT_IMPORT] Database error pada baris ' . ($index + 2) . ': ' . $e->getMessage());
             }
         }
-        \Log::info('[STUDENT_IMPORT] Selesai', [
+
+        \Log::info('[STUDENT_IMPORT] Import selesai', [
             'success' => $this->results['success'],
             'failed' => $this->results['failed'],
-            'errors_sample' => array_slice($this->results['errors'], 0, 5),
-            'warnings_sample' => array_slice($this->results['warnings'], 0, 5),
+            'errors_count' => count($this->results['errors']),
+            'warnings_count' => count($this->results['warnings'])
         ]);
+    }
+
+    protected function validateRowData($row, $index, $action, $user, $existingStudents, $activeStudents)
+    {
+        // Validasi berdasarkan aksi
+        switch ($action) {
+            case 'CREATE':
+                return $this->validateCreateData($row, $index, $user, $activeStudents);
+            case 'UPDATE':
+                return $this->validateUpdateData($row, $index, $user, $existingStudents);
+            case 'DELETE':
+                return $this->validateDeleteData($row, $index, $user, $existingStudents);
+            default:
+                $this->addError($index, "Aksi tidak valid: {$action}");
+                return false;
+        }
+    }
+
+    protected function validateCreateData($row, $index, $user, $activeStudents)
+    {
+        // Validasi field yang diperlukan untuk CREATE
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Cek NISN sudah ada atau belum
+        if (!empty($row['nisn'])) {
+            if (isset($activeStudents[$row['nisn']])) {
+                $this->addError($index, "NISN sudah terdaftar.", $row);
+                return false;
+            }
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateUpdateData($row, $index, $user, $existingStudents)
+    {
+        // Cari siswa berdasarkan NISN
+        if (empty($row['nisn'])) {
+            $this->addError($index, "NISN wajib diisi untuk UPDATE");
+            return false;
+        }
+
+        if (!isset($existingStudents[$row['nisn']])) {
+            $this->addError($index, "Siswa tidak ditemukan untuk update");
+            return false;
+        }
+
+        // Validasi field yang diperlukan untuk update
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateDeleteData($row, $index, $user, $existingStudents)
+    {
+        // Cari siswa berdasarkan NISN
+        if (empty($row['nisn'])) {
+            $this->addError($index, "NISN wajib diisi untuk DELETE");
+            return false;
+        }
+
+        if (!isset($existingStudents[$row['nisn']])) {
+            $this->addError($index, "Siswa tidak ditemukan untuk delete");
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function validateDataFormats($row, $index)
+    {
+        $hasError = false;
+
+        // Validasi jenis kelamin
+        if (!empty($row['jenis_kelamin']) && !in_array($row['jenis_kelamin'], ['L', 'P'])) {
+            $this->addError($index, "Jenis kelamin harus L atau P.", $row);
+            $hasError = true;
+        }
+
+        // Validasi agama
+        if (!empty($row['agama']) && !ReligionHelper::isValidReligion($row['agama'])) {
+            $this->addError($index, "Agama tidak valid. Pilih: Islam, Kristen, Katolik (atau Katholik), Hindu, Buddha, Konghucu.", $row);
+            $hasError = true;
+        }
+
+        // Validasi aksi
+        if (!empty($row['aksi']) && !in_array(strtoupper($row['aksi']), ['CREATE', 'UPDATE', 'DELETE'])) {
+            $this->addError($index, "Aksi harus CREATE, UPDATE, atau DELETE.", $row);
+            $hasError = true;
+        }
+
+        return !$hasError;
     }
 
     protected function createStudent($row, $index)
     {
-        if (!$this->validateRequired($row, $index)) return false;
-        $existing = Student::where('nisn', $row['nisn'])->first();
-        if ($existing) {
-            $this->addError($index, "NISN sudah terdaftar.", $row);
-            return false;
-        }
+        // Validation already done in phase 1, just create the student
 
         // Map header -> DB fields
         $data = [
@@ -126,7 +243,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
             'tempat_lahir' => $row['tempat_lahir'] ?? null,
             'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
-            'agama' => $row['agama'] ?? null,
+            'agama' => ReligionHelper::normalizeReligion($row['agama'] ?? null),
             'rombel' => $row['rombel'] ?? null,
             'status_siswa' => $row['status_siswa'] ?? 'aktif',
             'alamat' => $row['alamat'] ?? null,
@@ -184,7 +301,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             'jenis_kelamin' => $row['jenis_kelamin'] ?? $student->jenis_kelamin,
             'tempat_lahir' => $row['tempat_lahir'] ?? $student->tempat_lahir,
             'tanggal_lahir' => $row['tanggal_lahir'] ?? $student->tanggal_lahir,
-            'agama' => $row['agama'] ?? $student->agama,
+            'agama' => ReligionHelper::normalizeReligion($row['agama'] ?? $student->agama),
             'rombel' => $row['rombel'] ?? $student->rombel,
             'status_siswa' => $row['status_siswa'] ?? $student->status_siswa,
             'alamat' => $row['alamat'] ?? $student->alamat,
@@ -224,7 +341,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
         return true;
     }
 
-    protected function validateRequired($row, $index)
+    protected function validateRequired($row, $index, $user)
     {
         // Skip validation if row is actually empty
         if ($this->isEmptyRow($row)) {
@@ -232,7 +349,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         $required = ['aksi', 'nisn', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'rombel'];
-        if (Auth::user()->hasRole('admin_dinas')) {
+        if ($user->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }
 
@@ -245,20 +362,18 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation
             }
         }
 
-        // Additional validations only if values are present
-        if (!empty($row['jenis_kelamin']) && !in_array($row['jenis_kelamin'], ['L', 'P'])) {
-            $this->addError($index, "Jenis kelamin harus L atau P.", $row);
-            $hasError = true;
-        }
-
-        if (!empty($row['agama']) && !in_array($row['agama'], ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])) {
-            $this->addError($index, "Agama tidak valid. Pilih: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu.", $row);
-            $hasError = true;
-        }
-
-        if (!empty($row['aksi']) && !in_array(strtoupper($row['aksi']), ['CREATE', 'UPDATE', 'DELETE'])) {
-            $this->addError($index, "Aksi harus CREATE, UPDATE, atau DELETE.", $row);
-            $hasError = true;
+        // Validasi NPSN sekolah untuk admin dinas
+        if ($user->hasRole('admin_dinas')) {
+            if (!empty($row['npsn_sekolah'])) {
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                if (!$school) {
+                    $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
+                    $hasError = true;
+                }
+            } else {
+                $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
+                $hasError = true;
+            }
         }
 
         return !$hasError;

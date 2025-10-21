@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use App\Helpers\NormalizationHelper;
 
 class TurboStudentImport implements ToCollection, WithHeadingRow
 {
@@ -50,6 +51,12 @@ class TurboStudentImport implements ToCollection, WithHeadingRow
             if ($this->isEmptyRow($row)) continue;
 
             $row = $this->castRowData($row);
+            // NORMALIZATION
+            $row['jenis_kelamin'] = NormalizationHelper::normalizeGender($row['jenis_kelamin'] ?? null);
+            $row['aksi'] = NormalizationHelper::normalizeAction($row['aksi'] ?? null);
+            if (array_key_exists('kip', $row)) {
+                $row['kip'] = NormalizationHelper::normalizeYesNo($row['kip']);
+            }
 
             // Fast validation (minimal checks)
             if (empty($row['nisn']) || empty($row['nama_lengkap'])) {
@@ -108,6 +115,15 @@ class TurboStudentImport implements ToCollection, WithHeadingRow
             'deletes' => count($deleteNisns),
             'prep_time' => number_format($prepTime * 1000, 2) . 'ms'
         ]);
+
+        // All-or-nothing: abort if any validation errors were collected
+        if (!empty($this->results['errors'])) {
+            $this->results['failed'] = count($this->results['errors']);
+            Log::error('[TURBO_STUDENT] Import aborted due to validation errors', [
+                'errors_count' => $this->results['failed']
+            ]);
+            return;
+        }
 
         // Execute all operations in single transaction (SUPER FAST!)
         DB::transaction(function () use ($studentInserts, $studentUpdates, $deleteNisns) {

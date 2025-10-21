@@ -18,24 +18,33 @@ class Teacher extends Model
         'birth_place',
         'birth_date',
         'gender',
-        'religion',
-        'address',
-        'phone',
-        'education_level',
-        'education_major',
-        'subjects',
         'employment_status',
-        'rank',
-        'position',
+        'jenis_ptk',
+        'keterangan',
+        'gelar_depan',
+        'gelar_belakang',
+        'jenjang',
+        'education_major', // jurusan/prodi
+        'sertifikasi',
         'tmt',
-        'status',
-        'academic_year',
+        'tugas_tambahan',
+        'mengajar',
+        'jam_tugas_tambahan',
+        'jjm',
+        'total_jjm',
+        'siswa',
+        'kompetensi',
+        'subjects', // keep for backward compatibility
         'photo'
     ];
 
     protected $casts = [
         'birth_date' => 'date',
-        'tmt' => 'date'
+        'tmt' => 'date',
+        'jam_tugas_tambahan' => 'integer',
+        'jjm' => 'integer', 
+        'total_jjm' => 'integer',
+        'siswa' => 'integer'
     ];
 
     public function school()

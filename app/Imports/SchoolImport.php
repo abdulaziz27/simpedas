@@ -51,6 +51,10 @@ class SchoolImport implements ToCollection, WithHeadingRow, WithValidation
         $activeSchools = \App\Models\School::pluck('npsn', 'npsn')->toArray();
 
         foreach ($rows as $index => $row) {
+            // Ensure array for key access and array_* functions
+            if ($row instanceof \Illuminate\Support\Collection) {
+                $row = $row->toArray();
+            }
             // Skip baris yang semua kolomnya kosong
             if (collect($row)->filter()->isEmpty()) {
                 continue;

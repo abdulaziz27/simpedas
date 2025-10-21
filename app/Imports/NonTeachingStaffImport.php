@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use App\Helpers\ReligionHelper;
+use App\Helpers\NormalizationHelper;
 
 class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValidation
 {
@@ -26,88 +28,214 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
             'user_id' => $user->id
         ]);
 
-        foreach ($rows as $index => $row) {
-            \Log::info('NonTeachingStaffImport: Processing row ' . ($index + 1), [
-                'row_data' => $row->toArray(),
-                'has_data' => !collect($row)->filter(function ($value) {
-                    return !empty(trim($value));
-                })->isEmpty()
-            ]);
+        // Increase execution time for large imports
+        set_time_limit(300); // 5 minutes
+        ini_set('memory_limit', '512M');
 
-            // Skip baris kosong atau baris yang hanya berisi whitespace
-            if (collect($row)->filter(function ($value) {
-                return !empty(trim($value));
-            })->isEmpty()) {
-                \Log::info('NonTeachingStaffImport: Skipping empty row ' . ($index + 1));
+        // FASE 1: VALIDASI SEMUA DATA TERLEBIH DAHULU (tanpa menyimpan ke database)
+        $validatedRows = [];
+        $hasErrors = false;
+
+        \Log::info('[STAFF_IMPORT] Fase 1: Validasi semua data...');
+
+        // Pre-load existing staff to avoid N+1 queries
+        $existingStaff = \App\Models\NonTeachingStaff::pluck('nip_nik', 'nip_nik')->toArray();
+        $activeStaff = \App\Models\NonTeachingStaff::pluck('nip_nik', 'nip_nik')->toArray();
+
+        foreach ($rows as $index => $row) {
+            // Skip baris kosong
+            if (collect($row)->filter()->isEmpty()) {
                 continue;
             }
 
             // Skip baris yang tidak memiliki data penting (nama_lengkap atau nip_nik)
             if (empty($row['nama_lengkap']) && empty($row['nip_nik'])) {
-                \Log::info('NonTeachingStaffImport: Skipping row without essential data ' . ($index + 1));
                 continue;
             }
+
             // CASTING
             if (isset($row['nip_nik'])) $row['nip_nik'] = (string) $row['nip_nik'];
             if (isset($row['nuptk'])) $row['nuptk'] = (string) $row['nuptk'];
             if (isset($row['npsn_sekolah'])) $row['npsn_sekolah'] = (string) $row['npsn_sekolah'];
+
+            // NORMALIZATION - Tolerate common typos/variants
+            $row['jenis_kelamin'] = NormalizationHelper::normalizeGender($row['jenis_kelamin'] ?? null);
+            $row['status_ke_pegawaian'] = NormalizationHelper::normalizeEmploymentStatus($row['status_ke_pegawaian'] ?? null);
+            $row['status'] = NormalizationHelper::normalizeStatus($row['status'] ?? null);
+            $row['aksi'] = NormalizationHelper::normalizeAction($row['aksi'] ?? null);
+
+            try {
+                $action = strtoupper($row['aksi'] ?? 'CREATE');
+                
+                // Validasi data tanpa menyimpan ke database
+                $isValid = $this->validateRowData($row, $index, $action, $user, $existingStaff, $activeStaff);
+                if (!$isValid) {
+                    $hasErrors = true;
+                } else {
+                    $validatedRows[] = ['row' => $row, 'index' => $index, 'action' => $action];
+                }
+            } catch (\Exception $e) {
+                $this->addError($index, $e->getMessage());
+                \Log::error('[STAFF_IMPORT] Exception pada baris ' . ($index + 2) . ': ' . $e->getMessage());
+                $hasErrors = true;
+            }
+        }
+
+        // Jika ada error, jangan lanjutkan ke database
+        if ($hasErrors) {
+            $this->results['failed'] = count($this->results['errors']);
+            \Log::error('[STAFF_IMPORT] Import dibatalkan karena ada error. Total error: ' . count($this->results['errors']));
+            \Log::error('[STAFF_IMPORT] Silakan perbaiki semua error di file Excel dan upload ulang.');
+            return;
+        }
+
+        // FASE 2: SIMPAN KE DATABASE (hanya jika semua data valid)
+        \Log::info('[STAFF_IMPORT] Fase 2: Simpan ke database...');
+
+        foreach ($validatedRows as $validatedRow) {
+            $row = $validatedRow['row'];
+            $index = $validatedRow['index'];
+            $action = $validatedRow['action'];
+
+            // Set school_id (sudah divalidasi di fase 1)
             if ($user->hasRole('admin_sekolah')) {
                 $row['school_id'] = $user->school_id;
             } else {
-                // admin dinas: cari school_id dari NPSN_SEKOLAH
-                if (!empty($row['npsn_sekolah'])) {
-                    $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
-                    if ($school) {
-                        $row['school_id'] = $school->id;
-                    } else {
-                        $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
-                        $this->results['failed']++;
-                        continue;
-                    }
-                } else {
-                    $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
-                    $this->results['failed']++;
-                    continue;
-                }
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                $row['school_id'] = $school->id;
             }
-            $action = strtoupper($row['aksi'] ?? 'CREATE');
-            $result = false;
+
+            // Execute database operation
             try {
                 switch ($action) {
                     case 'CREATE':
-                        $result = $this->createStaff($row, $index);
+                        $this->createStaff($row, $index);
                         break;
                     case 'UPDATE':
-                        $result = $this->updateStaff($row, $index);
+                        $this->updateStaff($row, $index);
                         break;
                     case 'DELETE':
-                        $result = $this->deleteStaff($row, $index);
+                        $this->deleteStaff($row, $index);
                         break;
-                    default:
-                        $this->addError($index, "Aksi tidak valid: {$action}");
-                        $this->results['failed']++;
-                        continue 2;
                 }
-                if ($result === true) {
-                    $this->results['success']++;
-                } else {
-                    $this->results['failed']++;
-                }
+                $this->results['success']++;
             } catch (\Exception $e) {
                 $this->results['failed']++;
                 $this->addError($index, $e->getMessage());
+                \Log::error('[STAFF_IMPORT] Database error pada baris ' . ($index + 2) . ': ' . $e->getMessage());
             }
         }
+
+        \Log::info('[STAFF_IMPORT] Import selesai', [
+            'success' => $this->results['success'],
+            'failed' => $this->results['failed'],
+            'errors_count' => count($this->results['errors']),
+            'warnings_count' => count($this->results['warnings'])
+        ]);
+    }
+
+    protected function validateRowData($row, $index, $action, $user, $existingStaff, $activeStaff)
+    {
+        // Validasi berdasarkan aksi
+        switch ($action) {
+            case 'CREATE':
+                return $this->validateCreateData($row, $index, $user, $activeStaff);
+            case 'UPDATE':
+                return $this->validateUpdateData($row, $index, $user, $existingStaff);
+            case 'DELETE':
+                return $this->validateDeleteData($row, $index, $user, $existingStaff);
+            default:
+                $this->addError($index, "Aksi tidak valid: {$action}");
+                return false;
+        }
+    }
+
+    protected function validateCreateData($row, $index, $user, $activeStaff)
+    {
+        // Validasi field yang diperlukan untuk CREATE
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Cek NIP/NIK sudah ada atau belum
+        if (!empty($row['nip_nik'])) {
+            if (isset($activeStaff[$row['nip_nik']])) {
+                $this->addError($index, "NIP/NIK sudah terdaftar.", $row);
+                return false;
+            }
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateUpdateData($row, $index, $user, $existingStaff)
+    {
+        // Cari staff berdasarkan NIP/NIK
+        if (empty($row['nip_nik'])) {
+            $this->addError($index, "NIP/NIK wajib diisi untuk UPDATE");
+            return false;
+        }
+
+        if (!isset($existingStaff[$row['nip_nik']])) {
+            $this->addError($index, "Staff tidak ditemukan untuk update");
+            return false;
+        }
+
+        // Validasi field yang diperlukan untuk update
+        if (!$this->validateRequired($row, $index, $user)) {
+            return false;
+        }
+
+        // Validasi format data
+        return $this->validateDataFormats($row, $index);
+    }
+
+    protected function validateDeleteData($row, $index, $user, $existingStaff)
+    {
+        // Cari staff berdasarkan NIP/NIK
+        if (empty($row['nip_nik'])) {
+            $this->addError($index, "NIP/NIK wajib diisi untuk DELETE");
+            return false;
+        }
+
+        if (!isset($existingStaff[$row['nip_nik']])) {
+            $this->addError($index, "Staff tidak ditemukan untuk delete");
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function validateDataFormats($row, $index)
+    {
+        $hasError = false;
+
+        // Validasi jenis kelamin
+        if (!empty($row['jenis_kelamin']) && !in_array($row['jenis_kelamin'], ['Laki-laki', 'Perempuan'])) {
+            $this->addError($index, "Jenis kelamin harus 'Laki-laki' atau 'Perempuan'.", $row);
+            $hasError = true;
+        }
+
+        // Validasi agama
+        if (!empty($row['agama']) && !ReligionHelper::isValidReligion($row['agama'])) {
+            $this->addError($index, "Agama tidak valid. Pilih: Islam, Kristen, Katolik (atau Katholik), Hindu, Buddha, Konghucu.", $row);
+            $hasError = true;
+        }
+
+        // Validasi status kepegawaian
+        $validStatuses = ['PNS', 'PPPK', 'PTY', 'Honorer'];
+        if (!empty($row['status_ke_pegawaian']) && !in_array($row['status_ke_pegawaian'], $validStatuses)) {
+            $this->addError($index, "Status kepegawaian harus salah satu dari: " . implode(', ', $validStatuses), $row);
+            $hasError = true;
+        }
+
+        return !$hasError;
     }
 
     protected function createStaff($row, $index)
     {
-        if (!$this->validateRequired($row, $index)) return false;
-        $existing = NonTeachingStaff::where('nip_nik', $row['nip_nik'])->first();
-        if ($existing) {
-            $this->addError($index, "NIP/NIK sudah terdaftar.", $row);
-            return false;
-        }
+        // Validation already done in phase 1, just create the staff
 
         // Mapping field dari header bahasa Indonesia ke field database
         $data = [
@@ -118,7 +246,7 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
             'birth_place' => $row['tempat_lahir'] ?? null,
             'birth_date' => $row['tanggal_lahir'] ?? null,
             'gender' => $row['jenis_kelamin'] ?? null,
-            'religion' => $row['agama'] ?? null,
+            'religion' => ReligionHelper::normalizeReligion($row['agama'] ?? null),
             'address' => $row['alamat'] ?? null,
             'position' => $row['jabatan'] ?? null,
             'education_level' => $row['tingkat_pendidikan'] ?? null,
@@ -210,12 +338,13 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
         return true;
     }
 
-    protected function validateRequired($row, $index)
+    protected function validateRequired($row, $index, $user)
     {
         $required = ['nip_nik', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'jabatan', 'status_ke_pegawaian', 'status'];
-        if (Auth::user()->hasRole('admin_dinas')) {
+        if ($user->hasRole('admin_dinas')) {
             $required[] = 'npsn_sekolah';
         }
+        
         $hasError = false;
         foreach ($required as $field) {
             if (empty($row[$field])) {
@@ -223,6 +352,21 @@ class NonTeachingStaffImport implements ToCollection, WithHeadingRow, WithValida
                 $hasError = true;
             }
         }
+
+        // Validasi NPSN sekolah untuk admin dinas
+        if ($user->hasRole('admin_dinas')) {
+            if (!empty($row['npsn_sekolah'])) {
+                $school = \App\Models\School::where('npsn', $row['npsn_sekolah'])->first();
+                if (!$school) {
+                    $this->addError($index, "NPSN sekolah tidak ditemukan di database.", $row);
+                    $hasError = true;
+                }
+            } else {
+                $this->addError($index, "Kolom NPSN_SEKOLAH wajib diisi untuk admin dinas.", $row);
+                $hasError = true;
+            }
+        }
+
         return !$hasError;
     }
 

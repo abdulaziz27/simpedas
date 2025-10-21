@@ -188,7 +188,7 @@ class NonTeachingStaffTemplateExport implements WithHeadings, WithEvents, WithSt
                     '3. Kolom NAMA_LENGKAP: Wajib diisi',
                     '4. Kolom NIP_NIK: Wajib diisi dan harus unik. Untuk UPDATE/DELETE cukup isi NIP_NIK',
                     '5. Kolom JENIS_KELAMIN: Wajib diisi (dropdown)',
-                    '6. Kolom AGAMA: Wajib diisi (dropdown)',
+                    '6. Kolom AGAMA: Wajib diisi (dropdown: Islam, Kristen, Katolik/Katholik, Hindu, Buddha, Konghucu)',
                     '7. Kolom STATUS_KE_PEGAWAIAN: Wajib diisi (dropdown)',
                     '8. Kolom STATUS: Wajib diisi (dropdown: Aktif/Tidak Aktif)',
                     '',
@@ -197,6 +197,7 @@ class NonTeachingStaffTemplateExport implements WithHeadings, WithEvents, WithSt
                     '• Format tanggal: YYYY-MM-DD (contoh: 1990-05-15)',
                     '• NIP_NIK harus unik, tidak boleh duplikat',
                     '• Admin sekolah tidak perlu isi NPSN_SEKOLAH',
+                    '• Agama: Bisa tulis "Katolik" atau "Katholik", sistem akan otomatis normalisasi',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);

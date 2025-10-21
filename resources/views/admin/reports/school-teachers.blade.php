@@ -117,7 +117,7 @@
                                 {{ $teacher->employment_status }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $teacher->education_level }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $teacher->jenjang ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $teacher->gender ? ucfirst($teacher->gender) : '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <a href="{{ auth()->user()->hasRole('admin_sekolah') ? route('sekolah.teachers.show', $teacher->id) : route('dinas.teachers.show', $teacher->id) }}" class="text-indigo-600 hover:text-indigo-900">

@@ -90,7 +90,7 @@ class NonTeachingStaffController extends Controller
             $data['school_id'] = $user->school_id;
         }
         NonTeachingStaff::create($data);
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.index' : 'admin.non-teaching-staff.index')
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.index' : 'dinas.non-teaching-staff.index')
             ->with('success', 'Data staf berhasil ditambahkan.');
     }
 
@@ -135,7 +135,7 @@ class NonTeachingStaffController extends Controller
 
         $nonTeachingStaff->update($data);
 
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.show' : 'admin.non-teaching-staff.show', $nonTeachingStaff->id)
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.show' : 'dinas.non-teaching-staff.show', $nonTeachingStaff->id)
             ->with('success', 'Data staf berhasil diperbarui.');
     }
 
@@ -143,7 +143,7 @@ class NonTeachingStaffController extends Controller
     {
         $this->authorizeAccess($nonTeachingStaff);
         $nonTeachingStaff->delete();
-        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.index' : 'admin.non-teaching-staff.index')
+        return redirect()->route(Auth::user()->hasRole('admin_sekolah') ? 'sekolah.non-teaching-staff.index' : 'dinas.non-teaching-staff.index')
             ->with('success', 'Data staf berhasil dihapus.');
     }
 

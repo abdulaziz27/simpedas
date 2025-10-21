@@ -167,6 +167,161 @@ $guru = User::create([
 $guru->assignRole('guru');
 ```
 
+## 🛠️ MIGRASI & MODEL GURU
+
+Bagian ini menuntun Anda membuat tabel `gurus`, model `Guru`, dan relasi dasarnya sehingga perubahan data guru dapat dilakukan melalui Eloquent.
+
+### 1. Generate Skeleton Artisan
+
+```bash
+php artisan make:model Guru -m
+php artisan make:migration add_guru_id_to_users_table --table=users
+```
+
+Perintah pertama membuat file model `app/Models/Guru.php` dan migration `xxxx_xx_xx_xxxxxx_create_gurus_table.php`. Perintah kedua menyiapkan kolom referensi guru di tabel `users`.
+
+### 2. Struktur Migration `gurus`
+
+Edit file `database/migrations/xxxx_xx_xx_xxxxxx_create_gurus_table.php` agar sesuai kebutuhan:
+
+```php
+Schema::create('gurus', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
+    $table->string('nama_lengkap');
+    $table->string('nuptk', 20)->unique()->nullable();
+    $table->string('nip', 20)->nullable();
+    $table->string('tempat_lahir', 100)->nullable();
+    $table->date('tanggal_lahir')->nullable();
+    $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+    $table->enum('agama', ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'])->nullable();
+    $table->text('alamat')->nullable();
+    $table->string('email')->nullable();
+    $table->string('telepon', 20)->nullable();
+    $table->string('pendidikan_terakhir', 100)->nullable();
+    $table->string('jurusan_pendidikan', 100)->nullable();
+    $table->text('mapel_diampu')->nullable();
+    $table->enum('status_kepegawaian', ['PNS', 'PPPK', 'GTY', 'PTY'])->nullable();
+    $table->string('pangkat', 50)->nullable();
+    $table->string('jabatan', 100)->nullable();
+    $table->date('tmt')->nullable();
+    $table->enum('status', ['Aktif', 'Tidak Aktif', 'Pensiun'])->default('Aktif');
+    $table->string('tahun_ajaran', 20)->nullable();
+    $table->string('foto')->nullable();
+    $table->timestamps();
+
+    $table->index(['school_id', 'status']);
+    $table->index('nama_lengkap');
+    $table->index('nuptk');
+});
+```
+
+Kemudian isi migration `add_guru_id_to_users_table`:
+
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->foreignId('guru_id')->nullable()->after('school_id')->constrained('gurus')->nullOnDelete();
+});
+```
+
+Jangan lupa menambahkan method `down()` yang menghapus kolom `guru_id`.
+
+### 3. Definisikan Model `Guru`
+
+Perbarui `app/Models/Guru.php`:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Guru extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'school_id',
+        'nama_lengkap',
+        'nuptk',
+        'nip',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'agama',
+        'alamat',
+        'email',
+        'telepon',
+        'pendidikan_terakhir',
+        'jurusan_pendidikan',
+        'mapel_diampu',
+        'status_kepegawaian',
+        'pangkat',
+        'jabatan',
+        'tmt',
+        'status',
+        'tahun_ajaran',
+        'foto',
+    ];
+
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'tmt' => 'date',
+    ];
+
+    public function sekolah()
+    {
+        return $this->belongsTo(School::class, 'school_id');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'guru_id');
+    }
+}
+```
+
+### 4. Tambah Relasi di Model Lain
+
+- `app/Models/School.php`
+
+    ```php
+    public function gurus()
+    {
+        return $this->hasMany(Guru::class, 'school_id');
+    }
+    ```
+
+- `app/Models/User.php`
+
+    ```php
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class, 'guru_id');
+    }
+    ```
+
+### 5. Jalankan Migrasi
+
+```bash
+php artisan migrate
+```
+
+Setelah migrasi sukses, Anda dapat melakukan operasi CRUD data guru melalui model `Guru`.
+
+### 6. Analisa Penambahan Agama Katolik
+
+Tambahan pilihan agama `Katolik` menuntut konsistensi di seluruh lapisan aplikasi agar validasi, tampilan, dan ekspor data tetap selaras. Berikut area yang perlu dicek atau disesuaikan:
+
+- **Migrasi**: pastikan enum agama di `database/migrations/2025_07_03_182944_create_teachers_table.php`, `database/migrations/2025_07_03_182944_create_students_table.php`, dan `database/migrations/2025_07_03_182947_create_non_teaching_staff_table.php` sudah memasukkan `Katolik`.
+- **Konfigurasi & Factory**: perbarui daftar agama di `config/teacher.php`, `config/nonTeachingStaff.php`, serta factory `database/factories/TeacherFactory.php`, `database/factories/StudentFactory.php`, dan `database/factories/NonTeachingStaffFactory.php` agar opsi baru ikut digunakan saat seeding atau pengujian.
+- **Seeder**: jika mengandalkan data awal kustom (`database/seeders/TeacherSeeder.php`, `database/seeders/NonTeachingStaffSeeder.php`), tambahkan contoh entri beragama Katolik supaya dataset representatif.
+- **Validasi & Import**: tambahkan opsi baru pada rule `in:` di `app/Http/Controllers/Admin/TeacherController.php` dan pada pemeriksaan `in_array` di `app/Imports/StudentImport.php` supaya input Katolik diterima.
+- **Template Ekspor**: sesuaikan dropdown validasi di `app/Exports/TeacherTemplateExport*.php`, `app/Exports/StudentTemplateExport.php`, dan `app/Exports/NonTeachingStaffTemplateExport.php` agar daftar agama sinkron dengan enum terbaru.
+- **Form Blade**: tambahkan `<option value="Katolik">` di tampilan terkait (`resources/views/admin/teachers/*.blade.php`, `resources/views/admin/students/*.blade.php`, `resources/views/admin/non-teaching-staff/*.blade.php`, dan `resources/views/guru/edit.blade.php`) sehingga pengguna bisa memilihnya dari UI.
+
+Catatan: setelah melakukan perubahan enum pada tabel yang sudah ada, buat migrasi penyesuaian atau gunakan alter table sesuai kebijakan deployment Anda sebelum menjalankan `php artisan migrate`.
+
 ---
 
 ## ⚙️ KONFIGURASI LANJUTAN

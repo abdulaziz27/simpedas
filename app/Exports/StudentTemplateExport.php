@@ -203,7 +203,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     '4. Kolom JENIS_KELAMIN: Wajib diisi dengan L atau P (dropdown)',
                     '5. Kolom TEMPAT_LAHIR: Wajib diisi',
                     '6. Kolom TANGGAL_LAHIR: Wajib diisi (format: YYYY-MM-DD)',
-                    '7. Kolom AGAMA: Wajib diisi (dropdown: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu)',
+                    '7. Kolom AGAMA: Wajib diisi (dropdown: Islam, Kristen, Katolik/Katholik, Hindu, Buddha, Konghucu)',
                     '8. Kolom ROMBEL: Wajib diisi (contoh: 6A, 9B, 12 IPA 1)',
                     '9. Kolom STATUS_SISWA: Opsional (dropdown: aktif, tamat, pindah)',
                     '10. Kolom NPSN_SEKOLAH: Wajib diisi untuk admin dinas, otomatis untuk admin sekolah',
@@ -217,6 +217,7 @@ class StudentTemplateExport implements WithHeadings, WithEvents, WithStyles, Wit
                     '• Format tanggal: YYYY-MM-DD (contoh: 2014-01-15)',
                     '• NISN harus unik, tidak boleh duplikat',
                     '• Admin sekolah tidak perlu isi NPSN_SEKOLAH',
+                    '• Agama: Bisa tulis "Katolik" atau "Katholik", sistem akan otomatis normalisasi',
                 ];
                 foreach ($petunjuk as $text) {
                     $sheet->setCellValue($startCol . $row, $text);
