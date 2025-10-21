@@ -85,4 +85,91 @@ class NormalizationHelper
         
         return 'CREATE'; // Default to CREATE if no match
     }
+
+    /**
+     * Normalize status (for students and staff)
+     */
+    public static function normalizeStatus($status)
+    {
+        if (empty($status)) {
+            return null;
+        }
+
+        $status = trim($status);
+        $statusUpper = strtoupper($status);
+        
+        // Common variations for student status
+        $normalizations = [
+            'Aktif' => ['AKTIF', 'ACTIVE', 'A'],
+            'Tidak Aktif' => ['TIDAK AKTIF', 'INACTIVE', 'NON AKTIF', 'TA'],
+            'Lulus' => ['LULUS', 'GRADUATED', 'L'],
+            'Pindah' => ['PINDAH', 'MOVED', 'TRANSFER', 'P'],
+            'Keluar' => ['KELUAR', 'DROPOUT', 'DO', 'K'],
+            'Meninggal' => ['MENINGGAL', 'DECEASED', 'WAFAT', 'M'],
+        ];
+        
+        foreach ($normalizations as $standard => $variations) {
+            if (in_array($statusUpper, $variations)) {
+                return $standard;
+            }
+        }
+        
+        return $status; // Return as-is if no match
+    }
+
+    /**
+     * Normalize rombel (class) format
+     */
+    public static function normalizeRombel($rombel)
+    {
+        if (empty($rombel)) {
+            return null;
+        }
+
+        $rombel = trim($rombel);
+        
+        // Convert common formats to standard format
+        // Examples: "1A" -> "1A", "kelas 1a" -> "1A", "I-A" -> "1A"
+        $rombel = strtoupper($rombel);
+        $rombel = str_replace(['KELAS ', 'KELAS', 'ROMBEL ', 'ROMBEL'], '', $rombel);
+        $rombel = str_replace(['-', '_', ' '], '', $rombel);
+        
+        // Convert Roman numerals to Arabic
+        $romanToArabic = [
+            'I' => '1', 'II' => '2', 'III' => '3', 'IV' => '4', 'V' => '5', 'VI' => '6'
+        ];
+        
+        foreach ($romanToArabic as $roman => $arabic) {
+            if (strpos($rombel, $roman) === 0) {
+                $rombel = str_replace($roman, $arabic, $rombel);
+                break;
+            }
+        }
+        
+        return $rombel;
+    }
+
+    /**
+     * Normalize Yes/No values
+     */
+    public static function normalizeYesNo($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $value = strtoupper(trim($value));
+        
+        // Yes variations
+        if (in_array($value, ['YES', 'Y', 'YA', 'IYA', 'IYA', '1', 'TRUE', 'BENAR', 'ADA'])) {
+            return 'Ya';
+        }
+        
+        // No variations  
+        if (in_array($value, ['NO', 'N', 'TIDAK', 'TDK', '0', 'FALSE', 'SALAH', 'TIDAK ADA'])) {
+            return 'Tidak';
+        }
+        
+        return $value; // Return as-is if no match
+    }
 }
