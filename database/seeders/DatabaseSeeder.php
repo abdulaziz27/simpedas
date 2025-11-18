@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             NonTeachingStaffSeeder::class,
             UserSeeder::class,
             ArticleSeeder::class,
+            SettingSeeder::class,
+            GallerySeeder::class,
         ]);
     }
 }

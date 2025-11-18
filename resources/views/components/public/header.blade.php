@@ -1,11 +1,13 @@
 @props(['active' => null])
 <nav class="bg-[#125047] shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
+        <div class="flex justify-between h-24 items-center">
             <!-- Logo & Brand -->
             <div class="flex items-center space-x-2">
-                <a href="/">
-                    <img src="{{ asset('images/logo-siantar-cerdas.svg') }}" alt="Logo" class="h-12 w-24">
+                <a href="/" class="transition">
+                    <div class="overflow-hidden" style="border-radius: 4px; display: inline-block;">
+                        <img src="{{ asset('images/logo-siantar-cerdas-darkbg.svg') }}" alt="Logo" class="h-20 w-auto block">
+                    </div>
                 </a>
             </div>
             <!-- Navigation Links & User Dropdown -->

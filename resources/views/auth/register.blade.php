@@ -12,8 +12,10 @@
 
     <!-- Logo -->
     <div class="absolute top-0 left-0 p-8 z-20">
-        <a href="/">
-            <img src="{{ asset('images/logo-siantar-cerdas.svg') }}" alt="SIMPEDAS" class="h-10">
+        <a href="/" class="px-3 py-2 transition inline-block">
+            <div class="overflow-hidden" style="border-radius: 4px; display: inline-block;">
+                <img src="{{ asset('images/logo-siantar-cerdas-darkbg.svg') }}" alt="SIMPEDAS" class="h-16 w-auto block">
+            </div>
         </a>
     </div>
 
