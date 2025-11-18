@@ -23,6 +23,13 @@ Route::get('/non-teaching-staff/{id}', [PublicController::class, 'detailNonTeach
 Route::get('/statistik', [PublicController::class, 'statistik'])->name('statistik');
 Route::get('/statistik/{type}', [PublicController::class, 'statistikDetail'])->name('statistik.detail');
 
+// Article routes (public)
+Route::get('/artikel', [PublicController::class, 'articles'])->name('public.articles');
+Route::get('/artikel/{slug}', [PublicController::class, 'articleDetail'])->name('public.article.detail');
+
+// Gallery routes (public)
+Route::get('/galeri', [PublicController::class, 'galleries'])->name('public.galleries');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -122,6 +129,13 @@ Route::middleware('auth')->group(function () {
             'user-management' => 'user'
         ]);
         Route::get('user-management/{user}/print', [App\Http\Controllers\Admin\UserManagementController::class, 'print'])->name('user-management.print');
+        
+        // Article routes
+        Route::resource('articles', App\Http\Controllers\Admin\ArticleController::class);
+        Route::post('articles/upload-image', [App\Http\Controllers\Admin\ArticleController::class, 'uploadImage'])->name('articles.upload-image');
+        Route::resource('galleries', App\Http\Controllers\Admin\GalleryController::class);
+        Route::get('settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
         // Reports routes
         Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');

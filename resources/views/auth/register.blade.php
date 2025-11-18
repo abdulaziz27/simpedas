@@ -1,5 +1,7 @@
 @extends('layouts.guest')
 
+@section('title', 'Daftar - SIMPEDAS')
+
 @section('content')
 <div class="min-h-screen bg-white relative overflow-hidden">
     <!-- Background Split -->
@@ -11,7 +13,7 @@
     <!-- Logo -->
     <div class="absolute top-0 left-0 p-8 z-20">
         <a href="/">
-            <img src="{{ asset('images/logo-simpedas.png') }}" alt="SIMPEDAS" class="h-10">
+            <img src="{{ asset('images/logo-siantar-cerdas.svg') }}" alt="SIMPEDAS" class="h-10">
         </a>
     </div>
 

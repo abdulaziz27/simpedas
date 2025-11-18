@@ -5,7 +5,7 @@
             <!-- Logo & Brand -->
             <div class="flex items-center space-x-2">
                 <a href="/">
-                    <img src="{{ asset('images/logo-simpedas.png') }}" alt="Logo" class="h-12 w-24">
+                    <img src="{{ asset('images/logo-siantar-cerdas.svg') }}" alt="Logo" class="h-12 w-24">
                 </a>
             </div>
             <!-- Navigation Links & User Dropdown -->
@@ -15,6 +15,8 @@
                     <a href="{{ route('public.search-siswa') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Siswa</a>
                     <a href="{{ route('public.search-guru') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Guru</a>
                     <a href="{{ route('public.search-sekolah') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.search-sekolah') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Sekolah</a>
+                    <a href="{{ route('public.articles') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.articles') || request()->routeIs('public.article.detail') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Artikel</a>
+                    <a href="{{ route('public.galleries') }}" class="px-3 py-2 rounded transition {{ request()->routeIs('public.galleries') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Galeri</a>
                     <a href="{{ route('login') }}" class="ml-4 px-4 py-2 rounded bg-white text-[#125047] font-bold hover:bg-green-100 transition">Login</a>
                 @endguest
 
@@ -34,6 +36,9 @@
                                     <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Guru</a>
                                     <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Siswa</a>
                                     <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Staf</a>
+                                    <a href="{{ route('dinas.articles.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Artikel</a>
+                                    <a href="{{ route('dinas.galleries.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Galeri Foto</a>
+                                    <a href="{{ route('dinas.settings.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan Website</a>
                                     <a href="{{ route('dinas.user-management.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manajemen Pengguna</a>
                                 </div>
                             </div>
@@ -115,6 +120,8 @@
             <a href="{{ route('public.search-siswa') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-siswa') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Siswa</a>
             <a href="{{ route('public.search-guru') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-guru') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Guru</a>
             <a href="{{ route('public.search-sekolah') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.search-sekolah') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Data Sekolah</a>
+            <a href="{{ route('public.articles') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.articles') || request()->routeIs('public.article.detail') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Artikel</a>
+            <a href="{{ route('public.galleries') }}" class="block px-3 py-2 rounded {{ request()->routeIs('public.galleries') ? 'text-[#6ee7b7]' : 'text-white hover:text-[#6ee7b7]' }} font-semibold text-base">Galeri</a>
             <a href="{{ route('login') }}" class="block mt-2 px-4 py-2 rounded bg-white text-[#125047] font-bold hover:bg-green-100 transition">Login</a>
         @endguest
 
@@ -126,7 +133,10 @@
                     <a href="{{ route('dinas.schools.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Sekolah</a>
                     <a href="{{ route('dinas.teachers.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Guru</a>
                     <a href="{{ route('dinas.students.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Siswa</a>
-                    <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Staf</a>
+                    <a href="{{ route('dinas.non-teaching-staff.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Staf</a>
+                    <a href="{{ route('dinas.articles.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Manajemen Artikel</a>
+                    <a href="{{ route('dinas.galleries.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Galeri Foto</a>
+                    <a href="{{ route('dinas.settings.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white mb-1">Pengaturan Website</a>
                     <a href="{{ route('dinas.user-management.index') }}" class="block px-4 py-2 rounded hover:bg-[#6ee7b7] hover:text-[#125047] font-bold text-[#125047] bg-white">Manajemen Pengguna</a>
                 </div>
                 <a href="{{ route('statistik.detail', 'sekolah') }}" class="block mt-2 px-4 py-2 rounded text-white hover:text-[#6ee7b7] font-semibold transition">Statistik</a>

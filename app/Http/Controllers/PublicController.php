@@ -6,6 +6,9 @@ use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\School;
 use App\Models\NonTeachingStaff;
+use App\Models\Article;
+use App\Models\Setting;
+use App\Models\Gallery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -33,7 +36,43 @@ class PublicController extends Controller
             }
         }
 
-        return view('public.index', compact('stats'));
+        // Get latest 3 articles for homepage
+        $latestArticles = Article::published()
+            ->with('author')
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
+        // Get public stats for guest users
+        $publicStats = [
+            'total_sekolah' => School::count(),
+            'total_guru' => Teacher::count(),
+            'total_siswa_aktif' => Student::where('status_siswa', 'aktif')->count(),
+        ];
+
+        // Get settings for About Us and Contact
+        $aboutSettings = Setting::whereIn('key', [
+            'about_visi',
+            'about_misi',
+            'about_tugas_pokok',
+            'about_fungsi',
+        ])->get()->keyBy('key');
+
+        $contactSettings = Setting::whereIn('key', [
+            'contact_address',
+            'contact_phone',
+            'contact_email',
+            'contact_hours',
+            'contact_map_url'
+        ])->get()->keyBy('key');
+
+        // Get latest galleries (active only, limit 3 for homepage)
+        $latestGalleries = Gallery::active()
+            ->ordered()
+            ->take(3)
+            ->get();
+
+        return view('public.index', compact('stats', 'latestArticles', 'publicStats', 'aboutSettings', 'contactSettings', 'latestGalleries'));
     }
 
     public function searchGuru(Request $request)
@@ -258,5 +297,84 @@ class PublicController extends Controller
             'options' => $options,
             'all_labels' => $allLabels,
         ];
+    }
+
+    /**
+     * Display a listing of published articles.
+     */
+    public function articles(Request $request)
+    {
+        $query = Article::published()->with('author');
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('excerpt', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $articles = $query->latest('published_at')->paginate(9)->withQueryString();
+
+        return view('public.articles.index', compact('articles'));
+    }
+
+    /**
+     * Display the specified article.
+     */
+    public function articleDetail($slug)
+    {
+        $article = Article::published()
+            ->with('author')
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Increment views
+        $article->incrementViews();
+
+        // Get related articles (same author or similar title)
+        $relatedArticles = Article::published()
+            ->where('id', '!=', $article->id)
+            ->where(function ($query) use ($article) {
+                $query->where('author_id', $article->author_id)
+                    ->orWhere('title', 'like', '%' . substr($article->title, 0, 20) . '%');
+            })
+            ->latest('published_at')
+            ->take(3)
+            ->get();
+
+        return view('public.articles.show', compact('article', 'relatedArticles'));
+    }
+
+    /**
+     * Display all galleries.
+     */
+    public function galleries(Request $request)
+    {
+        $query = Gallery::active()->ordered();
+
+        if ($request->filled('category')) {
+            $query->byCategory($request->category);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $galleries = $query->paginate(12)->withQueryString();
+        $categories = Gallery::select('category')
+            ->where('is_active', true)
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->toArray();
+
+        return view('public.galleries.index', compact('galleries', 'categories'));
     }
 }
